@@ -44,9 +44,13 @@ The big ones for GTM operators:
 | `gh` | GitHub — repos, issues, PRs | `brew install gh` |
 | `gcloud` | Google Cloud — BigQuery, Cloud Functions | `brew install google-cloud-sdk` |
 | `aws` | AWS — S3 storage, Lambda, SES email | `brew install awscli` |
+| `apify` | Apify — web scraping, follower lists, data extraction | `npm i -g apify-cli` |
 | `vercel` | Vercel — deploy websites | `npm i -g vercel` |
 | `wrangler` | Cloudflare — Workers, Pages, R2 storage | `npm i -g wrangler` |
+| `supabase` | Supabase — database, auth, storage | `npm i -g supabase` |
 | `sqlite3` | SQLite — local database queries | Pre-installed on macOS |
+
+For detailed documentation on specific tools, see the `engine/` folder — `engine/apify.md` and `engine/apollo.md` cover the full setup, use cases, and scripts for scraping and enrichment workflows.
 
 Here's the pattern: you install the CLI, authenticate once (`gh auth login`, `gcloud auth login`), and then your coding agent can run commands through it.
 

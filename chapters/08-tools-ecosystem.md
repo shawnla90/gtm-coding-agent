@@ -24,9 +24,21 @@ The rule: **workbenches feed warehouses.** Always. Data flows through workbenche
 
 ## The Tools You Should Know
 
+### Apify
+
+Web scraping platform with a CLI. Run pre-built scrapers ("actors") from your terminal for follower lists, company data, engagement signals. The CLI runs scrapes on Apify's cloud while your terminal is free to do other work. $25-30/month covers most GTM scraping needs. The key GTM use case: scrape competitor followers, cross-reference against industry tools, and surface overlapping companies as buying signals. See `engine/apify.md` for full setup and scripts.
+
+```bash
+# Scrape 10K followers from a competitor's X account
+apify call api-ninja/x-twitter-followers-scraper \
+  --input='{"username": "competitor_handle", "maxFollowers": 10000}'
+```
+
 ### Apollo
 
 Contact database + email sequencing. Best free tier in GTM: 10,000 email credits/month with API access. Enrich people by email or LinkedIn URL, enrich companies by domain, search their database by filters. Rate limit: 50 req/min on free tier. Your first stop when you have a domain and need to find the right person. Data quality drops outside US/UK — verify with a second source if selling internationally.
+
+The batch enrichment pattern is critical: take a CSV from an Apify scrape, run it through Apollo in batches with resumable caching, and push enriched data to your warehouse. The `people/match` endpoint costs 0 credits and handles job-change detection across your entire database. See `engine/apollo.md` for the full batch script and rate limiting strategy.
 
 ```python
 # Apollo person enrichment — the call you'll make most often

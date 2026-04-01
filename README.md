@@ -28,6 +28,11 @@ gtm-coding-agent/
 │   ├── 09-voice-dna-content.md           #   voice extraction, anti-slop
 │   └── 10-terminal-mastery.md            #   tmux, SSH, multiplexing
 │
+├── engine/                                # tool documentation (living, updated regularly)
+│   ├── apify.md                           #   Apify CLI: scraping, actors, follower lists
+│   ├── apollo.md                          #   Apollo: batch enrichment, job change detection
+│   └── _tool-template.md                  #   template for adding new tools
+│
 ├── gtm-os/                                # operational skeleton
 │   ├── CLAUDE.md                          #   GTM-OS operating instructions
 │   ├── demand/                            #   ICP, positioning, competitors
@@ -143,6 +148,14 @@ The difference: a workspace is files you control, prompts you can edit, scripts 
 
 This is not a SaaS. It's a system. You'll learn how it works, then make it yours.
 
+## This Is a Living Repo
+
+This repo gets updated with real workflows I'm actively using and stress testing. Apify CLI scraping patterns, Apollo batch enrichment, Instagram growth automation, terminal multiplexing setups. If it's in here, I've run it. If it broke, I documented how.
+
+New commits land regularly as I discover better patterns, new CLI tools ship, or existing workflows evolve. The `engine/` folder has detailed tool documentation (Apify, Apollo, and more coming) with working scripts you can run today.
+
+If you learn from this and want to help it grow, star it, fork it, open a PR. This is how we build a GTM coding agents community. Not through courses. Through shared systems that actually work.
+
 ---
 
 ## What You'll Learn
@@ -156,7 +169,7 @@ This is not a SaaS. It's a system. You'll learn how it works, then make it yours
 | 05 - Automation Agents | Set up scripts that run your GTM on autopilot |
 | 06 - Local-First GTM | Turn your Mac into a GTM server |
 | 07 - Python for GTM | Write enrichment scripts, API calls, CSV pipelines |
-| 08 - Tools Ecosystem | Evaluate and integrate Apollo, Clay, Exa, Firecrawl |
+| 08 - Tools Ecosystem | Evaluate and integrate Apollo, Apify, Clay, Exa, Firecrawl |
 | 09 - Voice DNA & Content | Extract your voice, kill slop, create content that sounds like you |
 | 10 - Terminal Mastery | tmux, SSH, multiplexing for running multiple agent sessions |
 
@@ -173,11 +186,12 @@ This is not a SaaS. It's a system. You'll learn how it works, then make it yours
 
 ## Contributing
 
-This is an educational repo. If you've built GTM workflows with coding agents and want to contribute:
+This is a living educational repo. If you've built GTM workflows with coding agents and want to contribute:
 
 1. Fork the repo
-2. Add your example to `examples/` (anonymize client data)
+2. Add your example to `examples/` or your tool doc to `engine/` (anonymize client data)
 3. Open a PR with context on what GTM problem it solves
+4. Star the repo if it helped you. That's how others find it.
 
 ---
 
