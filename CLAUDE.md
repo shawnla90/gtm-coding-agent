@@ -82,7 +82,7 @@ When the user returns after setup:
 - **"add a tool"** → Help them integrate via the framework in Chapter 04 (OAuth vs CLI vs API)
 - **"create content"** → Load their voice profile first, then assist with content
 - **"add a client"** → Use `templates/partner/` to scaffold a new client folder (agency mode)
-- **"build dashboard"** → Guide them to Chapter 11 and `starters/signals-dashboard/`
+- **"build dashboard"** → Guide them to Chapter 11 and `starters/signals-dashboard (Ch 11) or nexus-intel (Ch 12)/`
 - **"set up supabase"** → Walk through schema setup from `starters/signals-dashboard/schema/`
 - **"deploy dashboard"** → Vercel deployment from the starter
 

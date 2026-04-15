@@ -1,0 +1,2 @@
+anthropic>=0.45.0
+# apify CLI is used as a subprocess — install separately with `npm i -g apify-cli` if not already present.

@@ -16,7 +16,7 @@ gtm-coding-agent/
 ├── CLAUDE.md                              # interactive onboarding         ← START HERE
 ├── README.md                              # you are here
 │
-├── chapters/                              # 10 educational chapters
+├── chapters/                              # 12 educational chapters
 │   ├── 01-coding-agents-vs-editors.md     #   agents vs cursor vs chatgpt
 │   ├── 02-context-engineering.md          #   CLAUDE.md, structured context
 │   ├── 03-token-efficiency.md             #   200K context, cost, subagents
@@ -26,11 +26,14 @@ gtm-coding-agent/
 │   ├── 07-python-for-gtm.md              #   APIs, CSVs, enrichment
 │   ├── 08-tools-ecosystem.md             #   apollo, clay, exa, firecrawl
 │   ├── 09-voice-dna-content.md           #   voice extraction, anti-slop
-│   └── 10-terminal-mastery.md            #   tmux, SSH, multiplexing
+│   ├── 10-terminal-mastery.md            #   tmux, SSH, multiplexing
+│   ├── 11-build-your-dashboard.md        #   Next.js + Supabase signals dashboard
+│   └── 12-competitive-intel-engine.md    #   SQLite-in-git + d3-force + Claude subprocess
 │
 ├── engine/                                # tool documentation (living, updated regularly)
 │   ├── apify.md                           #   Apify CLI: scraping, actors, follower lists
 │   ├── apollo.md                          #   Apollo: batch enrichment, job change detection
+│   ├── claude-subprocess.md               #   Claude CLI as a subprocess — batch analysis pattern
 │   └── _tool-template.md                  #   template for adding new tools
 │
 ├── gtm-os/                                # operational skeleton
@@ -72,10 +75,14 @@ gtm-coding-agent/
 │   └── content-repurpose.md              #   1 piece → 5 formats
 │
 ├── starters/                              # deployable starter projects
-│   └── signals-dashboard/                 #   Next.js GTM dashboard + Supabase
-│       ├── schema/                        #     SQL schemas + seed data
-│       ├── pipeline/                      #     Python signal scoring pipeline
-│       └── src/                           #     dashboard app (5 pages, dark theme)
+│   ├── signals-dashboard/                 #   Next.js + Supabase signals dashboard (Chapter 11)
+│   │   ├── schema/                        #     SQL schemas + seed data
+│   │   ├── pipeline/                      #     Python signal scoring pipeline
+│   │   └── src/                           #     dashboard app (5 pages, dark theme)
+│   └── nexus-intel/                       #   SQLite-in-git competitive intel engine (Chapter 12)
+│       ├── src/                           #     Next.js app with d3-force Nexus graph
+│       ├── scripts/                       #     Apify CLI scrapers + Claude subprocess analyzers
+│       └── data/                          #     SQLite schema, public seed, committed intel.db
 │
 └── social/                                # launch content
     ├── reddit-post.md
@@ -96,7 +103,7 @@ gtm-coding-agent/
 | **Templates** | **Prompts** |
 | CLAUDE.md variants, voice DNA, content formats, partner structures. Copy into your projects, fill in the blanks. | 6 battle-tested AI prompts for ICP building, positioning, competitor analysis, signal mapping, email sequences, and content repurposing. |
 | **Starter Projects** | |
-| Deployable apps you can fork. The signals dashboard is a full Next.js app with Supabase, intent signal scoring, and 5 operational pages. Deploy to Vercel in minutes. | |
+| Two deployable apps you can fork. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. Deploy either in minutes. | |
 
 ---
 
@@ -112,9 +119,17 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 
 ## See It In Action
 
+**Chapter 11 - Signals Dashboard (Supabase + Recharts):**
+
 https://github.com/user-attachments/assets/295f3b1b-37e1-4686-8de3-9b2b9219c8cb
 
 *The signals dashboard running against a live Supabase database. 5 pages, dark theme, real-time polling.*
+
+**Chapter 12 - Nexus Intel (SQLite + d3-force, 2x speed):**
+
+![Nexus Intel demo](https://raw.githubusercontent.com/shawnla90/gtm-coding-agent/main/assets/videos/nexus-intel-demo-2x.gif)
+
+*The competitive intel engine. Clone, seed, boot, see signals.*
 
 ---
 
@@ -189,6 +204,7 @@ If you learn from this and want to help it grow, star it, fork it, open a PR. Th
 | 09 - Voice DNA & Content | Extract your voice, kill slop, create content that sounds like you |
 | 10 - Terminal Mastery | tmux, SSH, multiplexing for running multiple agent sessions |
 | 11 - Build Your Dashboard | Build and deploy a real-time GTM dashboard with Next.js, Supabase, and signal intelligence |
+| 12 - Competitive Intel Engine | Build a Clay-companion intel engine: SQLite-in-git, Apify CLI scrapers, Claude-as-subprocess analysis, d3-force Nexus graph |
 
 ---
 
@@ -198,8 +214,10 @@ If you learn from this and want to help it grow, star it, fork it, open a PR. Th
 - [Cursor](https://cursor.com) — AI code editor (recommended for beginners)
 - Python 3.10+ — scripting and automation
 - Markdown — everything is structured text
-- [Next.js](https://nextjs.org) + [React](https://react.dev) — dashboard starter
-- [Supabase](https://supabase.com) — Postgres database for the dashboard
+- [Next.js](https://nextjs.org) + [React](https://react.dev) — dashboard starters
+- [Supabase](https://supabase.com) — Postgres for the signals dashboard
+- [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) + [d3-force](https://d3js.org/d3-force) — Nexus Intel starter
+- [Apify CLI](https://apify.com) — scraping actors for both starters
 - [Recharts](https://recharts.org) + [shadcn/ui](https://ui.shadcn.com) — charts and components
 
 ---

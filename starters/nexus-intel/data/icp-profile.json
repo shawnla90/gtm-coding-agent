@@ -1,0 +1,16 @@
+{
+  "client": "Apollo",
+  "vertical": "sales-intelligence-saas",
+  "exclude_job_buckets": ["agency-consultant"],
+  "persona_tiers": {
+    "5": ["cro", "chief revenue", "vp sales", "vp revenue", "vp growth", "vp partnerships"],
+    "4": ["director sales", "director revenue", "director bdr", "director sdr", "head of sales", "head of growth", "head of revenue"],
+    "3": ["sales manager", "sdr manager", "bdr manager", "sales ops manager", "revops manager", "revenue operations"],
+    "2": ["account executive", "sdr lead", "bdr lead", "sales enablement", "sales engineer"],
+    "1": ["sdr", "bdr", "sales development rep", "business development rep", "sales intern"]
+  },
+  "target_companies_keywords": ["saas", "software", "tech", "platform", "b2b", "startup", "series"],
+  "enterprise_company_keywords": ["inc", "corp", "group", "holdings", "ventures"],
+  "internal_keywords": ["apollo", "apollo.io"],
+  "competitor_keywords": ["zoominfo", "clay", "lusha", "cognism", "clearbit", "seamless", "rocketreach", "leadiq"]
+}
