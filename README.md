@@ -16,7 +16,7 @@ gtm-coding-agent/
 ├── CLAUDE.md                              # interactive onboarding         ← START HERE
 ├── README.md                              # you are here
 │
-├── chapters/                              # 12 educational chapters
+├── chapters/                              # 13 educational chapters
 │   ├── 01-coding-agents-vs-editors.md     #   agents vs cursor vs chatgpt
 │   ├── 02-context-engineering.md          #   CLAUDE.md, structured context
 │   ├── 03-token-efficiency.md             #   200K context, cost, subagents
@@ -28,7 +28,8 @@ gtm-coding-agent/
 │   ├── 09-voice-dna-content.md           #   voice extraction, anti-slop
 │   ├── 10-terminal-mastery.md            #   tmux, SSH, multiplexing
 │   ├── 11-build-your-dashboard.md        #   Next.js + Supabase signals dashboard
-│   └── 12-competitive-intel-engine.md    #   SQLite-in-git + d3-force + Claude subprocess
+│   ├── 12-competitive-intel-engine.md    #   SQLite-in-git + d3-force + Claude subprocess
+│   └── 13-crm-automation-slash-commands.md  #  HubSpot + Salesforce + /stale-opportunities
 │
 ├── engine/                                # tool documentation (living, updated regularly)
 │   ├── apify.md                           #   Apify CLI: scraping, actors, follower lists
@@ -79,10 +80,14 @@ gtm-coding-agent/
 │   │   ├── schema/                        #     SQL schemas + seed data
 │   │   ├── pipeline/                      #     Python signal scoring pipeline
 │   │   └── src/                           #     dashboard app (5 pages, dark theme)
-│   └── nexus-intel/                       #   SQLite-in-git competitive intel engine (Chapter 12)
-│       ├── src/                           #     Next.js app with d3-force Nexus graph
-│       ├── scripts/                       #     Apify CLI scrapers + Claude subprocess analyzers
-│       └── data/                          #     SQLite schema, public seed, committed intel.db
+│   ├── nexus-intel/                       #   SQLite-in-git competitive intel engine (Chapter 12)
+│   │   ├── src/                           #     Next.js app with d3-force Nexus graph
+│   │   ├── scripts/                       #     Apify CLI scrapers + Claude subprocess analyzers
+│   │   └── data/                          #     SQLite schema, public seed, committed intel.db
+│   └── crm-automation/                    #   HubSpot stale-opportunity engine (Chapter 13)
+│       ├── stale_opportunity_check.py     #     surface 60-day deals, re-enrich, write custom props
+│       ├── .claude/commands/              #     /stale-opportunities slash command
+│       └── README.md                      #     setup + HubSpot custom property schema
 │
 └── social/                                # launch content
     ├── reddit-post.md
@@ -97,13 +102,13 @@ gtm-coding-agent/
 | | |
 |---|---|
 | **Interactive Onboarding** | **Educational Chapters** |
-| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 10 chapters from "what is a coding agent" to "run your Mac as a GTM server". Read in order or jump to what you need. |
+| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 13 chapters from "what is a coding agent" to "wire your CRM to the agent and automate RevOps." Read in order or jump to what you need. |
 | **GTM-OS Skeleton** | **Modes** |
 | A working folder structure for ICP, positioning, segments, campaigns, and content. Fork it. Fill it in. Run GTM from it. | 4 personas: solo founder, agency, single-client, ABM outbound. Each mode configures the skeleton differently. |
 | **Templates** | **Prompts** |
 | CLAUDE.md variants, voice DNA, content formats, partner structures. Copy into your projects, fill in the blanks. | 6 battle-tested AI prompts for ICP building, positioning, competitor analysis, signal mapping, email sequences, and content repurposing. |
 | **Starter Projects** | |
-| Two deployable apps you can fork. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. Deploy either in minutes. | |
+| Three forkable starters. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. **CRM Automation** (Ch 13) is a stale-opportunity script that re-enriches 60-day-old HubSpot deals and writes the verdict back as custom properties. Deploy any of them in minutes. | |
 
 ---
 
@@ -113,7 +118,7 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 
 **[The GTM Coding Agent Playbook on shawnos.ai](https://shawnos.ai/guide/gtm-coding-agent)**
 
-12 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
+13 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
 
 ---
 
@@ -205,6 +210,7 @@ If you learn from this and want to help it grow, star it, fork it, open a PR. Th
 | 10 - Terminal Mastery | tmux, SSH, multiplexing for running multiple agent sessions |
 | 11 - Build Your Dashboard | Build and deploy a real-time GTM dashboard with Next.js, Supabase, and signal intelligence |
 | 12 - Competitive Intel Engine | Build a Clay-companion intel engine: SQLite-in-git, Apify CLI scrapers, Claude-as-subprocess analysis, d3-force Nexus graph |
+| 13 - CRM Automation & Slash Commands | Wire HubSpot and Salesforce to your agent, build `/stale-opportunities`, and mine the nurture graveyard AEs abandoned |
 
 ---
 

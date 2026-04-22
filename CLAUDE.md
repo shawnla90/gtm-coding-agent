@@ -68,6 +68,7 @@ Recommend 3-5 chapters based on their profile:
 | ABM pipeline builder | 07 → 08 → 04 → 06 → 05 |
 | Dashboard builder    | 11 → 07 → 08 → 06 |
 | ABM + dashboard      | 07 → 08 → 11 → 06 → 05 |
+| RevOps / CRM automation | 04 → 07 → 08 → 13 → 05 |
 
 Tell them: *"Start with Chapter XX. When you're done, come back and say 'next chapter' and I'll guide you through the next one."*
 
@@ -88,7 +89,7 @@ When the user returns after setup:
 
 ## Reference Paths
 
-- Chapters: `chapters/01-*.md` through `chapters/10-*.md`
+- Chapters: `chapters/01-*.md` through `chapters/13-*.md`
 - Mode configs: `modes/*.md`
 - Templates: `templates/{claude-md,voice,content,partner}/`
 - Prompts: `prompts/*.md`
