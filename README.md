@@ -16,7 +16,7 @@ gtm-coding-agent/
 ├── CLAUDE.md                              # interactive onboarding         ← START HERE
 ├── README.md                              # you are here
 │
-├── chapters/                              # 13 educational chapters
+├── chapters/                              # 15 educational chapters
 │   ├── 01-coding-agents-vs-editors.md     #   agents vs cursor vs chatgpt
 │   ├── 02-context-engineering.md          #   CLAUDE.md, structured context
 │   ├── 03-token-efficiency.md             #   200K context, cost, subagents
@@ -29,7 +29,9 @@ gtm-coding-agent/
 │   ├── 10-terminal-mastery.md            #   tmux, SSH, multiplexing
 │   ├── 11-build-your-dashboard.md        #   Next.js + Supabase signals dashboard
 │   ├── 12-competitive-intel-engine.md    #   SQLite-in-git + d3-force + Claude subprocess
-│   └── 13-crm-automation-slash-commands.md  #  HubSpot + Salesforce + /stale-opportunities
+│   ├── 13-crm-automation-slash-commands.md  #  HubSpot + Salesforce + /stale-opportunities
+│   ├── 14-voice-invocation.md           #   transcript → voice-drift + content fan-out to Discord
+│   └── 15-meta-ad-intelligence.md       #   Meta Ad Library scraper + Claude taxonomy + dashboard
 │
 ├── engine/                                # tool documentation (living, updated regularly)
 │   ├── apify.md                           #   Apify CLI: scraping, actors, follower lists
@@ -102,7 +104,7 @@ gtm-coding-agent/
 | | |
 |---|---|
 | **Interactive Onboarding** | **Educational Chapters** |
-| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 13 chapters from "what is a coding agent" to "wire your CRM to the agent and automate RevOps." Read in order or jump to what you need. |
+| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 15 chapters from "what is a coding agent" to "decode competitor ad strategy via the public Meta Ad Library." Read in order or jump to what you need. |
 | **GTM-OS Skeleton** | **Modes** |
 | A working folder structure for ICP, positioning, segments, campaigns, and content. Fork it. Fill it in. Run GTM from it. | 4 personas: solo founder, agency, single-client, ABM outbound. Each mode configures the skeleton differently. |
 | **Templates** | **Prompts** |
@@ -118,7 +120,7 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 
 **[The GTM Coding Agent Playbook on shawnos.ai](https://shawnos.ai/guide/gtm-coding-agent)**
 
-13 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
+15 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
 
 ---
 
@@ -211,6 +213,8 @@ If you learn from this and want to help it grow, star it, fork it, open a PR. Th
 | 11 - Build Your Dashboard | Build and deploy a real-time GTM dashboard with Next.js, Supabase, and signal intelligence |
 | 12 - Competitive Intel Engine | Build a Clay-companion intel engine: SQLite-in-git, Apify CLI scrapers, Claude-as-subprocess analysis, d3-force Nexus graph |
 | 13 - CRM Automation & Slash Commands | Wire HubSpot and Salesforce to your agent, build `/stale-opportunities`, and mine the nurture graveyard AEs abandoned |
+| 14 - Voice-Invocation | Auto-run voice-drift on every meeting transcript, fan out content + signals to typed Discord channels for review |
+| 15 - Meta Ad Intelligence | Scrape the Meta Ad Library, classify creatives via Claude subprocess, pair declared strategy with demand signals |
 
 ---
 
