@@ -63,7 +63,7 @@ Recommend 3-5 chapters based on their profile:
 |---------|----------|
 | Brand new to agents | 01 → 02 → 03 → 10 |
 | Technical, outbound-focused | 04 → 07 → 08 → 06 |
-| Content + GTM | 09 → 14 → 02 → 03 → 05 |
+| Content + GTM | 09 → 14 → 16 → 02 → 03 |
 | Agency | 02 → 04 → 07 → 08 → 05 |
 | ABM pipeline builder | 07 → 08 → 04 → 06 → 05 |
 | Dashboard builder    | 11 → 07 → 08 → 06 |
@@ -89,7 +89,7 @@ When the user returns after setup:
 
 ## Reference Paths
 
-- Chapters: `chapters/01-*.md` through `chapters/15-*.md`
+- Chapters: `chapters/01-*.md` through `chapters/16-*.md`
 - Mode configs: `modes/*.md`
 - Templates: `templates/{claude-md,voice,content,partner}/`
 - Prompts: `prompts/*.md`

@@ -16,7 +16,7 @@ gtm-coding-agent/
 ├── CLAUDE.md                              # interactive onboarding         ← START HERE
 ├── README.md                              # you are here
 │
-├── chapters/                              # 15 educational chapters
+├── chapters/                              # 16 educational chapters
 │   ├── 01-coding-agents-vs-editors.md     #   agents vs cursor vs chatgpt
 │   ├── 02-context-engineering.md          #   CLAUDE.md, structured context
 │   ├── 03-token-efficiency.md             #   200K context, cost, subagents
@@ -31,7 +31,8 @@ gtm-coding-agent/
 │   ├── 12-competitive-intel-engine.md    #   SQLite-in-git + d3-force + Claude subprocess
 │   ├── 13-crm-automation-slash-commands.md  #  HubSpot + Salesforce + /stale-opportunities
 │   ├── 14-voice-invocation.md           #   transcript → voice-drift + content fan-out to Discord
-│   └── 15-meta-ad-intelligence.md       #   Meta Ad Library scraper + Claude taxonomy + dashboard
+│   ├── 15-meta-ad-intelligence.md       #   Meta Ad Library scraper + Claude taxonomy + dashboard
+│   └── 16-youtube-clipping-content-engine.md  #  yt-dlp + OpenShorts + Claude orchestration → clips
 │
 ├── engine/                                # tool documentation (living, updated regularly)
 │   ├── apify.md                           #   Apify CLI: scraping, actors, follower lists
@@ -215,6 +216,7 @@ If you learn from this and want to help it grow, star it, fork it, open a PR. Th
 | 13 - CRM Automation & Slash Commands | Wire HubSpot and Salesforce to your agent, build `/stale-opportunities`, and mine the nurture graveyard AEs abandoned |
 | 14 - Voice-Invocation | Auto-run voice-drift on every meeting transcript, fan out content + signals to typed Discord channels for review |
 | 15 - Meta Ad Intelligence | Scrape the Meta Ad Library, classify creatives via Claude subprocess, pair declared strategy with demand signals |
+| 16 - Clipping Content Engine | Turn one long video into a week of clips: yt-dlp pull, OpenShorts detection, Claude curation + copy, fan out for review |
 
 ---
 
