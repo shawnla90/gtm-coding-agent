@@ -16,7 +16,7 @@ gtm-coding-agent/
 ├── CLAUDE.md                              # interactive onboarding         ← START HERE
 ├── README.md                              # you are here
 │
-├── chapters/                              # 15 educational chapters
+├── chapters/                              # 16 educational chapters
 │   ├── 01-coding-agents-vs-editors.md     #   agents vs cursor vs chatgpt
 │   ├── 02-context-engineering.md          #   CLAUDE.md, structured context
 │   ├── 03-token-efficiency.md             #   200K context, cost, subagents
@@ -31,12 +31,17 @@ gtm-coding-agent/
 │   ├── 12-competitive-intel-engine.md    #   SQLite-in-git + d3-force + Claude subprocess
 │   ├── 13-crm-automation-slash-commands.md  #  HubSpot + Salesforce + /stale-opportunities
 │   ├── 14-voice-invocation.md           #   transcript → voice-drift + content fan-out to Discord
-│   └── 15-meta-ad-intelligence.md       #   Meta Ad Library scraper + Claude taxonomy + dashboard
+│   ├── 15-meta-ad-intelligence.md       #   Meta Ad Library scraper + Claude taxonomy + dashboard
+│   └── 16-programmatic-landing-pages-hubspot-cms.md  #  HubSpot CMS Pages API + subagent columns
+│
+├── starters/                              # runnable starter folders
+│   └── hubspot-landing-engine/            #   brief → subagent columns → HubSpot CMS DRAFT pages
 │
 ├── engine/                                # tool documentation (living, updated regularly)
 │   ├── apify.md                           #   Apify CLI: scraping, actors, follower lists
 │   ├── apollo.md                          #   Apollo: batch enrichment, job change detection
 │   ├── claude-subprocess.md               #   Claude CLI as a subprocess — batch analysis pattern
+│   ├── hubspot-cms.md                     #   HubSpot CMS Pages API v3 + HubL templates
 │   └── _tool-template.md                  #   template for adding new tools
 │
 ├── gtm-os/                                # operational skeleton
@@ -215,6 +220,7 @@ If you learn from this and want to help it grow, star it, fork it, open a PR. Th
 | 13 - CRM Automation & Slash Commands | Wire HubSpot and Salesforce to your agent, build `/stale-opportunities`, and mine the nurture graveyard AEs abandoned |
 | 14 - Voice-Invocation | Auto-run voice-drift on every meeting transcript, fan out content + signals to typed Discord channels for review |
 | 15 - Meta Ad Intelligence | Scrape the Meta Ad Library, classify creatives via Claude subprocess, pair declared strategy with demand signals |
+| 16 - Programmatic Landing Pages | Brief + subagent columns + HubSpot CMS Pages API v3. Personalized DRAFT landing pages, one command, controlled list |
 
 ---
 

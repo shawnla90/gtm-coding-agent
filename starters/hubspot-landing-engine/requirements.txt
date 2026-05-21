@@ -1,0 +1,6 @@
+requests>=2.32.0
+python-dotenv>=1.0.1
+hubspot-api-client>=11.0.0
+anthropic>=0.40.0
+exa-py>=1.0.0
+PyYAML>=6.0.2

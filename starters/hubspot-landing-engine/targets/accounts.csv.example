@@ -1,0 +1,6 @@
+company,domain,contact_name,contact_title,owner,notes
+Stripe,stripe.com,Patrick Collison,CEO,shawn,test row 1
+Linear,linear.app,Karri Saarinen,CEO,shawn,test row 2
+Vercel,vercel.com,Guillermo Rauch,CEO,shawn,test row 3
+Clerk,clerk.com,Colin Sidoti,CEO,shawn,test row 4
+Resend,resend.com,Zeno Rocha,CEO,shawn,test row 5

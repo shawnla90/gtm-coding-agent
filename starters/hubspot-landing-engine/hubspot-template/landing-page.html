@@ -1,0 +1,58 @@
+{# Landing Engine - starter template.
+
+   Three modules on a single layout section called `main_content`:
+     - hero            (headline, subhead, CTA)
+     - body_rich_text  (the brief body, with placeholders replaced)
+     - cta             (footer call-to-action mirroring the hero)
+
+   Designed to be replaced. Drop this into your HubSpot Design Manager under
+   /landing-engine/ once, copy the path, then put it in .env as
+   HUBSPOT_TEMPLATE_PATH. See hubspot-template/README.md for upload steps.
+#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ content.html_title }}</title>
+  <meta name="description" content="{{ content.meta_description }}">
+  {{ standard_header_includes }}
+  <style>
+    :root {
+      --ink: #0a0f1c;
+      --paper: #ffffff;
+      --muted: #5a6478;
+      --accent: #fe4802;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; color: var(--ink); background: var(--paper); margin: 0; line-height: 1.5; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 64px 24px; }
+    .hero h1 { font-size: 44px; line-height: 1.1; margin: 0 0 12px; }
+    .hero p.subhead { font-size: 18px; color: var(--muted); margin: 0 0 32px; max-width: 560px; }
+    .body-block { font-size: 17px; }
+    .body-block h2 { font-size: 28px; margin-top: 56px; }
+    .cta { display: inline-block; background: var(--accent); color: #fff; padding: 14px 22px; border-radius: 6px; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      {% module "hero" path="@hubspot/text" label="Hero" %}
+      <h1>{{ widget_data.hero.headline }}</h1>
+      <p class="subhead">{{ widget_data.hero.subhead }}</p>
+      <a class="cta" href="{{ widget_data.hero.cta_url }}">{{ widget_data.hero.cta_label }}</a>
+    </section>
+
+    <section class="body-block">
+      {% module "body_rich_text" path="@hubspot/rich_text" label="Body" %}
+      {{ widget_data.body_rich_text.html|safe }}
+    </section>
+
+    <section class="footer-cta">
+      {% module "cta" path="@hubspot/cta" label="Footer CTA" %}
+      <a class="cta" href="{{ widget_data.hero.cta_url }}">{{ widget_data.hero.cta_label }}</a>
+    </section>
+  </main>
+  {{ standard_footer_includes }}
+</body>
+</html>

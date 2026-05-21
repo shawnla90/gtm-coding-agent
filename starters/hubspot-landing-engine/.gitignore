@@ -1,0 +1,11 @@
+.env
+.env.local
+briefs-private/
+outputs/*
+!outputs/.gitkeep
+*.db
+*.db-journal
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store

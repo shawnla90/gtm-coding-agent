@@ -1,0 +1,27 @@
+{
+  "layout_sections": ["main_content"],
+  "modules": {
+    "hero": {
+      "type": "custom_widget",
+      "fields": {
+        "headline":  { "type": "text",      "required": true },
+        "subhead":   { "type": "text",      "required": false },
+        "cta_label": { "type": "text",      "required": true },
+        "cta_url":   { "type": "url",       "required": true }
+      }
+    },
+    "body_rich_text": {
+      "type": "custom_widget",
+      "fields": {
+        "html": { "type": "rich_text", "required": true }
+      }
+    },
+    "cta": {
+      "type": "custom_widget",
+      "fields": {
+        "label": { "type": "text", "required": false },
+        "url":   { "type": "url",  "required": false }
+      }
+    }
+  }
+}
