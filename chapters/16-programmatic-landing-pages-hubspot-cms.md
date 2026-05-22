@@ -49,14 +49,6 @@ generating personalized landing pages from the CMS, programmatically, no
 drag-and-drop. When I left the agency the engine stayed there. The pattern
 stayed in my head.
 
-A few weeks ago in the Slack Claude Code challenge community I'm part of
-this month, a thread came up about programmatic content workflows. Someone
-mentioned they were using Claude to design HubSpot landing pages directly.
-That sentence reminded me I had a working pattern for the publishing half
-sitting in an archive. So I pulled it back out, rebuilt it on Claude Code
-Opus 4.7, and shipped it as a public starter folder so anyone with a
-HubSpot portal can fork it.
-
 The model layer is the piece that's different from the original. The
 original engine relied on a single AI generation call per page. This
 one fans out into focused subagents — one per "column" of insight per
