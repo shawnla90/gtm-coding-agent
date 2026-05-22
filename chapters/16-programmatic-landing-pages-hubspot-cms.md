@@ -1,7 +1,7 @@
 # Chapter 16: Programmatic Landing Pages from HubSpot CMS
 
 **This is a chapter for marketers, RevOps engineers, and anyone in GTM
-curious about coding agents. You pick a target list of 50 to 500
+curious about coding agents. You pick a target list of 50 
 accounts, write one markdown brief, and hit run. Six to ten minutes
 later there are that many personalized landing pages sitting as DRAFTs
 in your HubSpot portal, one per account, each with a hero block written
