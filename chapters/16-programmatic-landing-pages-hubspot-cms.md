@@ -1,8 +1,43 @@
 # Chapter 16: Programmatic Landing Pages from HubSpot CMS
 
-**One markdown brief, one HubL template designed once, a controlled target list of fifty to five hundred accounts, and five Claude subagents (one per "column" of insight) that fan out per account and feed a HubSpot Pages API v3 publisher. The result is N personalized DRAFT landing pages live in your HubSpot portal in six to ten minutes, idempotent on re-run, slug-collision-safe, two-key gated before anything goes live. This chapter walks the full pattern - the auth, the brief format, the column subagents, the `layoutSections` payload, the publishing flow - and ships with a runnable starter at `starters/hubspot-landing-engine/`.**
+**This is a chapter for marketers, RevOps engineers, and anyone in GTM
+curious about coding agents. You pick a target list of 50 to 500
+accounts, write one markdown brief, and hit run. Six to ten minutes
+later there are that many personalized landing pages sitting as DRAFTs
+in your HubSpot portal, one per account, each with a hero block written
+specifically for that company. Nothing goes live without a second,
+deliberate command. This chapter walks the pieces, who edits what, and
+how to fork the runnable version at `starters/hubspot-landing-engine/`.**
 
-![90-second demo of the full play]({{MAIN_DEMO_URL}})
+![90-second demo of the full play](https://raw.githubusercontent.com/shawnla90/gtm-coding-agent/main/assets/videos/ch16-main-demo.gif)
+
+---
+
+## TL;DR
+
+If you do GTM, RevOps, or growth-engineering work in HubSpot and you've
+been wondering whether you can run a Clay-style account-personalization
+motion without paying Clay rates or learning a second tool, the short
+answer is yes. This chapter is the pattern.
+
+- **One brief, many accounts.** You write a markdown brief with
+  placeholders for the personalized parts. Each placeholder gets filled
+  by a focused AI step (a "column"). The starter ships five columns:
+  pain points, tech stack, hook angle, ICP fit score, hero copy.
+- **One HubSpot private app, one scope (`content`).** If you went
+  through Chapter 13's CRM exercise you already have the app; just add
+  the scope. Step-by-step walkthrough is in Part 1.
+- **Six to ten minutes to fifty DRAFT pages.** Everything lands as
+  DRAFT in your portal. Live publishing requires a separate, explicit
+  command (two-key gate).
+- **Marketers edit briefs, not code.** The brief is markdown frontmatter
+  and placeholders. Optionally store briefs as HubSpot CMS Blog Posts
+  under a "Brief" category so non-engineer marketers can edit them
+  inside HubSpot's UI.
+- **Cheap to run.** Pennies per account on direct Anthropic API, zero
+  metered tokens on Claude Code Max.
+- **Forkable.** Public starter, MIT licensed, runs against any HubSpot
+  portal with CMS Hub.
 
 ---
 
@@ -22,21 +57,19 @@ sitting in an archive. So I pulled it back out, rebuilt it on Claude Code
 Opus 4.7, and shipped it as a public starter folder so anyone with a
 HubSpot portal can fork it.
 
-The model layer is the part that's different from the original. The original
-relied on a single generation call per page. This one fans out into focused
-subagents - one per "column" of insight - and per-account quality goes up
-by a step function. Per-account cost stays in the dimes on BYOK or zero
-metered tokens on Claude Code Max via the `claude` CLI.
+The model layer is the piece that's different from the original. The
+original engine relied on a single AI generation call per page. This
+one fans out into focused subagents — one per "column" of insight per
+account — and per-account quality goes up by a step function. The
+cost story still works (covered in detail under "Why not just use
+Clay?" below) because you're running against a small list, not ten
+thousand rows.
 
-The wedge: Clay-style AI column tools have to amortize model cost across
-thousands of customers, so they default to mid-tier models. You are working
-a controlled list of 50-500 accounts. You can afford Opus 4.7 per row. The
-asymmetry is structural, not contingent on this month's pricing.
-
-(If you've been reading the newsletter or the gtm-coding-agent repo, this
-chapter pairs naturally with Chapter 13's CRM-side work - same private-app
-pattern, one additional `content` scope, both engines writing to the same
-HubSpot portal. You can read either order; neither depends on the other.)
+(If you've been reading the newsletter or the gtm-coding-agent repo,
+this chapter pairs naturally with Chapter 13's CRM-side work — same
+private-app pattern, one additional `content` scope, both engines
+writing to the same HubSpot portal. You can read either order;
+neither depends on the other.)
 
 ---
 
@@ -59,59 +92,119 @@ HubSpot portal. You can read either order; neither depends on the other.)
    automatically. Nothing goes live without an explicit promotion call.
 ```
 
-Every reader of this chapter already has Chapter 13's private app token set
-up. If you don't, read Chapter 13's "Connecting HubSpot" section first. Same
-token works here; you only need to add one scope.
+The rest of this chapter is each piece up close. Start with Connect.
 
 ---
 
 ## Part 1: Connect
 
-The auth model for the CMS API is identical to the CRM API. Same Bearer
-header, same `pat-na1-` / `pat-na2-` token format, same private-app pattern.
+Before the engine can read or write anything in HubSpot, it needs a way
+to authenticate. There are two patterns, and the right one depends on
+how many HubSpot portals you're working in. We'll set up the simpler
+one (a private app), which is enough for ~95% of readers, then cover
+the agency case at the end.
 
-### Scopes you need
+### What a private app is, and why we use one
 
-For landing-page CRUD, you need exactly one scope:
+A private app is HubSpot's modern way to give a script permission to
+read and write to your portal. It replaced the old "API keys" model
+HubSpot retired in late 2022. If you've ever pasted a HubSpot API key
+into a tool, a private app token is what now sits in that slot.
+
+For everything in this chapter, a single private app with one ticked
+scope is enough. The setup is a 5-minute click-through inside HubSpot's
+settings.
+
+### How to find Private Apps in HubSpot
+
+The menu is a little buried, which is the part most tutorials skip.
+Here's the path:
+
+1. In your HubSpot portal, click the **gear icon** in the top-right
+   (Settings).
+2. In the left sidebar, scroll down to **Integrations**.
+3. Click **Private Apps**.
+
+If your portal still shows an "API key" entry in that menu instead, you
+are in a portal that hasn't migrated yet. HubSpot will show a
+deprecation banner; click through to the **Private Apps** page from
+there.
+
+On the Private Apps page, you'll see any apps you've already created,
+plus a **Create a private app** button.
+
+### Create the app (or reuse your Chapter 13 one)
+
+**If you already have a Chapter 13 private app:** click into it, hit
+**Edit details**, switch to the **Scopes** tab, search for `content`,
+tick it, and click **Commit changes**. The token you already have keeps
+working. Skip to "Test the token."
+
+**If you don't have one yet:** click **Create a private app**. You'll
+see two tabs:
+
+- **Basic Info** — name (something like "Landing Page Engine") and
+  description. Fill in whatever; only you see this.
+- **Scopes** — the permission list. This is the tab that matters.
+
+For this engine, you need exactly one scope:
 
 ```
 content
 ```
 
-That's the umbrella scope. It covers reading templates, creating pages,
-updating drafts, and publishing. If you already have the Chapter 13 private
-app set up with CRM scopes, edit that app and tick `content`. No need for a
-second app.
+Search the scopes panel for "content" and tick it. That's the umbrella
+permission for reading templates, creating pages, updating drafts, and
+publishing. Then click **Create app** in the top right.
+
+HubSpot will show a confirmation modal. Click **Show token** and copy
+the long string. It starts with `pat-na1-` (US data center) or
+`pat-na2-` (EU). Paste it into your starter's `.env` file:
 
 ```bash
-# In your starter's .env (already set if you followed Chapter 13)
+# starters/hubspot-landing-engine/.env
 HUBSPOT_PRIVATE_APP_TOKEN=pat-na1-...
+```
 
-# Test it from the terminal
+### Test the token
+
+From a terminal, with the starter as your working directory:
+
+```bash
 curl -s -H "Authorization: Bearer $HUBSPOT_PRIVATE_APP_TOKEN" \
   "https://api.hubapi.com/cms/v3/pages/landing-pages?limit=1" | head -c 200
 ```
 
-A successful response returns JSON. A 401 means the token is wrong. A 403
-means the scope is missing - go add `content` to the private app.
+If you get JSON back, you're connected. Two failure modes to know
+about:
 
-### When OAuth makes sense
+- **401 Unauthorized** — the token is wrong. Re-copy it from HubSpot;
+  the most common cause is a leading or trailing space.
+- **403 Forbidden** — the token is right, but the scope is missing.
+  Go back to the private app, tick `content` on the Scopes tab, click
+  **Commit changes**.
 
-Private app tokens are scoped to one HubSpot portal. If you're an agency
-running this engine across many client portals, you need OAuth instead. The
-starter ships an `auth_oauth.py` with the full flow and a SQLite token store
-keyed by `hub_id`.
+### When OAuth makes more sense
 
-Two practical notes:
+Private app tokens are one-portal-only. Each token authenticates
+against the single HubSpot portal it was created in. That's the right
+setup if you're running this engine for your own company, or for one
+client.
 
-- HubSpot OAuth access tokens last **30 minutes**. Refresh tokens never expire
-  (unless the user uninstalls). The starter's helper auto-refreshes when an
-  access token has 5 minutes or less remaining.
-- The auth flow itself happens once per portal in a browser. After that,
-  scripted runs use the stored refresh token. Production-shaped.
+If you're an agency running this engine across many client portals at
+once, you need OAuth instead. The starter ships an `auth_oauth.py` with
+the full flow and a SQLite token store keyed by `hub_id`. Two practical
+notes if you're going down that path:
 
-**My rule:** if you're working in one HubSpot portal, use a private app
-token. If you're working in two or more, OAuth is worth the setup hour.
+- HubSpot OAuth access tokens last **30 minutes**. Refresh tokens
+  never expire (unless the user uninstalls the app). The starter's
+  helper auto-refreshes when an access token has 5 minutes or less
+  remaining.
+- The OAuth dance itself happens once per portal in a browser. After
+  that, scripted runs use the stored refresh token.
+
+**Rule of thumb:** one portal → private app. Two or more portals →
+OAuth.
 
 ---
 
@@ -184,31 +277,42 @@ Each lives as a markdown file in `columns/`. Adding a new column is dropping
 a new `.md` file and listing it in a brief's `columns_required`. The
 pipeline picks it up next run.
 
-Under the hood, each subagent is a `claude --print --model {tier}`
-subprocess call. The pattern is documented in
-`engine/claude-subprocess.md`. Three reasons it wins for this work:
+Under the hood, each column is invoked as a subprocess:
 
-- **Parent / child model split.** The pipeline orchestrator and the per-row
-  writers run at different tiers. The Claude Code session driving
-  `pipeline.py` can sit on Haiku because orchestration is routing, not
-  generation. Each column subprocess is its own `claude --print --model opus`
-  child, one per column per account. Top-tier compute lives only in the
-  writing children. That is how "Opus 4.7 per row" stays in the dimes.
-- **Subscription economics.** The CLI piggybacks on your Claude Code Max
-  session. A run that hits Opus 4.7 fifty times costs zero metered tokens.
-  Path B (BYOK API key) is there for CI and non-Mac runners. Set
-  `ANTHROPIC_API_KEY` and pass `--use-sdk`.
-- **Per-account model tier.** This is the real wedge against Clay. Clay's
-  AI columns have to amortize model cost across thousands of customers, so
-  they default to mid-tier models. You're running against fifty accounts at
-  a time. You can afford the top tier. **Per-account quality goes up by a
-  step function, and the per-account cost stays in the dimes (rough est:
-  $0.12-$0.20 on BYOK, zero on Max subscription).**
+```bash
+claude --print --model opus   # one call per column, per account
+```
 
-**One caveat to name out loud.** Max-plan subscription terms may shift in
-the next six weeks. The starter accepts an `ANTHROPIC_API_KEY` and a
-`--use-sdk` flag specifically so the same pipeline keeps working on BYOK if
-the economics change.
+The pattern is documented in `engine/claude-subprocess.md`. Three things
+make this approach worth the slight added complexity over a single
+generation call per page:
+
+- **Parent / child model split.** Two layers of model run in this
+  pipeline, and they don't have to be the same model. The outer layer
+  — the Claude Code session driving `pipeline.py` — is orchestrating:
+  deciding which account is next, which column to run, where to put
+  the result. That work doesn't need top-tier reasoning, so the outer
+  session can sit on Haiku (fast and cheap). The inner layer is the
+  writing: one Opus 4.7 subprocess per column per account. **Top-tier
+  compute lives only in the writing children.** That is how "Opus 4.7
+  per row" stays measurable in dimes, not dollars.
+- **Subscription economics.** The starter calls Claude through the
+  `claude` CLI. If you have Claude Code Max, you've already paid for
+  the inference — the CLI piggybacks on that subscription, so a run
+  that hits Opus 4.7 fifty times costs zero metered tokens. If you
+  prefer to run this from CI or a non-Mac machine, set
+  `ANTHROPIC_API_KEY` and pass `--use-sdk` to switch to direct-API
+  billing.
+- **Per-account model tier.** This is the real wedge against Clay
+  (more in "Why not just use Clay?" below). Because you're running
+  against a small list, you can afford a top-tier model on every row.
+  Per-account quality goes up by a step function. Rough cost:
+  **$0.12 to $0.20 per account on BYOK, zero on Max subscription.**
+
+**One caveat to name out loud.** Max-plan subscription terms may shift
+over time. The starter accepts an `ANTHROPIC_API_KEY` and a `--use-sdk`
+flag specifically so the same pipeline keeps working on BYOK if the
+economics change.
 
 ### 2c. Generate and publish
 
@@ -294,7 +398,7 @@ What you'll see in the terminal:
 [publish] 3/3 -> LP - Vercel - abm-q2-mid-market
 ```
 
-![Personalized DRAFT landing page generated from the brief]({{PAGE_REVEAL_GIF}})
+![Personalized DRAFT landing page generated from the brief](https://raw.githubusercontent.com/shawnla90/gtm-coding-agent/main/assets/videos/ch16-page-reveal.gif)
 
 Three DRAFT landing pages now exist in your HubSpot portal under Marketing ->
 Landing Pages. Each one references the account by name, leads with a
@@ -356,35 +460,62 @@ publishing flow - all stay the same.
 
 ---
 
-## Why this beats the Clay path
+## Why not just use Clay?
 
-![Clay AI columns vs direct API call, cost per row at Opus]({{COST_COMPARE_GIF}})
+Clay is the obvious comparison. Clay also enriches accounts with AI
+columns and lets you fan out personalization across thousands of
+records. Three real differences between this engine and a Clay-driven
+motion. The biggest one isn't a feature — it's about who each tool is
+built for.
 
-Three reasons, in order of how often they end up mattering.
+### Clay is built for volume; this is built for a controlled list
 
-**Model tier per row.** Clay's AI columns run against the same model for
-every customer because the cost has to amortize across the customer base.
-That model is rarely the top tier. Your pipeline runs against the top tier
-because your list is small. On a fifty-account batch, that's roughly the
-difference between a hook that references a real news item from last
-quarter and a hook that says "Hi Stripe, I noticed you're in fintech." For
-grounded numbers: Clay's published rate for a content-gen Opus column is
-~7.5 credits per row, which lands at ~$0.50 to $0.56/row on their current
-tiers. Direct via the Anthropic API at the same prompt size is ~$0.03/row.
+Clay's whole pricing model is built on amortizing AI inference cost
+across many customers running large enrichment lists. To make that
+math work, Clay's AI columns default to mid-tier models on the
+cheaper side of the cost curve. They have to. Top-tier models cost
+too much per call to run at 10,000-row scale across an entire customer
+base.
 
-**HubSpot stays canonical.** Briefs live in HubSpot. Pages publish to
-HubSpot. Attribution stays in HubSpot. The whole motion fits inside the
-tool the rest of your team already uses. No second product to learn, no
-second contract to sign.
+You are not running at 10,000 rows. You're running fifty. At fifty
+rows, the cost difference between a mid-tier and a top-tier model is
+roughly the gap between $1.50 and $20 — a number you do not notice on
+a single campaign. **So you can afford the top tier on every row.**
 
-**Version control.** Every brief is markdown. Every column is markdown.
-Every generated payload is JSON. All four artifacts live in git. When the
-RevOps lead asks why the messaging for the Q3 launch is different from Q2,
-the answer is a diff.
+That changes what comes out the other end. Hero copy actually grounded
+in this specific company instead of a template with the company name
+swapped in. Hooks that reference a real news item from last quarter
+instead of "Hi Stripe, I noticed you're in fintech."
 
-**My rule:** use Clay when you're operating on lists of 5,000+ and you
-need shallow enrichment fast. Use this engine when you're operating on
-lists of 50-500 and you need the hero copy to actually be defensible.
+Numbers, since people ask:
+
+| Path | Cost per row at Opus quality | Notes |
+|---|---|---|
+| Clay AI column | ~$0.50–$0.56 | ~7.5 Clay credits/row on current tiers |
+| Direct Anthropic API | ~$0.03 | Same prompt, same model |
+| Claude Code Max via `claude` CLI | $0 metered | Piggybacks on subscription |
+
+The wedge is structural. It is not contingent on this month's pricing
+— it's a function of who can afford what at what scale.
+
+### HubSpot stays canonical
+
+Briefs live in HubSpot. Pages publish to HubSpot. Attribution stays in
+HubSpot. The whole motion fits inside the tool the rest of your team
+already uses. No second product to learn, no second contract to sign,
+no analytics that need to be stitched together.
+
+### Version control
+
+Every brief is markdown. Every column is markdown. Every generated
+payload is JSON. All four artifacts live in git. When your RevOps lead
+asks why the Q3 messaging is different from Q2, the answer is a diff,
+not a Slack search.
+
+**Rule of thumb:** Clay when you're operating on lists of 5,000+ and
+you need shallow enrichment fast. This engine when you're operating on
+lists of 50 to 500 and you need the hero copy to actually be
+defensible.
 
 ---
 
@@ -436,17 +567,25 @@ campaign is a 5-minute brief edit and a `pipeline.py` run.
 
 ---
 
-## Key Takeaways
+## Recap
 
-- The same private app token from Chapter 13 powers this engine. One extra
-  scope (`content`) is the only setup change.
-- Briefs are templates with holes. Columns fill the holes. Templates define
-  the visual frame. Three separate artifacts, one pipeline.
-- Subagents on Opus-tier models per account is the move Clay can't make
-  economically. Controlled lists are the unlock.
-- DRAFT-first is the production setting. Two-key gate before pages go live.
-- Re-runs are idempotent. The cache keys on `(domain, column_slug)`.
-- OAuth is the upgrade when you run this across multiple HubSpot portals.
+The point of this chapter, in plain English:
+
+- You can run an account-by-account landing-page personalization motion
+  out of HubSpot directly. No second tool.
+- The setup is one private app, one scope (`content`), one `.env` file.
+- The work is split between a marketing-editable artifact (the brief)
+  and a developer-editable artifact (the column prompts). RevOps sits
+  in the middle and can edit both.
+- Cost stays in the dimes per account because you're running against
+  small, deliberate lists. The model tier is the difference between
+  generic-feeling hero copy and copy that sounds like it was written
+  for this specific company.
+- Nothing goes live without a second, deliberate command. DRAFT first.
+- Re-runs are cheap. Cached column outputs mean a second pass against
+  the same list skips the AI work.
+- If you outgrow one HubSpot portal, OAuth is the upgrade path. The
+  same pipeline keeps working.
 
 ---
 
