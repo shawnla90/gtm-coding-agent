@@ -1,33 +1,42 @@
 # Chapter 16: Programmatic Landing Pages from HubSpot CMS
 
-**Chapter 13 wired your CRM as a command center - your terminal now talks to HubSpot directly, no browser tab, no marketplace MCP server in the loop. This chapter wires the publishing destination. The same terminal session that pulls qualified contacts and writes three custom angles back as properties now also publishes the matching landing page for each one. One concrete example all the way through: `pipeline.py --step all` reads a brief from HubSpot CMS, runs five subagents per account on a controlled target list, and posts five DRAFT landing pages back to your portal. Six to ten minutes for fifty accounts depending on column mix.**
+**One markdown brief, one HubL template designed once, a controlled target list of fifty to five hundred accounts, and five Claude subagents (one per "column" of insight) that fan out per account and feed a HubSpot Pages API v3 publisher. The result is N personalized DRAFT landing pages live in your HubSpot portal in six to ten minutes, idempotent on re-run, slug-collision-safe, two-key gated before anything goes live. This chapter walks the full pattern - the auth, the brief format, the column subagents, the `layoutSections` payload, the publishing flow - and ships with a runnable starter at `starters/hubspot-landing-engine/`.**
+
+![90-second demo of the full play]({{MAIN_DEMO_URL}})
 
 ---
 
-## The promise we made
+## Where this engine came from
 
-Three weeks ago in the outbound engine play, the Substack closed with this line:
+I built a version of this at a HubSpot agency I worked at before going
+independent. It ran at scale for ABM cohorts and nurture revisitors,
+generating personalized landing pages from the CMS, programmatically, no
+drag-and-drop. When I left the agency the engine stayed there. The pattern
+stayed in my head.
 
-> *content if you want the terminal to also build and publish landing pages.*
+A few weeks ago in the Slack Claude Code challenge community I'm part of
+this month, a thread came up about programmatic content workflows. Someone
+mentioned they were using Claude to design HubSpot landing pages directly.
+That sentence reminded me I had a working pattern for the publishing half
+sitting in an archive. So I pulled it back out, rebuilt it on Claude Code
+Opus 4.7, and shipped it as a public starter folder so anyone with a
+HubSpot portal can fork it.
 
-That promise has been sitting open. This chapter is the build-out. The
-matching landing-page engine to the outbound engine that already shipped. Same
-private app token. Same subprocess fan-out. New destination: HubSpot CMS
-Pages API.
+The model layer is the part that's different from the original. The original
+relied on a single generation call per page. This one fans out into focused
+subagents - one per "column" of insight - and per-account quality goes up
+by a step function. Per-account cost stays in the dimes on BYOK or zero
+metered tokens on Claude Code Max via the `claude` CLI.
 
-Why bother shipping the matching half? Because the CRM enrichment work is half
-the loop. The other half is the linkable URL. When your SDR opens a contact
-record and sees three personalized angles in custom properties, the next
-question is "where do I send them?" If the answer is a generic pricing page,
-you spent compute on a half-built motion. If the answer is a personalized
-landing page that references their actual stack and the actual pain you
-diagnosed, you closed the loop.
+The wedge: Clay-style AI column tools have to amortize model cost across
+thousands of customers, so they default to mid-tier models. You are working
+a controlled list of 50-500 accounts. You can afford Opus 4.7 per row. The
+asymmetry is structural, not contingent on this month's pricing.
 
-The other reason: this is the part that's hardest to delegate to a SaaS tool.
-Clay's AI columns score, enrich, and classify. They don't write to your
-CMS. Unbounce templates, even with their AI generator, give you generic copy
-filled in by a generic model. The model tier matters more here than anywhere
-else - and that's the wedge.
+(If you've been reading the newsletter or the gtm-coding-agent repo, this
+chapter pairs naturally with Chapter 13's CRM-side work - same private-app
+pattern, one additional `content` scope, both engines writing to the same
+HubSpot portal. You can read either order; neither depends on the other.)
 
 ---
 
@@ -177,8 +186,14 @@ pipeline picks it up next run.
 
 Under the hood, each subagent is a `claude --print --model {tier}`
 subprocess call. The pattern is documented in
-`engine/claude-subprocess.md`. Two reasons it wins for this work:
+`engine/claude-subprocess.md`. Three reasons it wins for this work:
 
+- **Parent / child model split.** The pipeline orchestrator and the per-row
+  writers run at different tiers. The Claude Code session driving
+  `pipeline.py` can sit on Haiku because orchestration is routing, not
+  generation. Each column subprocess is its own `claude --print --model opus`
+  child, one per column per account. Top-tier compute lives only in the
+  writing children. That is how "Opus 4.7 per row" stays in the dimes.
 - **Subscription economics.** The CLI piggybacks on your Claude Code Max
   session. A run that hits Opus 4.7 fifty times costs zero metered tokens.
   Path B (BYOK API key) is there for CI and non-Mac runners. Set
@@ -279,6 +294,8 @@ What you'll see in the terminal:
 [publish] 3/3 -> LP - Vercel - abm-q2-mid-market
 ```
 
+![Personalized DRAFT landing page generated from the brief]({{PAGE_REVEAL_GIF}})
+
 Three DRAFT landing pages now exist in your HubSpot portal under Marketing ->
 Landing Pages. Each one references the account by name, leads with a
 research-anchored hero block, and links to the CTA in your brief. The bodies
@@ -341,6 +358,8 @@ publishing flow - all stay the same.
 
 ## Why this beats the Clay path
 
+![Clay AI columns vs direct API call, cost per row at Opus]({{COST_COMPARE_GIF}})
+
 Three reasons, in order of how often they end up mattering.
 
 **Model tier per row.** Clay's AI columns run against the same model for
@@ -348,7 +367,10 @@ every customer because the cost has to amortize across the customer base.
 That model is rarely the top tier. Your pipeline runs against the top tier
 because your list is small. On a fifty-account batch, that's roughly the
 difference between a hook that references a real news item from last
-quarter and a hook that says "Hi Stripe, I noticed you're in fintech."
+quarter and a hook that says "Hi Stripe, I noticed you're in fintech." For
+grounded numbers: Clay's published rate for a content-gen Opus column is
+~7.5 credits per row, which lands at ~$0.50 to $0.56/row on their current
+tiers. Direct via the Anthropic API at the same prompt size is ~$0.03/row.
 
 **HubSpot stays canonical.** Briefs live in HubSpot. Pages publish to
 HubSpot. Attribution stays in HubSpot. The whole motion fits inside the
