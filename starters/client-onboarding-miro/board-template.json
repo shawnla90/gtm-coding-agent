@@ -1,0 +1,70 @@
+{
+  "_comment": "Offline board template for Chapter 17. Column x-coordinates and colors define the grid. Overlay the client's architecture from client.json onto this layout.",
+  "frame": {
+    "width": 3206,
+    "height": 1400,
+    "x": 0,
+    "y": 0
+  },
+  "grid": {
+    "header_y": 220,
+    "first_row_y": 320,
+    "row_height": 90,
+    "shape_w": 220,
+    "shape_h": 60,
+    "columns": [
+      {
+        "name": "SOURCES",
+        "x": 279,
+        "color": "#2563eb"
+      },
+      {
+        "name": "DATABASE",
+        "x": 788,
+        "color": "#059669"
+      },
+      {
+        "name": "ENRICHMENT",
+        "x": 1480,
+        "color": "#7c3aed"
+      },
+      {
+        "name": "CRM",
+        "x": 2410,
+        "color": "#dc2626"
+      },
+      {
+        "name": "OUTREACH",
+        "x": 2860,
+        "color": "#ea580c"
+      }
+    ]
+  },
+  "intents": {
+    "bridge": {
+      "color": "#9ca3af",
+      "weight": 2
+    },
+    "chain": {
+      "color": "#374151",
+      "weight": 2
+    },
+    "cross_frame": {
+      "color": "#dc2626",
+      "weight": 3
+    },
+    "repurpose": {
+      "color": "#7c3aed",
+      "weight": 2
+    },
+    "loop": {
+      "color": "#2563eb",
+      "weight": 2
+    },
+    "measurement": {
+      "color": "#0891b2",
+      "weight": 2
+    }
+  }
+}
+

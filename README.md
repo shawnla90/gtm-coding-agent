@@ -16,7 +16,7 @@ gtm-coding-agent/
 ├── CLAUDE.md                              # interactive onboarding         ← START HERE
 ├── README.md                              # you are here
 │
-├── chapters/                              # 16 educational chapters
+├── chapters/                              # 17 educational chapters
 │   ├── 01-coding-agents-vs-editors.md     #   agents vs cursor vs chatgpt
 │   ├── 02-context-engineering.md          #   CLAUDE.md, structured context
 │   ├── 03-token-efficiency.md             #   200K context, cost, subagents
@@ -32,10 +32,12 @@ gtm-coding-agent/
 │   ├── 13-crm-automation-slash-commands.md  #  HubSpot + Salesforce + /stale-opportunities
 │   ├── 14-voice-invocation.md           #   transcript → voice-drift + content fan-out to Discord
 │   ├── 15-meta-ad-intelligence.md       #   Meta Ad Library scraper + Claude taxonomy + dashboard
-│   └── 16-programmatic-landing-pages-hubspot-cms.md  #  HubSpot CMS Pages API + subagent columns
+│   ├── 16-programmatic-landing-pages-hubspot-cms.md  #  HubSpot CMS Pages API + subagent columns
+│   └── 17-client-onboarding-miro-boards.md  #  Miro onboarding boards + client docs package
 │
 ├── starters/                              # runnable starter folders
-│   └── hubspot-landing-engine/            #   brief → subagent columns → HubSpot CMS DRAFT pages
+│   ├── hubspot-landing-engine/            #   brief → subagent columns → HubSpot CMS DRAFT pages
+│   └── client-onboarding-miro/            #   Miro board templates for Chapter 17
 │
 ├── engine/                                # tool documentation (living, updated regularly)
 │   ├── apify.md                           #   Apify CLI: scraping, actors, follower lists
@@ -125,7 +127,7 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 
 **[The GTM Coding Agent Playbook on shawnos.ai](https://shawnos.ai/guide/gtm-coding-agent)**
 
-15 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
+17 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
 
 ---
 
@@ -221,6 +223,7 @@ If you learn from this and want to help it grow, star it, fork it, open a PR. Th
 | 14 - Voice-Invocation | Auto-run voice-drift on every meeting transcript, fan out content + signals to typed Discord channels for review |
 | 15 - Meta Ad Intelligence | Scrape the Meta Ad Library, classify creatives via Claude subprocess, pair declared strategy with demand signals |
 | 16 - Programmatic Landing Pages | Brief + subagent columns + HubSpot CMS Pages API v3. Personalized DRAFT landing pages, one command, controlled list |
+| 17 - Client Onboarding Miro Boards | Build a client-visible GTM engine map, docs package, and screenshot QA loop before kickoff |
 
 ---
 

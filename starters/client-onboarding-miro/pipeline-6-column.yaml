@@ -1,0 +1,62 @@
+# 6-column pipeline architecture template.
+# Use this for website, content, and demand-generation client boards.
+
+frame:
+  width: 3206
+  height: 2200
+  background: "#ffffff"
+
+columns:
+  - name: TRAFFIC
+    color: "#2563eb"
+    x: 279
+    description: "Sources of visitors and leads"
+
+  - name: HOSTING
+    color: "#059669"
+    x: 788
+    description: "Infrastructure layer"
+
+  - name: CONTENT
+    color: "#7c3aed"
+    x: 1480
+    description: "What lives on the site"
+
+  - name: DISTRIBUTION
+    color: "#ea580c"
+    x: 1960
+    description: "Repurpose and publish channels"
+
+  - name: FUNNEL
+    color: "#dc2626"
+    x: 2410
+    description: "Conversion stages"
+
+  - name: MEASUREMENT
+    color: "#0891b2"
+    x: 2860
+    description: "Tracking and analytics"
+
+header:
+  y: 237
+  width: 200
+  height: 35
+  text_color: "#ffffff"
+  shape: round_rectangle
+
+items:
+  default_y_top: 312
+  row_height: 80
+  shape: round_rectangle
+  width: 230
+  height: 70
+  text_color: "#1f2937"
+  border_color: "#e5e7eb"
+  fill_pastel:
+    TRAFFIC: "#dbeafe"
+    HOSTING: "#d1fae5"
+    CONTENT: "#ede9fe"
+    DISTRIBUTION: "#ffedd5"
+    FUNNEL: "#fee2e2"
+    MEASUREMENT: "#cffafe"
+
