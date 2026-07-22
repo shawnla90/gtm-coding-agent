@@ -1,0 +1,122 @@
+[
+  {
+    "id": "pm_sample_01",
+    "subreddit": "projectmanagement",
+    "title": "Asana vs Monday.com for a 12-person team, which one actually scales?",
+    "selftext": "We are outgrowing spreadsheets and narrowed it down to Asana vs Monday.com. Team is 12 people, mostly marketing and ops. Which one holds up as you add projects without getting messy? Looking for people who have run both.",
+    "permalink": "https://www.reddit.com/r/projectmanagement/comments/pm_sample_01/asana_vs_monday/",
+    "created_utc": 1784419200,
+    "score": 214,
+    "num_comments": 96
+  },
+  {
+    "id": "pm_sample_02",
+    "subreddit": "Notion",
+    "title": "Notion vs ClickUp for project management, torn between the two",
+    "selftext": "I love Notion for docs but the project management side feels loose. ClickUp looks more built for tasks and sprints. For a small team that wants docs and tasks in one place, which way would you go?",
+    "permalink": "https://www.reddit.com/r/Notion/comments/pm_sample_02/notion_vs_clickup/",
+    "created_utc": 1784332800,
+    "score": 168,
+    "num_comments": 74
+  },
+  {
+    "id": "pm_sample_03",
+    "subreddit": "smallbusiness",
+    "title": "Best project management tool for a small team on a budget?",
+    "selftext": "Five person shop, we need something simple to track tasks and deadlines without paying per seat through the nose. Free tier is fine to start. What are you all using that does not get expensive fast?",
+    "permalink": "https://www.reddit.com/r/smallbusiness/comments/pm_sample_03/best_pm_tool_budget/",
+    "created_utc": 1784246400,
+    "score": 132,
+    "num_comments": 61
+  },
+  {
+    "id": "pm_sample_04",
+    "subreddit": "agile",
+    "title": "Jira feels like overkill for our 8-person team, what are people switching to?",
+    "selftext": "Jira is powerful but it is bloated and slow for how we work. Sprints take forever to set up. We are an 8-person team doing light agile. Looking for a simpler alternative that still does a backlog and sprint board.",
+    "permalink": "https://www.reddit.com/r/agile/comments/pm_sample_04/jira_overkill/",
+    "created_utc": 1784160000,
+    "score": 189,
+    "num_comments": 88
+  },
+  {
+    "id": "pm_sample_05",
+    "subreddit": "startups",
+    "title": "Switching from Trello, need better kanban and a roadmap view",
+    "selftext": "Trello was great when we were tiny but we have hit its limits. We want proper kanban plus a roadmap and timeline view for planning. Migrating everyone is the scary part. What did you move to and was the migration painful?",
+    "permalink": "https://www.reddit.com/r/startups/comments/pm_sample_05/switching_from_trello/",
+    "created_utc": 1784073600,
+    "score": 156,
+    "num_comments": 70
+  },
+  {
+    "id": "pm_sample_06",
+    "subreddit": "productivity",
+    "title": "ClickUp vs Asana, which is less bloated for a small team?",
+    "selftext": "Every time I open ClickUp there are twenty features I do not use. Asana looks cleaner but I hear it gets pricey. For a team of six that just wants task management that stays out of the way, which one?",
+    "permalink": "https://www.reddit.com/r/productivity/comments/pm_sample_06/clickup_vs_asana_bloat/",
+    "created_utc": 1783987200,
+    "score": 143,
+    "num_comments": 65
+  },
+  {
+    "id": "pm_sample_07",
+    "subreddit": "projectmanagement",
+    "title": "Anyone regret moving to Monday.com? Pricing keeps climbing",
+    "selftext": "We moved to Monday.com last year and the per-seat pricing keeps going up every renewal. Features are fine but the cost is getting hard to justify for a small team. Anyone switched away and to what?",
+    "permalink": "https://www.reddit.com/r/projectmanagement/comments/pm_sample_07/regret_monday/",
+    "created_utc": 1783900800,
+    "score": 121,
+    "num_comments": 58
+  },
+  {
+    "id": "pm_sample_08",
+    "subreddit": "ProductManagement",
+    "title": "Linear vs Jira for sprint planning on a small product team?",
+    "selftext": "Engineering wants Linear for speed, leadership is used to Jira. For sprint planning and backlog grooming on a small team, is Linear enough or do we lose too much by leaving Jira? Real experiences welcome.",
+    "permalink": "https://www.reddit.com/r/ProductManagement/comments/pm_sample_08/linear_vs_jira/",
+    "created_utc": 1783814400,
+    "score": 177,
+    "num_comments": 81
+  },
+  {
+    "id": "pm_sample_09",
+    "subreddit": "SaaS",
+    "title": "Looking for an Airtable alternative for task management",
+    "selftext": "Airtable is great as a database but for actual task management and project tracking it feels off. I want something purpose-built for projects with a board view and good integrations. Recommendations for a small team?",
+    "permalink": "https://www.reddit.com/r/SaaS/comments/pm_sample_09/airtable_alternative/",
+    "created_utc": 1783728000,
+    "score": 108,
+    "num_comments": 49
+  },
+  {
+    "id": "pm_sample_10",
+    "subreddit": "Entrepreneur",
+    "title": "Basecamp vs Asana for a small remote agency?",
+    "selftext": "Running a remote agency with clients, need project management that handles team collaboration and keeps clients in the loop. Basecamp vs Asana, which fits an agency better? Time tracking would be a bonus.",
+    "permalink": "https://www.reddit.com/r/Entrepreneur/comments/pm_sample_10/basecamp_vs_asana/",
+    "created_utc": 1783641600,
+    "score": 134,
+    "num_comments": 62
+  },
+  {
+    "id": "pm_sample_11",
+    "subreddit": "projectmanagement",
+    "title": "Best free project management tool that is not limited to 3 projects?",
+    "selftext": "Most free plans cap you at a couple of projects then push you to pay. I want a genuinely usable free tier for a small team, kanban and task management at minimum. What free project management tool actually works past the trial?",
+    "permalink": "https://www.reddit.com/r/projectmanagement/comments/pm_sample_11/best_free_pm/",
+    "created_utc": 1783555200,
+    "score": 149,
+    "num_comments": 67
+  },
+  {
+    "id": "pm_sample_12",
+    "subreddit": "nocode",
+    "title": "Trello vs Notion vs ClickUp for a solo founder juggling clients?",
+    "selftext": "Solo founder here, juggling several clients and my own roadmap. Trello is simple, Notion is flexible, ClickUp does everything. For a one-person operation that might add a contractor later, which project management setup would you pick?",
+    "permalink": "https://www.reddit.com/r/nocode/comments/pm_sample_12/trello_notion_clickup/",
+    "created_utc": 1783468800,
+    "score": 118,
+    "num_comments": 53
+  }
+]

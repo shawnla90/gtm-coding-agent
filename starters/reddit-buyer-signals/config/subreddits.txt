@@ -1,0 +1,18 @@
+# Subreddits to track for your category's buyer talk.
+# These are where people debate the exact tools you compete with. The example is a
+# project-management SaaS for small teams. Swap these for the communities your buyers post in.
+# One per line. Blank lines and # comments are ignored.
+
+projectmanagement
+ProductManagement
+agile
+startups
+smallbusiness
+Notion
+clickup
+productivity
+SaaS
+Entrepreneur
+# where teams ask which tool to standardize on
+nocode
+remotework

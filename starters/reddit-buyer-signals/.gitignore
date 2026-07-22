@@ -1,0 +1,14 @@
+# local data + the pointers (never commit data or the working export)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/sheet_url.txt
+data/slides_url.txt
+data/clearbox_export.json
+# built deck artifact
+*.pptx
+# python
+venv/
+.venv/
+__pycache__/
+*.pyc
