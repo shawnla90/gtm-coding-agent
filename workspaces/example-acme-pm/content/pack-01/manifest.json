@@ -1,0 +1,30 @@
+{
+  "pack_slug": "acme-pm-reddit-content",
+  "summary": "CLIENT-SCOPED pack for Acme PM, drafted in Acme PM's voice from a real Reddit buyer question. Stays in the client package. Do NOT dispatch to a public content channel; client-voice content never goes to the public content OS.",
+  "client": "Acme PM",
+  "voice_profile": "voice/core-voice.md",
+  "dispatch": "disabled_client_scoped",
+  "items": [
+    {
+      "channel": "linkedin-content",
+      "platform": "linkedin",
+      "subtype": "feed",
+      "body_path": "linkedin.md",
+      "strip_md": true
+    },
+    {
+      "channel": "reddit-posts",
+      "platform": "reddit",
+      "subtype": "draft",
+      "body_path": "reddit.md",
+      "strip_md": true
+    },
+    {
+      "channel": "blog-newsletters",
+      "platform": "blog",
+      "subtype": "long-tail",
+      "body_path": "blog.md",
+      "strip_md": false
+    }
+  ]
+}

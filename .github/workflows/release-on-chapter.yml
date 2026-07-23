@@ -1,0 +1,49 @@
+name: Draft release on chapter or starter change
+
+# New chapters and starters ship as GitHub Releases so watchers and stargazers get notified.
+# This drafts a release for the current top version in CHANGELOG.md when chapters or starters
+# change on main. A draft notifies no one until a human publishes it, so there is always a review step.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'chapters/**'
+      - 'starters/**'
+      - 'CHANGELOG.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read top version from CHANGELOG
+        id: ver
+        run: |
+          VER=$(grep -m1 -oE '## \[[0-9]+\.[0-9]+\.[0-9]+\]' CHANGELOG.md | tr -d '## []')
+          if [ -z "$VER" ]; then echo "no version found in CHANGELOG.md"; exit 1; fi
+          echo "tag=v$VER" >> "$GITHUB_OUTPUT"
+
+      - name: Extract notes for that version
+        run: |
+          awk '/^## \[/{c++} c==1{print} c==2{exit}' CHANGELOG.md > RELEASE_NOTES.md
+          echo "--- notes ---"; cat RELEASE_NOTES.md
+
+      - name: Create draft release if it does not exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.ver.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG already exists; nothing to do"
+          else
+            gh release create "$TAG" --draft --title "$TAG" --notes-file RELEASE_NOTES.md --target main
+            echo "drafted release $TAG (publish it manually to notify watchers and stargazers)"
+          fi

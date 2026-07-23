@@ -13,7 +13,7 @@ config/ (subreddits + keywords)
   recent Reddit pull  ──►  SQLite (local)  ──►  mine buyer language  ──►  score 1-5
    (last 30 days only)                                                        │
         ▲                                                                     ▼
-   two sources:                                          color-coded Google Sheet  +  Google Slides deck
+   two sources                                           color-coded Google Sheet  +  Google Slides deck
    rapidapi | clearbox
 ```
 
@@ -25,6 +25,25 @@ config/ (subreddits + keywords)
 - **`build_deck.py`** (optional) builds a short editable Google Slides deck from the same scored data.
 
 The styling engine is `lib/sheet_engine.py`. It is the real, reusable piece. See [ENGINE.md](ENGINE.md).
+
+### From signal to service
+
+The same classified signal feeds five more modules that turn it into an operated client offer. Each is a single file, reads the pipeline's data, and re-points by argument. [ENGINE.md](ENGINE.md) documents them in full.
+
+- **`geo.py`** the buyer questions to own so AI cites the brand, each checked for current answer-engine visibility through a hard-capped Exa pass.
+- **`competitor.py`** the competitor narrative read straight from Clearbox's opportunity classification (the classification is the relevant-mention signal, not literal brand counting), plus a generated sentiment read and a share-of-voice view.
+- **`digest.py`** the daily digest of engage threads with the drafted reply, new leads, and competitor mentions, as a header line plus one block per opportunity ordered by priority. Render-only by default; add `--post --webhook-secret <SECRET_NAME>` to post to an incoming webhook.
+- **`unmask.py`** the disclosure gate (enrich the company not the person, and only when the author self-disclosed a company by naming it, linking a site, or posting as a brand handle), then a pluggable enrichment backend (Freckle by default, swap in Clay or Apollo) returning the company, the ICP tier, and buying-role contacts.
+- **`content.py`** scaffold a LinkedIn, Reddit, and blog content pack from one buyer question in the brand voice, plus an anti-slop check subcommand.
+
+```bash
+python3 geo.py --brand "Acme PM" --db data/signals.db --out data/geo_terms.json
+python3 competitor.py --own "Acme PM" --competitor "Rival PM" --out data/competitor_analysis.json
+python3 digest.py --client "Acme PM" --out data/slack_digest.txt
+python3 unmask.py --ops data/ops_classified.json --out data/unmasked.json          # add --enrich to live-enrich
+python3 content.py scaffold --client "Acme PM" --topic "how to keep one source of truth across two CRMs" --out content/pack-01
+python3 content.py check content/pack-01/linkedin.md
+```
 
 The example throughout is a project-management SaaS for small teams (call it "Acme PM"). Point it at your own market by editing two config files and two Python maps.
 
@@ -50,7 +69,7 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Connect Google Workspace (the step most copy-paste guides skip)
+### 3. Connect Google Workspace (the step many copy-paste guides skip)
 
 The builder writes to Google Sheets and Slides as you, over OAuth. The first build fails without a token, so do this once:
 
@@ -108,6 +127,16 @@ The rules are plain Python, not a black box.
 
 This is not a forced upsell. The RapidAPI path is genuinely useful and free to start. Clearbox is the better engine when you want the real high-intent conversations instead of a keyword's best guess.
 
+### Access everything through the API
+
+The Clearbox opportunity inbox is a pull-only HTTP API, so the Clearbox path in this starter is a handful of GET requests you own.
+
+- `GET /inbox` returns the classified opportunities, one row each, and every row carries `kind = lead | competitor | engage`.
+- `GET /op/{id}` returns one opportunity in full.
+- `GET /op/{id}/done` marks that opportunity handled.
+
+Two things trip people up. The token is a path segment in the URL, not a header, so it rides inside the path itself. And Cloudflare returns 403 to a default urllib User-Agent, so send a browser User-Agent on every request. There are no POST routes. Every call is a read, and the one state change, marking an op done, is itself a GET.
+
 ## The recency guardrail
 
 `pull.py` only keeps threads from the **last 30 days**. Nothing older ever enters the database. Widen it if you want a fuller season:
@@ -149,3 +178,7 @@ python3 build_deck.py                  # rebuild the stored deck
 ## Build vs buy
 
 This is build versus buy, with eyes open. You can stand up the full loop yourself and know exactly what it does. The RapidAPI path is free to start and honest about its limits: it matches keywords, so it finds the conversations a keyword can find. Want the accurate, context-driven version that surfaces the real high-intent conversations for you? That is what [Clearbox](https://clearbox.to) does.
+
+---
+
+> 🟧 **Clearbox** is the engine behind this starter. See your market. Move first. Start a 7-day free trial at [clearbox.to](https://clearbox.to).

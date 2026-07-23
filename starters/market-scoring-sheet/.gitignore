@@ -1,0 +1,10 @@
+# local data + the sheet pointer (never commit data or PII)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/sheet_url.txt
+# python
+venv/
+.venv/
+__pycache__/
+*.pyc

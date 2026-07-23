@@ -42,7 +42,7 @@ and it has read Reddit. The buyer talk on r/projectmanagement,
 r/smallbusiness, and r/startups is training and retrieval fuel. The tool that
 answers the question in public becomes the default recommendation.
 
-Right now, for most categories, nobody has claimed that spot. The comparison
+Right now, for many categories, nobody has claimed that spot. The comparison
 threads are full of buyers weighing your competitors, and your product is not
 in the conversation, so the model has nothing of yours to cite.
 
@@ -147,8 +147,8 @@ conversations, not a forum post from three years ago that no longer reflects
 how the tools compare. On the behavior side, it is what keeps you from
 getting banned. The way to grow on Reddit is to show up in discussions that
 are actually happening and add something real. If your engagement strategy is
-digging up old threads to drop a link, moderators notice, and the community
-notices, and you are done. Recent-only forces you into live conversations,
+digging up old threads to drop a link, moderators catch it, and the community
+catches it, and you are done. Recent-only forces you into live conversations,
 which is the only place a sincere mention is even possible.
 
 The other gotcha is the source. There are two, and the difference is honest:
@@ -200,6 +200,165 @@ weekly runs, wrap `run.sh` in a cron job and let it re-score itself.
 
 ---
 
+## The content and intelligence layer
+
+The pull, the score, and the sheet find the gap. Four more scripts help you
+close it. They ship in the same `reddit-buyer-signals/` starter, they read the
+same classified opportunities, and each one does a single job you can run on
+its own.
+
+### What are the GEO terms (geo.py)
+
+A GEO term is a buyer question you want an answer engine to cite you for. "How
+do you keep one source of truth across HubSpot and Salesforce." "What is the
+fastest way to dedupe accounts before a migration." The sort of thing a RevOps
+lead asks an assistant, and something your product can answer with authority.
+
+`geo.py` starts from the real buyer language the account already surfaced, the
+same mined topics the sheet is built on, and shapes each into a clean query.
+Then it runs a hard-capped pass through Exa on the top few terms and asks one
+thing of each. When a buyer asks this today, does your brand show up in what
+the model reads. The cap lives in `lib/exa_client.py` as `MAX_QUERIES`
+(default 8), and a caller cannot exceed it even by passing more queries, so a
+visibility check never burns the balance. With no Exa key set, the terms still
+come out, just without a live score.
+
+The output carries two things on every row, the term to own and whether AI
+cites you for it right now. That is the plan and the gap in one file.
+
+```bash
+python3 geo.py --brand "Acme PM" --db data/signals.db --out data/geo_terms.json
+# GEO terms: 22 · visibility-checked 8 · already cited 1 · score 12 -> data/geo_terms.json
+```
+
+A score of 12 means that across the eight buyer questions checked, your brand
+surfaced in one. That number is the reason to publish the pages, stated plainly.
+
+### Competitor analysis (competitor.py)
+
+This read does not count brand strings, and it does not have to. Clearbox has
+already classified every opportunity as engage, lead, or competitor, tagged
+against your own brands and your competitors' brands. The classification is the
+relevant-mention signal by construction. `competitor.py` reads it straight and
+rolls it into a share-of-voice view, how many live conversations a competitor
+is already the answer in, versus how many are an open opening where your
+category is live and no one owns it yet.
+
+It adds two things the Reddit data itself has no field for. A sentiment read,
+generated upstream over the opportunity summaries and labeled as generated so
+no one mistakes an LLM read for a stored field. And a plain narrative of where
+you stand.
+
+```bash
+python3 competitor.py --own "Acme PM" --competitor "Rival PM" \
+    --ops data/ops_classified.json --out data/competitor_analysis.json
+# competitor analysis: 9/40 competitor ops · 26 openings · sentiment {'neutral': 5} -> ...
+```
+
+Nine of forty live conversations already point at the competitor. Twenty-six
+are wide open. That is the argument for showing up, in two numbers.
+
+### Create content (content.py)
+
+`content.py scaffold` takes one real buyer question and builds a three-draft
+pack, a LinkedIn post, a Reddit post kept as a draft, and a long-tail blog, all
+in the client's voice, with anti-slop enforced. The coding agent writes the
+words. The script gives it the skeleton, a generation brief with the voice
+profile inlined, and a manifest that keeps the pack client-scoped so it never
+dispatches to a public content channel.
+
+```bash
+python3 content.py scaffold --client "Acme PM" --voice ../voice/core-voice.md \
+    --topic "keeping one source of truth across HubSpot and Salesforce" \
+    --out content/pack-01
+```
+
+The blog has a defined shape so it earns citations. A buyer-query H1, a TL;DR
+answer block up top, and a `## Frequently Asked Questions` section with
+`### question` headings that emit FAQPage schema. HowTo-shaped steps go in where
+the answer is a procedure. When a draft is done, the second subcommand scans it
+before it ships.
+
+```bash
+python3 content.py check content/pack-01/blog.md
+# content/pack-01/blog.md: ok
+# PASS: 0 flag(s) across 1 file(s)
+```
+
+The checker merges the house structural scanner with an explicit banned-word
+list and an em-dash catch. No em-dashes, no define-by-negation, no CTA-slop,
+no banned words. It is the same check that gates this chapter.
+
+### Access everything through the API
+
+The classified opportunity inbox is a live HTTP API, pull-only. Three routes,
+no writes to your data.
+
+- `GET /inbox` lists every open opportunity. Each row carries `kind`, one of
+  `lead`, `competitor`, or `engage`. That field is the routing switch the rest
+  of the pipeline reads.
+- `GET /op/{id}` returns one opportunity in full.
+- `GET /op/{id}/done` marks an opportunity worked, so it leaves the inbox on
+  the next pull.
+
+Two things about the transport that a copy-pasted snippet gets wrong. The token
+is a path segment in the URL, not a header. And Cloudflare fronts the host, so a
+request sent with the default urllib User-Agent comes back 403. Send a browser
+User-Agent on every call and it goes through.
+
+```python
+import os, json, urllib.request
+
+BASE = "https://api.clearbox.to"
+TOKEN = os.environ["CLEARBOX_INBOX_TOKEN"]          # a path segment, not a header
+UA = {"User-Agent": "Mozilla/5.0 (clearbox-inbox-poller)"}  # default urllib UA gets a 403
+
+def get(path):
+    req = urllib.request.Request(f"{BASE}/{TOKEN}{path}", headers=UA)
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return json.load(r)
+
+inbox = get("/inbox")                       # rows tagged lead | competitor | engage
+for row in inbox["opportunities"]:
+    op = get(f"/op/{row['id']}")            # the full opportunity
+    # classify, gate, enrich, digest ...
+    get(f"/op/{row['id']}/done")            # done, drop it from the inbox
+```
+
+There are no POST routes. You do not push state back beyond marking an
+opportunity done. The pattern is a cron that polls `/inbox`, works each row by
+its `kind`, and marks it done. Everything else in this chapter reads the JSON
+that comes out of these three routes.
+
+---
+
+## The Reddit skills that do not get you banned
+
+This is the hook, so it is worth saying flat. The reason these skills are safe
+to run is that the risky part, the posting, stays human, and the parts that
+scale, the reading and the routing, are the only parts automated.
+
+Three guardrails hold that line.
+
+- **Recency, enforced at the pull.** Only the last 30 to 60 days enters the
+  database. Nothing older, ever. Fresh threads are what answer engines weight,
+  and a live conversation is the only place a sincere mention is even possible.
+- **Relevance, on every pull.** A thread is kept only when it names a real
+  brand or a category noun. A keyword search drags in careers, gaming, and
+  politics threads that share a word but not a buyer. The relevance gate drops
+  them on the way into SQLite, so the plan is built on real buyers.
+- **Karma first, always.** Be a genuine human on Reddit. Comment because you
+  have something to add, build standing in the communities you sell into, and
+  let the reading and routing run off to the side. The automation reads the
+  room. You still speak in it.
+
+Automate the inbox, the classification, the gate, the enrichment, and the
+digest. Post in your own voice, on threads you would have answered anyway. That
+split is the whole method, and it is why the account stays in good standing
+while the pipeline runs every day.
+
+---
+
 ## Why this belongs in a coding-agent GTM repo
 
 This is not really about Reddit.
@@ -220,3 +379,7 @@ The pattern is the same one that runs through the whole GTM Coding Agent repo:
 Use the sheet to find the questions your buyers are asking right now, use the
 deck to show anyone the gap, then go be the answer. On a channel and a
 schedule you control, not one you rent.
+
+---
+
+> 🟧 **Clearbox** is the engine behind this chapter. See your market. Move first. Start a 7-day free trial at [clearbox.to](https://clearbox.to).

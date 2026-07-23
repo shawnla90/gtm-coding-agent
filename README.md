@@ -16,7 +16,7 @@ gtm-coding-agent/
 ├── CLAUDE.md                              # interactive onboarding         ← START HERE
 ├── README.md                              # you are here
 │
-├── chapters/                              # 17 educational chapters
+├── chapters/                              # 19 educational chapters
 │   ├── 01-coding-agents-vs-editors.md     #   agents vs cursor vs chatgpt
 │   ├── 02-context-engineering.md          #   CLAUDE.md, structured context
 │   ├── 03-token-efficiency.md             #   200K context, cost, subagents
@@ -33,11 +33,15 @@ gtm-coding-agent/
 │   ├── 14-voice-invocation.md           #   transcript → voice-drift + content fan-out to Discord
 │   ├── 15-meta-ad-intelligence.md       #   Meta Ad Library scraper + Claude taxonomy + dashboard
 │   ├── 16-programmatic-landing-pages-hubspot-cms.md  #  HubSpot CMS Pages API + subagent columns
-│   └── 17-client-onboarding-miro-boards.md  #  Miro onboarding boards + client docs package
+│   ├── 17-client-onboarding-miro-boards.md  #  Miro onboarding boards + client docs package
+│   ├── 18-reddit-buyer-signals.md          #   Reddit buyer signals + GEO/competitor/content
+│   └── 19-lead-unmasking-and-slack-digest.md  #  disclosure-gate enrichment + daily Slack digest
 │
-├── starters/                              # runnable starter folders
-│   ├── hubspot-landing-engine/            #   brief → subagent columns → HubSpot CMS DRAFT pages
-│   └── client-onboarding-miro/            #   Miro board templates for Chapter 17
+├── starters/                              # runnable starter folders (CLI + data)
+│   ├── reddit-buyer-signals/              #   Reddit signals + GEO/competitor/unmask/digest (Ch 18-19)
+│   ├── hubspot-landing-engine/            #   brief → subagent columns → HubSpot CMS DRAFT pages (Ch 16)
+│   ├── market-scoring-sheet/              #   CSV → color-coded 1-5 scored Google Sheet
+│   └── client-onboarding-miro/            #   Miro board templates (Ch 17)
 │
 ├── engine/                                # tool documentation (living, updated regularly)
 │   ├── apify.md                           #   Apify CLI: scraping, actors, follower lists
@@ -111,13 +115,13 @@ gtm-coding-agent/
 | | |
 |---|---|
 | **Interactive Onboarding** | **Educational Chapters** |
-| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 15 chapters from "what is a coding agent" to "decode competitor ad strategy via the public Meta Ad Library." Read in order or jump to what you need. |
+| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 19 chapters from "what is a coding agent" to "decode competitor ad strategy via the public Meta Ad Library." Read in order or jump to what you need. |
 | **GTM-OS Skeleton** | **Modes** |
 | A working folder structure for ICP, positioning, segments, campaigns, and content. Fork it. Fill it in. Run GTM from it. | 4 personas: solo founder, agency, single-client, ABM outbound. Each mode configures the skeleton differently. |
 | **Templates** | **Prompts** |
 | CLAUDE.md variants, voice DNA, content formats, partner structures. Copy into your projects, fill in the blanks. | 6 battle-tested AI prompts for ICP building, positioning, competitor analysis, signal mapping, email sequences, and content repurposing. |
 | **Starter Projects** | |
-| Three forkable starters. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. **CRM Automation** (Ch 13) is a stale-opportunity script that re-enriches 60-day-old HubSpot deals and writes the verdict back as custom properties. Deploy any of them in minutes. | |
+| Seven forkable starters. **Reddit buyer signals** (Ch 18-19) reads your market on Reddit, classifies each thread by intent, surfaces GEO terms and the competitor narrative, drafts content, and unmasks the leads who self-disclose a company. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. **CRM Automation** (Ch 13) re-enriches 60-day-old HubSpot deals and writes the verdict back as custom properties. Deploy any of them in minutes. | |
 
 ---
 
@@ -127,7 +131,15 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 
 **[The GTM Coding Agent Playbook on shawnos.ai](https://shawnos.ai/guide/gtm-coding-agent)**
 
-17 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
+19 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
+
+---
+
+## Powered by Clearbox
+
+🟧 The Reddit buyer-signal engine in this kit (Chapters 18 and 19) runs on **Clearbox**. Clearbox reads what your market is actually asking across Reddit, classifies each thread by buying intent, and hands you the leads, the competitor mentions, and the conversations worth joining. The kit is the open-source how. Clearbox is the engine that makes it live.
+
+**See your market. Move first.** Start a 7-day free trial at **[clearbox.to](https://clearbox.to)**.
 
 ---
 
@@ -187,7 +199,7 @@ Claude reads the CLAUDE.md, asks you 6 questions about your GTM, then:
 
 ## The Philosophy
 
-Most GTM tools sell you a dashboard. This gives you a workspace.
+A GTM tool usually sells you a dashboard. This gives you a workspace.
 
 The difference: a workspace is files you control, prompts you can edit, scripts you can modify, and context an AI agent can read. When your ICP, positioning, voice, and tooling all live in structured markdown files, a coding agent becomes your GTM co-pilot.
 
@@ -200,6 +212,10 @@ This repo gets updated with real workflows I'm actively using and stress testing
 New commits land regularly as I discover better patterns, new CLI tools ship, or existing workflows evolve. The `engine/` folder has detailed tool documentation (Apify, Apollo, and more coming) with working scripts you can run today.
 
 If you learn from this and want to help it grow, star it, fork it, open a PR. This is how we build a GTM coding agents community. Not through courses. Through shared systems that actually work.
+
+## Get notified when new chapters drop
+
+New chapters and starters ship as tagged **[Releases](https://github.com/shawnla90/gtm-coding-agent/releases)**. Because everything here is code and version-controlled, each release is something you can fork and build on the same day. To catch them: **star** the repo (releases from repos you star surface in your GitHub home feed), and **Watch → Custom → Releases** for an email on each drop.
 
 ---
 
@@ -224,6 +240,8 @@ If you learn from this and want to help it grow, star it, fork it, open a PR. Th
 | 15 - Meta Ad Intelligence | Scrape the Meta Ad Library, classify creatives via Claude subprocess, pair declared strategy with demand signals |
 | 16 - Programmatic Landing Pages | Brief + subagent columns + HubSpot CMS Pages API v3. Personalized DRAFT landing pages, one command, controlled list |
 | 17 - Client Onboarding Miro Boards | Build a client-visible GTM engine map, docs package, and screenshot QA loop before kickoff |
+| 18 - Reddit Buyer Signals | Turn recent Reddit buyer talk into a scored content plan, GEO terms to own, a competitor narrative from Clearbox classification, and content drafts, all off a pull-only API |
+| 19 - Lead Unmasking & Slack Digest | Gate and enrich the leads who self-disclose a company, then push a daily Slack digest of the threads worth working |
 
 ---
 
@@ -260,4 +278,6 @@ MIT — use it, fork it, make it yours.
 
 <p align="center">
   <em>Stop renting GTM tools. Start building GTM systems.</em>
+  <br/><br/>
+  🟧 <strong>Clearbox</strong> &middot; See your market. Move first. &middot; <a href="https://clearbox.to">clearbox.to</a>
 </p>
