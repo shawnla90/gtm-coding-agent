@@ -40,3 +40,9 @@ scratch/
 
 # Social content (private drafts)
 social/
+
+# Client workspaces are private. Never commit a real client to this public repo.
+# Only the fictional example workspace is tracked.
+workspaces/*
+!workspaces/example-acme-pm/
+!workspaces/example-acme-pm/**

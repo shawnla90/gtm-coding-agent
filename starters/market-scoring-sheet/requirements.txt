@@ -1,0 +1,5 @@
+gspread>=6.0
+google-auth>=2.0
+google-auth-oauthlib>=1.0
+pandas>=2.0
+requests>=2.28

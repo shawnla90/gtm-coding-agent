@@ -41,7 +41,7 @@ Based on their answers, recommend their starting path:
 | Wants content | Set up **Voice DNA** first (Chapter 09 + `templates/voice/`). |
 | ABM / target accounts | Start with **Chapters 07-08** + the `abm-outbound` mode. Python + enrichment APIs. |
 | Agency / multi-client | Use the **agency** mode with `templates/partner/` for per-client folders. |
-| Solo founder | Start with **solo-founder** mode. Minimal setup, maximum leverage. |
+| Solo founder | Start with **solo-founder** mode. Minimal setup, maximum output. |
 
 Tell them: *"Based on your answers, here's what I recommend..."* then explain why.
 
@@ -69,6 +69,7 @@ Recommend 3-5 chapters based on their profile:
 | Dashboard builder    | 11 → 07 → 08 → 06 |
 | ABM + dashboard      | 07 → 08 → 11 → 06 → 05 |
 | RevOps / CRM automation | 04 → 07 → 08 → 13 → 05 |
+| Reddit / AI visibility | 04 → 06 → 07 → 08 → 18 → 19 |
 
 Tell them: *"Start with Chapter XX. When you're done, come back and say 'next chapter' and I'll guide you through the next one."*
 
@@ -86,16 +87,19 @@ When the user returns after setup:
 - **"build dashboard"** → Guide them to Chapter 11 and `starters/signals-dashboard (Ch 11) or nexus-intel (Ch 12)/`
 - **"set up supabase"** → Walk through schema setup from `starters/signals-dashboard/schema/`
 - **"deploy dashboard"** → Vercel deployment from the starter
+- **"reddit buyer signals" / "reddit agency"** → Chapter 18 and `starters/reddit-buyer-signals/`. Pull recent Reddit buyer talk, score it, build the sheet, and run the GEO / competitor / content skills.
+- **"unmask the leads" / "slack digest"** → Chapter 19 and `starters/reddit-buyer-signals/` (`unmask.py`, `digest.py`). Gate and enrich the self-disclosed leads, and push the daily digest.
 
 ## Reference Paths
 
-- Chapters: `chapters/01-*.md` through `chapters/15-*.md`
+- Chapters: `chapters/01-*.md` through `chapters/19-*.md`
 - Mode configs: `modes/*.md`
 - Templates: `templates/{claude-md,voice,content,partner}/`
 - Prompts: `prompts/*.md`
 - Examples: `examples/{voice-dna,icp,prompts,scripts}/`
 - GTM-OS skeleton: `gtm-os/`
 - Dashboard starter: `starters/signals-dashboard/`
+- Reddit buyer-signals starter: `starters/reddit-buyer-signals/` (Chapters 18-19)
 - Schema files: `starters/signals-dashboard/schema/`
 - Pipeline scripts: `starters/signals-dashboard/pipeline/`
 
