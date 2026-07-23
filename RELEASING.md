@@ -5,14 +5,14 @@ New chapters and starters ship as tagged GitHub Releases, so anyone watching or 
 1. Update `CHANGELOG.md`: add a new version block at the top (newest first) describing what shipped.
 2. Tag and push:
    ```bash
-   git tag -a v0.2.0 -m "Clearbox Reddit agency pack: intelligence + unmasking"
-   git push origin v0.2.0
+   git tag -a v0.3.0 -m "Clearbox Reddit agency pack: intelligence + unmasking"
+   git push origin v0.3.0
    ```
 3. Cut the release from the tag, using the changelog block as the notes:
    ```bash
    # notes = the top version block of CHANGELOG.md
    awk '/^## \[/{c++} c==1{print} c==2{exit}' CHANGELOG.md > /tmp/notes.md
-   gh release create v0.2.0 --title "v0.2.0 - Reddit intelligence + unmasking" --notes-file /tmp/notes.md
+   gh release create v0.3.0 --title "v0.3.0 - Reddit intelligence + unmasking" --notes-file /tmp/notes.md
    ```
 
 The `.github/workflows/release-on-chapter.yml` workflow drafts a release automatically when `chapters/**` or `starters/**` change on `main`. A draft does not notify anyone until a human clicks publish, so you always get a review step.

@@ -4,7 +4,7 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
-## [0.2.0] - 2026-07-23
+## [0.3.0] - 2026-07-23
 
 ### Added
 - **Chapter 19: Lead Unmasking and the Daily Slack Digest.** The operated-service layer. A disclosure gate that enriches the company (never the person) only when an author self-discloses, then the daily Slack digest of the threads worth working.
