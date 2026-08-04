@@ -4,6 +4,15 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.4.0] - 2026-08-04
+
+### Added
+- **Chapter 21: Student GTM.** The track record a student builds in one semester with no budget, no title, and no portfolio: the `me/` folder as a knowledge base, the gotchas log as the format that needs no authority, one weekly recording that becomes the long video, the clips, and the voice profile, and the campus network as the first client list. Runnable configuration in `modes/student.md`, which starts where [first-boot](https://github.com/shawnla90/first-boot) ends.
+- **`student-gtm` starter:** an interview (`python3 setup.py`) that scaffolds the student's own repo outside this one, with `CLAUDE.md`, a `me/` folder (`profile.md`, `skills.md`, `gaps.md`, `target-roles.md`), `signals/config/`, `voice/core-voice.md`, `clients/`, `portfolio/README.md`, and the first week's project folder carrying its own `gotchas.md`. Ships the weekly build-in-public loop, three post templates, the campus offer and outreach pages, and the subreddit and keyword config pointed at the market that would hire them. No API key, no paid provider, nothing hosted.
+
+### Changed
+- README and CLAUDE.md indexes reconciled: 21 chapters, nine starters, five personas, updated learning paths and routers.
+
 ## [0.3.0] - 2026-07-23
 
 ### Added

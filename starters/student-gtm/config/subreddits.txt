@@ -1,0 +1,33 @@
+# Communities to read weekly if you are aiming at B2B SaaS sales and GTM roles.
+# One per line. Blank lines and # comments are ignored.
+#
+# Verify any subreddit you add yourself before you rely on it. Open it in a browser and confirm
+# it exists, is public, and has posts from this month. A dead or private subreddit returns an
+# empty result set with no error, so your run looks fine and finds nothing.
+#
+# Read for a month before you post. You are hunting for the question that four different people
+# asked four different ways. That question is your next project.
+
+# the room your first job title lives in: SDRs, BDRs, ramp, quota, tooling complaints
+salesdevelopment
+# the people already paid to build the automations you are learning to build
+gtmengineering
+# deal-level talk from reps and managers, which is where buyer language is unfiltered
+b2b_sales
+# founders and operators of the companies that hire for GTM roles
+saas
+# the tooling half of the job, argued out in public by people building it
+ai_agents
+
+# Expansion list. Uncomment a few at a time, and verify each one first.
+# Adding ten subreddits at once buries the five that were working.
+# startups
+# leadgeneration
+# b2bmarketing
+# crm
+# sales_intelligence
+# emailoutreach
+# agency
+# salesops
+# marketing
+# smallbusiness

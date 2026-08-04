@@ -1,0 +1,58 @@
+# Sam Rivera, spring 2026. The rooms where the people who would hire me complain out loud.
+# One per line. Blank lines and # comments are ignored.
+#
+# This file is me/target-roles.md translated into something the signal script can run. When that
+# file changes, this one changes the same day.
+#
+# I verified every line below in a browser first: it exists, it is public, and it has posts from
+# this month. A dead or private subreddit returns an empty result set with no error, so the run
+# looks fine and finds nothing. That happened to me for four days in February with a name I
+# guessed at, and the tell was a queue that kept coming back a little too clean.
+
+# ---------------------------------------------------------------------------
+# Running since 2026-02-09
+# ---------------------------------------------------------------------------
+
+# the room my first job title lives in. Ramp, quota, tooling complaints, bad lists.
+# Produced 4 of the 6 rows in the interview table in me/target-roles.md.
+salesdevelopment
+
+# the people already paid to build what I am learning to build. Highest signal per minute,
+# lowest volume. I read every thread here rather than skimming.
+gtmengineering
+
+# deal-level talk from reps and managers, which is where buyer language is unfiltered.
+b2b_sales
+
+# founders and operators of the companies on my target list. This is where I found company 07,
+# who published their own funnel numbers in a comment.
+saas
+
+# the tooling half of the job, argued out in public by the people building it. Noisiest of the
+# five. I read it last, and on a bad week I skip it.
+ai_agents
+
+# ---------------------------------------------------------------------------
+# Cut, with the reason. Kept here so I stop re-adding them.
+# ---------------------------------------------------------------------------
+
+# 2026-02-23: cut r/marketing. Volume was enormous and none of it was operational. Six days of
+# reading produced zero questions I could answer with something I had built.
+# marketing
+
+# 2026-03-02: cut r/smallbusiness. Good threads, wrong list. The people there are the clients I
+# can serve today, and those live in clients/ and status.md instead. This file is for the
+# companies that would hire me.
+# smallbusiness
+
+# ---------------------------------------------------------------------------
+# Expansion list. One at a time, verified first, and only when a week has been thin.
+# Adding ten at once buries the five that are working, which I know because I tried it on
+# 2026-02-16 and read nothing useful for three days.
+# ---------------------------------------------------------------------------
+# startups
+# crm
+# salesops
+# leadgeneration
+# b2bmarketing
+# emailoutreach

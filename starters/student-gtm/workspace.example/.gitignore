@@ -1,0 +1,32 @@
+# secrets stay out of git, always. keys live in environment variables.
+.env
+.env.*
+*.key
+credentials.json
+token.json
+client_secret*.json
+
+# real client data stays out of a public repo. commit the script and a row you made up,
+# never the club's member list. this is the rule that keeps week 1 from becoming a leak.
+data/
+*.csv
+
+# raw recordings are large. publish the clips and the links, keep the source local.
+recordings/
+*.mp4
+*.mov
+*.wav
+*.m4a
+
+# python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# setup.py's own state and the backups it takes before a --redo
+.gtm-setup.json
+*.bak
+
+# os noise
+.DS_Store
