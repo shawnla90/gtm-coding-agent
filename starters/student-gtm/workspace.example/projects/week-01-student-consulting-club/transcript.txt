@@ -1,0 +1,76 @@
+Week 01 build session, roster sync for the student consulting club.
+Recorded 2026-02-11. Screen and mic, one file, 3:41:26 total.
+Transcribed locally with whisper. Lightly trimmed for length: the four stretches below are the ones
+the clips came out of, and the timestamps are from the full recording.
+
+This file is committed on purpose. It is the voice sample that voice/core-voice.md is built from,
+and it is small. The raw video lives in recordings/week-01/ and is gitignored.
+
+---
+
+[00:00:31] Okay, so this is week one. I am building a thing for the club, the consulting club, the
+one I am actually in. Every Sunday the VP of membership opens two sheets and retypes people from one
+into the other. I watched them do it on Monday. It took forty minutes and they did it while
+answering texts, which is how you get a roster with the same person on it twice.
+
+[00:02:07] So what I did was, before any of this, I wrote the README. It is already committed. There
+is one sentence in it that says what done looks like, and it is not about my code, it is about them
+going two Sundays without opening the responses tab. If I do not write that down on Tuesday I will
+build something clever and then decide afterwards that it worked.
+
+[00:04:50] Right, so the shape is: read the responses tab, clean each row up, check whether that
+person is already on the roster, and only add the ones who are not. That is it. The boring version.
+
+[00:38:12] Okay. So that broke because... hold on. It says four oh three, insufficient authentication
+scopes. And the read worked. The read has been working for an hour. It is only the write.
+
+[00:39:40] I think that is a permissions thing. Let me go look at the project in the console.
+
+[01:04:15] So I have been in the console for twenty five minutes and everything in here says I have
+access. Which means I am in the wrong place. It says scopes. I keep reading it as permissions and
+those are two different words that sound the same.
+
+[01:31:02] Turns out the scope lives in the token, not in my script. I widened the scope in the code
+this morning but the token file on disk is from before that, and it is still valid, so the library
+just uses it. The consent screen I kept re-opening was not granting anything. It was recognizing me.
+
+[01:33:55] So the fix was one line, which is delete the token file. And then a second line, which is
+print the scopes on the token when the script starts, so the next version of me sees it in about two
+seconds instead of two hours. The actual number is two hours and ten minutes and ninety of it was in
+the wrong console.
+
+[01:52:40] Okay so this is the dedupe. I have the emails from the form and the emails from the
+roster, and I am checking one against the other. And it looks right. Like, reading it, it looks
+right.
+
+[01:54:03] Huh. It says skipped zero. Sixty four responses, appended sixty four, skipped zero. That
+is a clean run. That is what I wanted it to say.
+
+[01:55:20] I am going to keep going. I will come back to that.
+
+[02:47:33] I was wrong about the skipped zero. I have the roster open and there are people on here
+twice. The email from the form has a capital A and the one on the roster does not, so as far as
+Python is concerned those are two different people, and Python is right. I typed the comparison and
+I typed it wrong.
+
+[02:49:10] The fix is strip and lower before I compare anything. That is one line. The part that is
+not one line is that I pointed my first real run at the only copy of a roster six years of officers
+have built. There is no backup of that. There is no undo on that. That is the part I keep thinking
+about, not the capital A.
+
+[02:52:44] So the boring version of this is: dry run is the default now. If you want it to write you
+have to type dash dash write. And before it writes anything it copies the tab to a backup tab with
+today's date on it. Four lines. I am putting those four lines in everything I write from now on.
+
+[03:11:05] Okay. Read sixty four, would append forty one, would skip twenty three. That is the first
+one that has printed what I expected. Twenty three people were about to go on that roster twice and
+some of them were already on there twice from before, which is the thing the club could never see.
+
+[03:14:20] I am not writing anything tonight. I am going to look at it again tomorrow and then let it
+write for the club on Thursday.
+
+[03:38:02] So, where this ended up. It does one thing. It reads the form, it cleans the rows, it
+skips anyone already on there, and it adds the rest. It runs on my laptop on a cron job, Sundays at
+eight, and if my laptop is closed on Sunday it does not run and nobody finds out until Monday. The
+club knows that. I told them that before they said yes, because that is going to be true until I
+learn how to put something on a server, and that is its own week.

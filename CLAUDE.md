@@ -21,6 +21,7 @@ Ask these questions sequentially:
    - GTM engineer / rev ops at one company
    - Agency running GTM for multiple clients
    - ABM / pipeline builder focused on target accounts
+   - Student building a GTM track record with no budget and no title
 
 5. **"Code comfort level?"**
    - 1 = Never opened a terminal
@@ -42,6 +43,7 @@ Based on their answers, recommend their starting path:
 | ABM / target accounts | Start with **Chapters 07-08** + the `abm-outbound` mode. Python + enrichment APIs. |
 | Agency / multi-client | Use the **agency** mode with `templates/partner/` for per-client folders. |
 | Solo founder | Start with **solo-founder** mode. Minimal setup, maximum output. |
+| Student | Use the **student** mode with `starters/student-gtm/`. Free stack, one shipped project a week, campus organizations as the first clients. |
 
 Tell them: *"Based on your answers, here's what I recommend..."* then explain why.
 
@@ -49,7 +51,7 @@ Tell them: *"Based on your answers, here's what I recommend..."* then explain wh
 
 Based on their mode, execute these steps:
 
-1. **Read the matching mode file** from `modes/` (solo-founder.md, agency.md, single-client.md, or abm-outbound.md)
+1. **Read the matching mode file** from `modes/` (solo-founder.md, agency.md, single-client.md, abm-outbound.md, or student.md)
 2. **Create their workspace folder structure** following the mode's instructions
 3. **Copy relevant templates** into their workspace
 4. **Fill in the identity section** of their GTM-OS CLAUDE.md with info from Step 1
@@ -70,6 +72,7 @@ Recommend 3-5 chapters based on their profile:
 | ABM + dashboard      | 07 → 08 → 11 → 06 → 05 |
 | RevOps / CRM automation | 04 → 07 → 08 → 13 → 05 |
 | Reddit / AI visibility | 04 → 06 → 07 → 08 → 18 → 19 |
+| Student building a track record | 21 → 02 → 07 → 18 → 09 → 20 → 05 |
 
 Tell them: *"Start with Chapter XX. When you're done, come back and say 'next chapter' and I'll guide you through the next one."*
 
@@ -89,10 +92,12 @@ When the user returns after setup:
 - **"deploy dashboard"** → Vercel deployment from the starter
 - **"reddit buyer signals" / "reddit agency"** → Chapter 18 and `starters/reddit-buyer-signals/`. Pull recent Reddit buyer talk, score it, build the sheet, and run the GEO / competitor / content skills.
 - **"unmask the leads" / "slack digest"** → Chapter 19 and `starters/reddit-buyer-signals/` (`unmask.py`, `digest.py`). Gate and enrich the self-disclosed leads, and push the daily digest.
+- **"podcast to shorts" / "clip this recording"** → Chapter 20 and `starters/podcast-shorts/`. Take one recording to a word-timestamped transcript, pick the cuts, render captioned vertical clips, and stage them as drafts.
+- **"student gtm" / "I'm a student"** → Chapter 21 and `starters/student-gtm/`. Run the interview, scaffold their own build-in-public repo, and set the weekly loop: build for a campus client, record it, ship it, write the gotchas, publish.
 
 ## Reference Paths
 
-- Chapters: `chapters/01-*.md` through `chapters/19-*.md`
+- Chapters: `chapters/01-*.md` through `chapters/21-*.md`
 - Mode configs: `modes/*.md`
 - Templates: `templates/{claude-md,voice,content,partner}/`
 - Prompts: `prompts/*.md`
@@ -100,6 +105,8 @@ When the user returns after setup:
 - GTM-OS skeleton: `gtm-os/`
 - Dashboard starter: `starters/signals-dashboard/`
 - Reddit buyer-signals starter: `starters/reddit-buyer-signals/` (Chapters 18-19)
+- Podcast-to-shorts starter: `starters/podcast-shorts/` (Chapter 20)
+- Student GTM starter: `starters/student-gtm/` (Chapter 21)
 - Schema files: `starters/signals-dashboard/schema/`
 - Pipeline scripts: `starters/signals-dashboard/pipeline/`
 

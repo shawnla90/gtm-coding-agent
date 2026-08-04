@@ -1,0 +1,47 @@
+# Search queries to run across public communities. One query per line.
+# Blank lines and # comments are ignored.
+#
+# Two groups, and they do different jobs. The first group tells you what the work is really
+# called and what people expect you to be able to do. The second group is the one that gets you
+# hired, because it is the sound of your future employer having a bad week.
+
+# ---------------------------------------------------------------------------
+# Group 1: the work you want to be hired to do
+# Read these to learn the actual scope of the role, the tools that come up by name, and what
+# hiring managers say when they explain why they passed on someone.
+# ---------------------------------------------------------------------------
+what does a gtm engineer actually do
+how to become a gtm engineer
+sdr to gtm engineer
+entry level sales development role
+hiring a gtm engineer
+revops entry level
+portfolio for a sales job
+no experience gtm role
+built an internal tool for our sales team
+python script for outbound
+automating list building
+clay alternative build it myself
+first 90 days as an sdr
+what should i learn for a revops job
+
+# ---------------------------------------------------------------------------
+# Group 2: the pain your future employer already has
+# These are the threads to answer. Answer the question, attach the working artifact, skip the
+# pitch. One useful answer with a repo link behind it beats any outbound sequence you can run
+# as a student, because it makes them come to you.
+# ---------------------------------------------------------------------------
+our crm data is a mess
+duplicate records in hubspot
+lead routing is broken
+cold email deliverability tanked
+reply rates dropped this quarter
+spending hours on manual list building
+sdr ramp time too long
+we cannot attribute pipeline
+sales and marketing data do not match
+enrichment credits burning fast
+hubspot workflow limits
+too many tools in our gtm stack
+how do you track intent signals
+our reporting takes a full day every week

@@ -16,7 +16,7 @@ gtm-coding-agent/
 ├── CLAUDE.md                              # interactive onboarding         ← START HERE
 ├── README.md                              # you are here
 │
-├── chapters/                              # 19 educational chapters
+├── chapters/                              # 21 educational chapters
 │   ├── 01-coding-agents-vs-editors.md     #   agents vs cursor vs chatgpt
 │   ├── 02-context-engineering.md          #   CLAUDE.md, structured context
 │   ├── 03-token-efficiency.md             #   200K context, cost, subagents
@@ -35,13 +35,17 @@ gtm-coding-agent/
 │   ├── 16-programmatic-landing-pages-hubspot-cms.md  #  HubSpot CMS Pages API + subagent columns
 │   ├── 17-client-onboarding-miro-boards.md  #  Miro onboarding boards + client docs package
 │   ├── 18-reddit-buyer-signals.md          #   Reddit buyer signals + GEO/competitor/content
-│   └── 19-lead-unmasking-and-slack-digest.md  #  disclosure-gate enrichment + daily Slack digest
+│   ├── 19-lead-unmasking-and-slack-digest.md  #  disclosure-gate enrichment + daily Slack digest
+│   ├── 20-podcast-to-shorts.md             #   one recording → captioned vertical clip drafts
+│   └── 21-student-gtm.md                   #   campus network → public GTM track record
 │
 ├── starters/                              # runnable starter folders (CLI + data)
 │   ├── reddit-buyer-signals/              #   Reddit signals + GEO/competitor/unmask/digest (Ch 18-19)
 │   ├── hubspot-landing-engine/            #   brief → subagent columns → HubSpot CMS DRAFT pages (Ch 16)
 │   ├── market-scoring-sheet/              #   CSV → color-coded 1-5 scored Google Sheet
-│   └── client-onboarding-miro/            #   Miro board templates (Ch 17)
+│   ├── client-onboarding-miro/            #   Miro board templates (Ch 17)
+│   ├── podcast-shorts/                    #   recording → word-timed captioned vertical drafts (Ch 20)
+│   └── student-gtm/                       #   interview → your own build-in-public repo (Ch 21)
 │
 ├── engine/                                # tool documentation (living, updated regularly)
 │   ├── apify.md                           #   Apify CLI: scraping, actors, follower lists
@@ -115,13 +119,13 @@ gtm-coding-agent/
 | | |
 |---|---|
 | **Interactive Onboarding** | **Educational Chapters** |
-| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 19 chapters from "what is a coding agent" to "decode competitor ad strategy via the public Meta Ad Library." Read in order or jump to what you need. |
+| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 21 chapters from "what is a coding agent" to "decode competitor ad strategy via the public Meta Ad Library." Read in order or jump to what you need. |
 | **GTM-OS Skeleton** | **Modes** |
-| A working folder structure for ICP, positioning, segments, campaigns, and content. Fork it. Fill it in. Run GTM from it. | 4 personas: solo founder, agency, single-client, ABM outbound. Each mode configures the skeleton differently. |
+| A working folder structure for ICP, positioning, segments, campaigns, and content. Fork it. Fill it in. Run GTM from it. | 5 personas: solo founder, agency, single-client, ABM outbound, student. Each mode configures the skeleton differently. |
 | **Templates** | **Prompts** |
 | CLAUDE.md variants, voice DNA, content formats, partner structures. Copy into your projects, fill in the blanks. | 6 battle-tested AI prompts for ICP building, positioning, competitor analysis, signal mapping, email sequences, and content repurposing. |
 | **Starter Projects** | |
-| Seven forkable starters. **Reddit buyer signals** (Ch 18-19) reads your market on Reddit, classifies each thread by intent, surfaces GEO terms and the competitor narrative, drafts content, and unmasks the leads who self-disclose a company. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. **CRM Automation** (Ch 13) re-enriches 60-day-old HubSpot deals and writes the verdict back as custom properties. Deploy any of them in minutes. | |
+| Nine forkable starters. **Reddit buyer signals** (Ch 18-19) reads your market on Reddit, classifies each thread by intent, surfaces GEO terms and the competitor narrative, drafts content, and unmasks the leads who self-disclose a company. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. **CRM Automation** (Ch 13) re-enriches 60-day-old HubSpot deals and writes the verdict back as custom properties. **Podcast to Shorts** (Ch 20) turns one recording into captioned vertical clips staged as drafts, cut against a word-timestamped transcript. **Student GTM** (Ch 21) interviews a student and scaffolds their own repo, weekly recording loop, gotchas log, and campus client offer. Deploy any of them in minutes. | |
 
 ---
 
@@ -131,7 +135,7 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 
 **[The GTM Coding Agent Playbook on shawnos.ai](https://shawnos.ai/guide/gtm-coding-agent)**
 
-19 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
+21 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
 
 ---
 
@@ -242,6 +246,8 @@ New chapters and starters ship as tagged **[Releases](https://github.com/shawnla
 | 17 - Client Onboarding Miro Boards | Build a client-visible GTM engine map, docs package, and screenshot QA loop before kickoff |
 | 18 - Reddit Buyer Signals | Turn recent Reddit buyer talk into a scored content plan, GEO terms to own, a competitor narrative from Clearbox classification, and content drafts, all off a pull-only API |
 | 19 - Lead Unmasking & Slack Digest | Gate and enrich the leads who self-disclose a company, then push a daily Slack digest of the threads worth working |
+| 20 - Podcast to Shorts | Turn one recording into captioned vertical clips staged as drafts, cut against a word-timestamped transcript |
+| 21 - Student GTM | Build a public go-to-market track record in one semester with no budget, no title, and the campus network you already have |
 
 ---
 

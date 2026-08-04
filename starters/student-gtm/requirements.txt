@@ -1,0 +1,4 @@
+# setup.py is pure standard library. You need none of this to scaffold your workspace.
+# This one dependency covers the optional signal steps: pulling public community threads
+# and posting a run summary to a webhook. Install it when you get to those, not before.
+requests>=2.28

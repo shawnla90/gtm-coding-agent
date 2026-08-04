@@ -1,0 +1,58 @@
+# Sam Rivera, spring 2026. The phrases that mean somebody has a problem I could answer.
+# One query per line. Blank lines and # comments are ignored.
+#
+# Two groups, and they do different jobs. Group 1 tells me what the work is really called and what
+# I am expected to be able to do. Group 2 is the sound of my future employer having a bad week,
+# and it is the group that gets me hired.
+#
+# The offer these are pointed at is in me/target-roles.md: I find the thing a team does by hand
+# every week, build the script that ends it, and publish what broke. A query that would not turn
+# up somebody with that problem does not belong in this file.
+
+# ---------------------------------------------------------------------------
+# Group 1: the work I want to be hired to do
+# I read these. I rarely answer them, because the people asking are where I am rather than
+# where I am going.
+# ---------------------------------------------------------------------------
+what does a gtm engineer actually do
+sdr to gtm engineer
+entry level sales development role
+hiring a gtm engineer
+portfolio for a sales job
+no experience gtm role
+built an internal tool for our sales team
+python script for outbound
+what should i learn for a revops job
+first 90 days as an sdr
+
+# ---------------------------------------------------------------------------
+# Group 2: the pain my future employer already has
+# These are the threads I answer. Answer the question in full, attach the working artifact, skip
+# the pitch. One useful answer with a repo behind it beats any outbound I could run as a student,
+# because it makes them come to me. 34 answers since 2026-02-09, four of which turned into a
+# direct message.
+# ---------------------------------------------------------------------------
+our crm data is a mess
+duplicate records in hubspot
+duplicate contacts in our list
+lead routing is broken
+spending hours on manual list building
+our reporting takes a full day every week
+sales and marketing data do not match
+we cannot attribute pipeline
+sdr ramp time too long
+enrichment credits burning fast
+too many tools in our gtm stack
+someone left and took the process with them
+
+# ---------------------------------------------------------------------------
+# Notes on what these actually produced
+# ---------------------------------------------------------------------------
+# 2026-02-20: "duplicate records in hubspot" is the highest-yield line in the file. Same problem
+#   as week 01 at a different scale, so I can answer it from something I built rather than from
+#   something I read.
+# 2026-03-02: added "someone left and took the process with them" after seeing it phrased four
+#   different ways by four different people. That is the question week 01 answers, and it is now
+#   a row in the interview table.
+# 2026-03-09: cut "cold email deliverability tanked". Real pain, and every answer I could give
+#   was something I had read rather than something I had done. Adding it back when I have.

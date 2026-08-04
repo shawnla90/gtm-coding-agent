@@ -1,0 +1,15 @@
+# the scaffolded workspace (it belongs in its own public repo, so it stays out of this one)
+my-gtm/
+
+# secrets
+.env
+.env.*
+
+# python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# os noise
+.DS_Store
