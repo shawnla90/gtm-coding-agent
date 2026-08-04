@@ -1,0 +1,10 @@
+transcripts/
+clips/
+projects/
+out/
+review/
+source/
+__pycache__/
+venv/
+.venv/
+assets/vendor/gsap.min.js

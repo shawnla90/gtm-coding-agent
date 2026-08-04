@@ -1,0 +1,56 @@
+{
+  "sources": {
+    "speaker_a_video": "source/speaker_a.mp4",
+    "speaker_a_wav": "source/speaker_a.wav",
+    "speaker_b_video": "source/speaker_b.mp4",
+    "speaker_b_wav": "source/speaker_b.wav"
+  },
+  "framing_defaults": {
+    "speaker_a_face_x": 960,
+    "speaker_b_face_x": 640
+  },
+  "series": [
+    "why-we-started",
+    "the-pricing-story",
+    "two-founders-one-take"
+  ],
+  "clips": [
+    {
+      "slug": "why-we-started",
+      "mode": "square",
+      "lead": "speaker_a",
+      "start": 312.0,
+      "end": 388.0,
+      "start_text": "the first customer we ever had",
+      "end_text": "and that is why we started",
+      "hook": ["we had zero customers.", "then one email changed it."],
+      "cta": "full episode on YouTube",
+      "kicker": "THE PODCAST"
+    },
+    {
+      "slug": "the-pricing-story",
+      "mode": "guest",
+      "lead": "speaker_b",
+      "start": 1204.5,
+      "end": 1266.0,
+      "start_text": "everyone told us to charge more",
+      "end_text": "we doubled it the next day",
+      "hook": ["we were told our price was insane.", "so we doubled it."],
+      "cta": "full episode on YouTube"
+    },
+    {
+      "slug": "two-founders-one-take",
+      "mode": "duo",
+      "lead": "speaker_a",
+      "start": 2410.0,
+      "end": 2492.0,
+      "start_text": "you disagreed with me on this",
+      "end_text": "and you were right",
+      "hook": ["my co-founder told me no.", "here is what happened next."],
+      "cta": "full episode on YouTube",
+      "speaker_names": { "speaker_a": "alex", "speaker_b": "sam" },
+      "cameo_text": "the dog has entered the podcast",
+      "tx_windows": [[2410.0, 2492.0]]
+    }
+  ]
+}

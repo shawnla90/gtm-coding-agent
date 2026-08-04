@@ -1,0 +1,4 @@
+# python deps for the podcast-shorts pipeline
+# system deps NOT installable via pip: ffmpeg (all steps), node/npx (overlay render)
+openai-whisper
+numpy
