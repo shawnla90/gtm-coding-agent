@@ -4,6 +4,21 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.5.0] - 2026-08-06
+
+### Added
+
+- **`skills/` — four installable Claude Code skills, the complete Reddit motion:**
+  - `clearbox-onboard` — a website domain in, a researched Clearbox offer pack out: the one-liner, selling points in the form's seven template shapes, keywords, competitors, and verified subreddits, every claim traced to a URL. Ships `PROMPT.md`, a standalone pastable version that runs in any coding agent.
+  - `reddit-onboard` — a personalized route through the public playbook ([shawnos.ai/reddit](https://shawnos.ai/reddit)) for a new signup, grounded in their real data, pushed to Notion. Comes with the FACTCHECK gate: every number traces to a query, behavioral claims come from raw events, and a client doc describes what works instead of grading their setup.
+  - `reddit-engage` — value-first reply drafting from a scouted queue with a hard approve-each-one human gate. Nothing posts on its own.
+  - `reddit-agency` — the win-a-client package: color-coded buyer-signal sheet, pitch deck, and a Notion command center of real, linked, stable docs. Run it for clients; they can run it for theirs.
+- **[ClearboxGTM](https://github.com/shawnla90/ClearboxGTM)** — a new sibling repo: the same four skills plus this kit's buyer-signals engine, the orchestration playbooks (Freckle enrichment loop, Deepline trust model, Notion command center, the account-quality benchmark), and generated proof. The how-to-win-on-Reddit repo, Clearbox-branded, built to hand to a client.
+
+### Changed
+
+- README: `skills/` added to the repo anatomy; Powered by Clearbox now links ClearboxGTM.
+
 ## [0.4.0] - 2026-08-04
 
 ### Added

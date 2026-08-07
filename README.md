@@ -39,6 +39,12 @@ gtm-coding-agent/
 │   ├── 20-podcast-to-shorts.md             #   one recording → captioned vertical clip drafts
 │   └── 21-student-gtm.md                   #   campus network → public GTM track record
 │
+├── skills/                                # installable Claude Code skills (the Reddit motion)
+│   ├── clearbox-onboard/                  #   domain → researched Clearbox offer pack + pastable prompt
+│   ├── reddit-onboard/                    #   personalized route through the public playbook → Notion
+│   ├── reddit-engage/                     #   value-first replies, approve-each-one human gate
+│   └── reddit-agency/                     #   win-a-client package: sheet, deck, command center
+│
 ├── starters/                              # runnable starter folders (CLI + data)
 │   ├── reddit-buyer-signals/              #   Reddit signals + GEO/competitor/unmask/digest (Ch 18-19)
 │   ├── hubspot-landing-engine/            #   brief → subagent columns → HubSpot CMS DRAFT pages (Ch 16)
@@ -142,6 +148,8 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 ## Powered by Clearbox
 
 🟧 The Reddit buyer-signal engine in this kit (Chapters 18 and 19) runs on **Clearbox**. Clearbox reads what your market is actually asking across Reddit, classifies each thread by buying intent, and hands you the leads, the competitor mentions, and the conversations worth joining. The kit is the open-source how. Clearbox is the engine that makes it live.
+
+The full Reddit motion has its own repo: **[ClearboxGTM](https://github.com/shawnla90/ClearboxGTM)** — the four skills in `skills/`, this kit's buyer-signals engine, the orchestration playbooks (Freckle, Deepline, Notion), and the generated proof (1.5M+ tracked views on one real account), all in one place you can hand to a client or run for your own.
 
 **See your market. Move first.** Start a 7-day free trial at **[clearbox.to](https://clearbox.to)**.
 
