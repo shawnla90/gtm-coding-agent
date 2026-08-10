@@ -4,6 +4,20 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.6.0] - 2026-08-10
+
+### Added
+
+- **Profile lookup waterfall (`lib/profile_lookup.py`):** a new disclosure source for the lead-unmasking pipeline. Checks whether a Reddit username's public web presence (profile, search results, social links) discloses a company. Four-tier waterfall: Reddit JSON API (stub for when it returns), Exa search (working, finds company blogs and LinkedIn), DuckDuckGo (free fallback), and Playwright via CDP (connects to an existing Chrome session). Pass `--profile` to `unmask.py` to enable.
+- **Security and risk section in Chapter 19:** honest documentation of what is and is not de-anonymization, LinkedIn headless scraping risks (the bot works but violates ToS, here is what reduces risk and what increases it), and a clear line on what you should not do.
+- **Updated disclosure flow:** `unmask.py` now supports a three-step gate: in-thread domain scan, profile lookup (opt-in), and brand-handle heuristic. The mermaid diagram and worked examples in Chapter 19 reflect the new flow.
+
+### Changed
+
+- Chapter 19 expanded from 272 to ~400 lines: profile lookup section, security guidance, updated code examples and CLI usage, revised mermaid diagram showing the three-step gate.
+- README: Chapter 19 description updated to reflect profile lookup and risk docs.
+- CLAUDE.md: routing for "unmask the leads" now mentions `--profile` flag.
+
 ## [0.5.0] - 2026-08-06
 
 ### Added

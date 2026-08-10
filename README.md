@@ -35,7 +35,7 @@ gtm-coding-agent/
 │   ├── 16-programmatic-landing-pages-hubspot-cms.md  #  HubSpot CMS Pages API + subagent columns
 │   ├── 17-client-onboarding-miro-boards.md  #  Miro onboarding boards + client docs package
 │   ├── 18-reddit-buyer-signals.md          #   Reddit buyer signals + GEO/competitor/content
-│   ├── 19-lead-unmasking-and-slack-digest.md  #  disclosure-gate enrichment + daily Slack digest
+│   ├── 19-lead-unmasking-and-slack-digest.md  #  disclosure-gate + profile lookup + Slack digest
 │   ├── 20-podcast-to-shorts.md             #   one recording → captioned vertical clip drafts
 │   └── 21-student-gtm.md                   #   campus network → public GTM track record
 │

@@ -91,7 +91,7 @@ When the user returns after setup:
 - **"set up supabase"** → Walk through schema setup from `starters/signals-dashboard/schema/`
 - **"deploy dashboard"** → Vercel deployment from the starter
 - **"reddit buyer signals" / "reddit agency"** → Chapter 18 and `starters/reddit-buyer-signals/`. Pull recent Reddit buyer talk, score it, build the sheet, and run the GEO / competitor / content skills.
-- **"unmask the leads" / "slack digest"** → Chapter 19 and `starters/reddit-buyer-signals/` (`unmask.py`, `digest.py`). Gate and enrich the self-disclosed leads, and push the daily digest.
+- **"unmask the leads" / "slack digest"** → Chapter 19 and `starters/reddit-buyer-signals/` (`unmask.py`, `digest.py`). Gate and enrich the self-disclosed leads, and push the daily digest. Use `--profile` to run the profile lookup waterfall (web search for identity signals beyond the thread text).
 - **"podcast to shorts" / "clip this recording"** → Chapter 20 and `starters/podcast-shorts/`. Take one recording to a word-timestamped transcript, pick the cuts, render captioned vertical clips, and stage them as drafts.
 - **"student gtm" / "I'm a student"** → Chapter 21 and `starters/student-gtm/`. Run the interview, scaffold their own build-in-public repo, and set the weekly loop: build for a campus client, record it, ship it, write the gotchas, publish.
 

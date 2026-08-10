@@ -62,14 +62,26 @@ on the thread like a human.
 DOMAIN_RE = re.compile(r"\b([a-z0-9][a-z0-9-]+\.(?:com|io|ai|co|app|dev))\b", re.I)
 IGNORE = {"reddit.com", "youtube.com", "github.com", "linkedin.com", "x.com"}
 
-def disclose(op):
+def disclose(op, profile=False):
     text = f"{op.get('summary','')} {op.get('snippet','')}"
+    # Step 1: company domain in thread text
     for m in DOMAIN_RE.finditer(text):
         dom = m.group(1).lower()
         if ".".join(dom.split(".")[-2:]) in IGNORE:
-            continue                                  # a shared link, not their company
+            continue
         return {"disclosed": True, "domain": dom,
                 "action": "reply first, then enrich the company"}
+    # Step 2: profile lookup (--profile flag)
+    if profile and op.get("author"):
+        from lib.profile_lookup import lookup_profile
+        result = lookup_profile(op["author"])
+        if result.get("disclosed") and result.get("domains"):
+            return {"disclosed": True, "domain": result["domains"][0],
+                    "action": "reply first, then enrich the company"}
+    # Step 3: brand-handle heuristic
+    if BRAND_HANDLE_RE.search(op.get("author", "")):
+        return {"disclosed": True, "domain": None,
+                "action": "check the handle, it may name a company"}
     return {"disclosed": False, "domain": None,
             "action": "stays a Reddit conversation, reply on the thread"}
 ```
@@ -105,8 +117,11 @@ spend a credit.
 # gate only, no external calls, writes who disclosed a company and the domain
 python3 unmask.py --ops data/ops_classified.json --out data/unmasked.json
 
-# gate then live-enrich each disclosed domain through your backend
-python3 unmask.py --ops data/ops_classified.json --enrich --out data/unmasked.json
+# gate + profile lookup (checks web presence for identity signals)
+python3 unmask.py --ops data/ops_classified.json --profile --out data/unmasked.json
+
+# gate + profile + live-enrich each disclosed domain through your backend
+python3 unmask.py --ops data/ops_classified.json --profile --enrich --out data/unmasked.json
 ```
 
 ### A worked example
@@ -154,6 +169,127 @@ Nobody was de-anonymized. The author said the company name in public, the gate
 read it, and the enrichment ran on the company. A pseudonymous author who
 mentions none of the three signals produces a row that says so and stays a
 Reddit reply.
+
+---
+
+## Profile lookup: the second disclosure source (lib/profile_lookup.py)
+
+The in-thread check catches authors who named a company in their post. But
+Reddit users also disclose identity on their profile page (bio, social links,
+personal website) and across their broader web presence. The profile lookup
+adds a second check between the thread scan and the handle heuristic.
+
+Pass `--profile` to enable it:
+
+```bash
+# gate + profile lookup (web search for identity signals)
+python3 unmask.py --ops data/ops_classified.json --profile --out data/unmasked.json
+
+# gate + profile + enrichment
+python3 unmask.py --ops data/ops_classified.json --profile --enrich --out data/unmasked.json
+```
+
+### The waterfall
+
+The lookup tries multiple sources, stops at the first hit:
+
+| Tier | Method | Cost | Status |
+|------|--------|------|--------|
+| 1 | Reddit JSON API (`/user/{name}/about.json`) | Free | Blocked since mid-2025 (403). Stub is ready for when it returns. |
+| 2 | Exa search (`"{username}" founder OR CEO`) | ~$0.01/query | Working. Finds associated web presence: company blogs, LinkedIn, personal sites. |
+| 3 | DuckDuckGo HTML search | Free | Working. Coarser but catches personal sites and professional profiles. |
+| 4 | Playwright browser scrape | Free | Requires an existing Chrome session via CDP (Reddit blocks headless). |
+
+The profile lookup only runs on leads that *failed* the in-thread check, so
+there are no wasted API calls on already-disclosed leads. The output carries
+the source tier so you know how the domain was found.
+
+### What it catches
+
+In a live test against a client's 8 lead usernames:
+
+- **1 of 8 disclosed via Exa** (username cross-referenced to a company blog)
+- **7 of 8 genuinely pseudonymous** (no identity signals across any tier)
+- **The in-thread check had found 0 of 8**
+
+That one new lead was invisible to the thread-text scan. The user had a
+random-looking username but their web presence linked the username to a
+company domain. The profile lookup caught it, fed the domain into Freckle
+enrichment, and the lead was real.
+
+### The honest result
+
+Most B2B Reddit posters are pseudonymous. The profile lookup will not turn
+every lead into a company. What it does is catch the subset who left
+identity breadcrumbs somewhere public. For a 30-op inbox, that might be 1-3
+additional disclosed leads. Each one is a lead that would have stayed
+anonymous without the lookup.
+
+### Using Playwright with an existing browser
+
+Reddit blocks headless browsers. To use Tier 4, launch Chrome with remote
+debugging enabled:
+
+```bash
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
+```
+
+The script connects via CDP (Chrome DevTools Protocol) to the running
+session, opens the profile page in a new tab, reads the bio and social
+links, and closes the tab. Your existing login state is preserved.
+
+### CLI for testing individual usernames
+
+```bash
+# test specific usernames, all tiers
+python3 -m lib.profile_lookup some_username another_user --verbose
+
+# test a single tier
+python3 -m lib.profile_lookup some_username --tier exa
+
+# JSON output for piping
+python3 -m lib.profile_lookup some_username --json
+```
+
+---
+
+## Risk and ethics: what is and is not de-anonymization
+
+The disclosure gate and the profile lookup read what the author chose to
+publish. A Reddit bio, a linked website, a post mentioning their company:
+all public, all voluntary. That is not de-anonymization. The line:
+
+**If you cannot explain how you found someone in one boring sentence, do
+not contact them.**
+
+"You mentioned your company in a Reddit thread" passes. "I looked up your
+Reddit username on your profile" passes. "I ran your IP through a
+de-anonymization service" does not.
+
+### On LinkedIn headless scraping
+
+The LinkedIn bot (`~/clearbox/scripts/linkedin-bot/`) uses Playwright to
+automate LinkedIn actions (profile visits, connection requests). This works
+but carries real risk:
+
+- **It violates LinkedIn ToS.** You can get your account restricted or
+  banned.
+- **What reduces risk:** session reuse (never launch fresh contexts that wipe
+  logins), rate limiting (human-like delays between actions), small batches,
+  and staying within patterns a human would follow.
+- **What increases risk:** high volume, rapid sequences, scraping hundreds of
+  profiles in one session, using purchased accounts.
+- **The honest status:** still being tested. No bans so far, but that is not
+  a guarantee. Document your approach, keep backups of your LinkedIn data,
+  and accept the risk if you choose to run it.
+
+### What you should not do
+
+- Enrich anonymous users through third-party de-anonymization services
+- Use purchased or rented Reddit accounts for engagement
+- Automate Reddit posts without disclosure ("I work at X")
+- Run enrichment on people who did not disclose a company
+- Contact someone off-platform without a public, traceable reason
 
 ---
 
@@ -229,9 +365,13 @@ flowchart TD
     A[GET /inbox with a browser UA] --> B{kind?}
     B -->|engage| C[draft a value-first reply]
     B -->|competitor| D[roll into competitor intel]
-    B -->|lead| E{author disclosed a company?}
-    E -->|yes, named a domain| F[enrich the company, not the person]
-    E -->|no, pseudonymous| G[stays a Reddit reply]
+    B -->|lead| E{company domain in thread?}
+    E -->|yes| F[enrich the company, not the person]
+    E -->|no| P{profile lookup --profile}
+    P -->|company found via web search| F
+    P -->|brand-like handle| Q[check the handle, may name a company]
+    P -->|pseudonymous| G[stays a Reddit reply]
+    Q --> F
     C --> H[wait for the day to fill]
     D --> H
     F --> H

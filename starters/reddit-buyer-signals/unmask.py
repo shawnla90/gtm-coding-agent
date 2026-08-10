@@ -2,16 +2,18 @@
 """unmask.py - the lead-unmasking pass over a client's classified Reddit opportunities.
 
 The disclosure gate first, then enrichment. Reddit is pseudonymous, so you enrich the COMPANY, never
-the person, and only when the author tied themselves to a company in the thread: they named it, linked
-a site, or post as a brand handle. Pseudonymous threads stay Reddit conversations. This is the honest
-version of "unmasking": it reads what the author volunteered in public, it does not de-anonymize
-anyone.
+the person, and only when the author tied themselves to a company in the thread, their profile, or
+their public web presence. Pseudonymous threads stay Reddit conversations. This is the honest version
+of "unmasking": it reads what the author volunteered in public, it does not de-anonymize anyone.
 
   # gate only (default, no external calls): who disclosed a company, and the domain
   python3 unmask.py --ops data/ops_classified.json --out data/unmasked.json
 
-  # gate + live enrich each disclosed domain through your enrichment backend
-  python3 unmask.py --ops data/ops_classified.json --enrich --out data/unmasked.json
+  # gate + profile lookup (checks Reddit profile + web search for identity signals)
+  python3 unmask.py --ops data/ops_classified.json --profile --out data/unmasked.json
+
+  # gate + profile + live enrich each disclosed domain through your enrichment backend
+  python3 unmask.py --ops data/ops_classified.json --profile --enrich --out data/unmasked.json
 
 Enrichment backend is pluggable. The default shells the Freckle CLI (saved workflow
 "enrich-domain-score-icp-contacts-omnibound", org clearbox): invoke -> poll -> inspect, returning the
@@ -41,10 +43,16 @@ IGNORE_DOMAINS = {"reddit.com", "redd.it", "google.com", "youtube.com", "github.
                   "substack.com", "loom.com", "imgur.com"}
 
 
-def disclose(op: dict) -> dict:
-    """The disclosure gate. Did the author self-disclose a company, and what is the domain if so."""
+def disclose(op: dict, profile: bool = False) -> dict:
+    """The disclosure gate. Three checks in order:
+    1. Thread text — did the author mention a company domain in their post/comment?
+    2. Profile lookup — does their Reddit profile or web presence disclose a company? (--profile)
+    3. Handle heuristic — does the username look like a brand name?
+    """
     text = f"{op.get('summary', '')} {op.get('snippet', '')}"
     author = op.get("author") or ""
+
+    # Step 1: in-thread domain disclosure
     for m in DOMAIN_RE.finditer(text):
         dom = m.group(1).lower()
         root = ".".join(dom.split(".")[-2:])
@@ -52,9 +60,24 @@ def disclose(op: dict) -> dict:
             continue
         return {"disclosed": True, "signal": "company domain in thread", "domain": dom,
                 "action": "reply first, then enrich the company"}
+
+    # Step 2: profile lookup (web search, Reddit profile scrape)
+    if profile and author:
+        try:
+            from lib.profile_lookup import lookup_profile
+            result = lookup_profile(author)
+            if result.get("disclosed") and result.get("domains"):
+                return {"disclosed": True, "signal": result["signal"],
+                        "domain": result["domains"][0],
+                        "action": "reply first, then enrich the company"}
+        except ImportError:
+            pass
+
+    # Step 3: brand-handle heuristic
     if BRAND_HANDLE_RE.search(author):
         return {"disclosed": True, "signal": "author handle looks like a brand", "domain": None,
                 "action": "check the handle, it may name a company"}
+
     return {"disclosed": False, "signal": "no company disclosed", "domain": None,
             "action": "stays a Reddit conversation, reply on the thread"}
 
@@ -105,6 +128,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ops", default="data/ops_classified.json")
     ap.add_argument("--out", default="data/unmasked.json")
+    ap.add_argument("--profile", action="store_true",
+                    help="run profile lookup (web search + Reddit scrape) on undisclosed leads")
     ap.add_argument("--enrich", action="store_true", help="live-enrich each disclosed domain")
     ap.add_argument("--limit", type=int, default=25, help="max domains to enrich in one run")
     args = ap.parse_args()
@@ -114,7 +139,7 @@ def main() -> int:
 
     rows = []
     for o in leads:
-        d = disclose(o)
+        d = disclose(o, profile=args.profile)
         rows.append({
             "op_id": o.get("op_id") or o.get("id"),
             "subreddit": "r/" + (o.get("subreddit") or ""),
@@ -142,19 +167,25 @@ def main() -> int:
             print(f"  enriching {dom} ...")
             enrichment.append(freckle_enrich(dom))
 
+    profile_disclosed = [r for r in disclosed if "profile" in r.get("signal", "")
+                         or "web search" in r.get("signal", "")]
+
     result = {
         "leads_total": len(leads),
         "disclosed_company": len(disclosed),
+        "disclosed_via_profile": len(profile_disclosed),
         "handle_looks_like_brand": len(maybe),
         "stays_on_reddit": len(stays),
+        "profile_lookup_enabled": args.profile,
         "gate": ("enrich the company, not the person, and only when the author tied themselves to a "
-                 "company in the thread"),
+                 "company in the thread, their profile, or their public web presence"),
         "rows": rows,
         "enrichment": enrichment,
     }
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(result, indent=2, ensure_ascii=False))
-    print(f"unmask: {len(leads)} leads -> {len(disclosed)} disclosed a company, "
+    profile_note = f" ({len(profile_disclosed)} via profile lookup)" if args.profile else ""
+    print(f"unmask: {len(leads)} leads -> {len(disclosed)} disclosed a company{profile_note}, "
           f"{len(maybe)} brand-like handles, {len(stays)} stay on Reddit"
           f"{' · enriched ' + str(len(enrichment)) if args.enrich else ''} -> {args.out}")
     return 0
