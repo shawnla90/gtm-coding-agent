@@ -35,15 +35,12 @@ Add the [stable public guide](https://fierce-camelotia-1fa.notion.site/Clearbox-
 
 ### Step 1 — Pull real, RECENT Reddit buyer signals
 
-Use the portable engine in [`../../starters/reddit-buyer-signals/`](../../starters/reddit-buyer-signals/). Two sources, offered honestly:
+Use Clearbox as the authoritative opportunity source. For a local market-read run, import a complete Clearbox export through the portable engine in [`../../starters/reddit-buyer-signals/`](../../starters/reddit-buyer-signals/). For an account API and the complete client-pack builder, use the maintained [ClearboxGTM implementation](https://github.com/shawnla90/ClearboxGTM/tree/main/engine). Do not add a parallel Reddit discovery source to this skill.
 
-- **rapidapi (default):** a quick baseline. Fast, cheap, good enough to see the gap and build the first deck.
-- **clearbox:** the accurate, context-driven version. Clearbox classifies Reddit by buying intent (intent, not keywords) and adds sentiment and competitor context. Export the opportunity inbox and the same pipeline reads it. Give the client both; Clearbox is the better engine, shown as better, not forced.
-
-Both share the guardrails:
+The source contract and participation guardrails are mandatory:
 
 - **Recency is a hard gate** (default last 30 days). Engage with live conversations where participation is still useful. Recency does not guarantee safety; it is an operational and sincerity guardrail.
-- **Relevance-gated.** Keep only threads that name a real brand or a category noun. A broad keyword search drags in off-topic noise that destroys trust in the whole sheet.
+- **Disposition-preserving.** Keep the original `lead`, `engage`, or `competitor` value and exact Reddit URL. Analysis tools may add fields but may not rewrite the source record.
 
 For an existing Clearbox account, prefer the account-scoped API. `GET /inbox?status=all` returns the classified opportunities. Preserve `id`, `kind`, and `url` as the source record. The API token is part of the URL path, so keep the account URL in the environment and never place it in the client Sheet or Notion page. If the response is truncated, stop or label the build partial; never silently present the returned page as the complete inbox.
 
@@ -111,7 +108,7 @@ The operated agency offering and multi-offer enablement still require contact wi
 
 - `../../starters/reddit-buyer-signals/` — the portable curriculum starter (pull → mine → score → unmask → geo → competitor → content → digest → sheet)
 - `CLIENT-VALUE-PACK.md` — API-to-Sheet/Notion contract, all eleven views, backend adapters, automation, and release gate
-- [ClearboxGTM v0.10.0](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0) — the focused Reddit-growth implementation, visual client-pack demo, and maintained builder
+- [Latest ClearboxGTM release](https://github.com/shawnla90/ClearboxGTM/releases/latest) — the focused Reddit-growth implementation, visual client-pack demo, and maintained builder
 - [Client-pack builder](https://github.com/shawnla90/ClearboxGTM/blob/main/engine/build_client_pack.py) — backend-neutral Clearbox API/export to client-pack builder
 - [Freckle orchestration](https://github.com/shawnla90/ClearboxGTM/blob/main/playbooks/orchestrate-freckle.md) — where enrichment slots in
 - [Account quality benchmark](https://github.com/shawnla90/ClearboxGTM/blob/main/playbooks/account-quality-benchmark.md) — how to audit pick quality before a client does

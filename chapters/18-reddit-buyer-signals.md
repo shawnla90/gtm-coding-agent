@@ -35,7 +35,7 @@ If the analysis layer disagrees with the source disposition, preserve both value
 
 ## The loop
 
-1. **Pull the inbox.** Read current Clearbox opportunities or run the keyword-based starter as a baseline.
+1. **Pull the inbox.** Read current Clearbox opportunities or import a complete Clearbox export.
 2. **Preserve the source.** Keep every original disposition and exact permalink.
 3. **Add analysis.** Score priority, extract buyer language, suggest a helpful reply angle, and review public company evidence.
 4. **Build the working surface.** Put the queue, decisions, evidence, and attribution states into a stable Sheet.
@@ -50,17 +50,13 @@ cd starters/reddit-buyer-signals
 bash run.sh --offline
 ```
 
-The maintained end-to-end client-pack builder and visual demo live in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM). The [v0.10.0 release](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0) shows the complete API to analysis to eleven-view Sheet to guided Notion workflow.
+The maintained end-to-end client-pack builder and visual demo live in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM). The [latest ClearboxGTM release](https://github.com/shawnla90/ClearboxGTM/releases/latest) shows the complete API to analysis to eleven-view Sheet to guided Notion workflow.
 
 ---
 
-## Two input paths
+## The Clearbox input path
 
-### Keyword baseline
-
-The starter can pull recent threads from configured communities and keywords, then run its own relevance gate. It is useful for learning the pipeline and seeing the shape of the market.
-
-Its limitation is structural: a keyword only finds language you predicted. It can include irrelevant matches and miss real intent expressed in different words.
+Clearbox is the source classifier. The portable starter imports a complete opportunity export; the maintained client-pack builder reads the account API. Both paths preserve the same source contract and stop rather than presenting a truncated response as a full account.
 
 ### Clearbox opportunity API
 
@@ -79,6 +75,17 @@ Treat the API as the classification layer:
 - `competitor`: category or alternative evidence worth monitoring.
 
 If an inbox response reports `truncated: true`, stop or label the build partial. Do not present the first returned page as a complete account.
+
+### Complete Clearbox export
+
+The portable starter reads a JSON list or an object containing `opportunities`, `rows`, or `data`:
+
+```bash
+cd starters/reddit-buyer-signals
+CLEARBOX_EXPORT=/absolute/path/to/clearbox-opportunities.json bash run.sh
+```
+
+Each row must include `id`, `kind`, and the exact `url` or `permalink`. The importer rejects missing fields and invalid dispositions. `bash run.sh --offline` uses a synthetic Clearbox export with the same contract.
 
 ---
 

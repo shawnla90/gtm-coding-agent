@@ -2,7 +2,7 @@
 
 Use this contract when a Clearbox user, agency, or operator needs a repeatable client dashboard and guided value brief. The Sheet is the working surface. The Notion page is the readable source of truth that explains what was uncovered, where the value is, how to work it, and how success will be measured.
 
-This skill is mirrored here so the broader GTM Coding Agent curriculum can route and explain the workflow. The maintained executable builder, sanitized fixtures, visual demo, and release gates live in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM). Start from [v0.10.0](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0) or newer:
+This skill is mirrored here so the broader GTM Coding Agent curriculum can route and explain the workflow. The maintained executable builder, sanitized fixtures, visual demo, and release gates live in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM). Start from the [latest release](https://github.com/shawnla90/ClearboxGTM/releases/latest):
 
 ```bash
 git clone https://github.com/shawnla90/ClearboxGTM.git

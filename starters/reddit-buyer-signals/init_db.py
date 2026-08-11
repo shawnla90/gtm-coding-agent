@@ -14,10 +14,10 @@ HERE = Path(__file__).resolve().parent
 DB = HERE / "data" / "signals.db"
 
 SCHEMA = """
--- raw Reddit threads pulled by subreddit or keyword search
+-- Clearbox-classified Reddit opportunities normalized for local analysis
 CREATE TABLE IF NOT EXISTS reddit_threads (
   id            INTEGER PRIMARY KEY,
-  external_id   TEXT UNIQUE,     -- reddit post id (dedup key)
+  external_id   TEXT UNIQUE,     -- Clearbox opportunity id (dedup key)
   subreddit     TEXT,
   title         TEXT,
   selftext      TEXT,
@@ -27,8 +27,9 @@ CREATE TABLE IF NOT EXISTS reddit_threads (
   num_comments  INTEGER,
   created_utc   INTEGER,
   flair         TEXT,
-  source_type   TEXT,            -- 'search' or 'subreddit'
-  source_query  TEXT,            -- the keyword or subreddit that surfaced it
+  source_type   TEXT,            -- 'clearbox'
+  source_query  TEXT,            -- legacy-compatible copy of the Clearbox disposition
+  clearbox_kind TEXT,            -- lead | engage | competitor (source of record)
   topic_tags    TEXT,            -- CSV of auto-tagged topics
   pulled_at     TEXT
 );
@@ -82,6 +83,9 @@ def main():
     con = sqlite3.connect(DB)
     con.execute("PRAGMA journal_mode = WAL;")
     con.executescript(SCHEMA)
+    columns = {row[1] for row in con.execute("PRAGMA table_info(reddit_threads)")}
+    if "clearbox_kind" not in columns:
+        con.execute("ALTER TABLE reddit_threads ADD COLUMN clearbox_kind TEXT")
     con.commit()
     tables = [r[0] for r in con.execute(
         "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").fetchall()]

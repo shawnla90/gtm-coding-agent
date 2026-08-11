@@ -8,7 +8,7 @@ published on that profile is direct disclosure; web-search matches always requir
   Tier 1  Reddit profile   (/user/{name}/about.json) — direct disclosure when available
   Tier 2  Exa search       ("{username}" founder OR CEO) — manual-review candidates only
   Tier 3  DuckDuckGo HTML  (free, no key) — manual-review candidates only
-  Tier 4  Playwright       (browser scrape) — direct evidence from the rendered Reddit profile
+  Tier 4  Playwright       (rendered profile check) — direct evidence from the Reddit profile
 
 Usage:
   from lib.profile_lookup import lookup_profile
@@ -41,7 +41,7 @@ IGNORE_DOMAINS = {
     "notion.so", "medium.com", "substack.com", "loom.com",
     "imgur.com", "gfycat.com", "giphy.com", "tenor.com",
     "wikipedia.org", "archive.org", "web.archive.org",
-    "duckduckgo.com", "bing.com", "exa.ai", "rapidapi.com",
+    "duckduckgo.com", "bing.com", "exa.ai",
     "redditorhistory.com", "deletedby.com", "nicheprowler.com", "lullar.com",
     "redditcommentsearch.com", "reddituserdetective.com", "think-pol.com",
     "footprintiq.app", "redditmetis.com", "camas.unddit.com", "unddit.com",
@@ -391,9 +391,9 @@ def _ddg_search(username: str) -> dict | None:
     )
 
 
-# ── Tier 4: Playwright browser scrape ────────────────────────────────────────
-def _playwright_scrape(username: str) -> dict | None:
-    """Scrape the Reddit profile page via an existing Chrome session (CDP) or headless fallback.
+# ── Tier 4: Playwright rendered-profile check ────────────────────────────────
+def _rendered_profile(username: str) -> dict | None:
+    """Inspect the rendered Reddit profile via an existing Chrome session or headless fallback.
 
     Reddit blocks headless browsers. To use this tier, launch Chrome with remote debugging:
       /Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --remote-debugging-port=9222
@@ -404,7 +404,7 @@ def _playwright_scrape(username: str) -> dict | None:
         _log("playwright not installed")
         return _lookup_error("playwright", "playwright is not installed")
 
-    def _scrape_page(page) -> dict | None:
+    def _inspect_page(page) -> dict | None:
         page.goto(f"https://www.reddit.com/user/{username}/", timeout=15000)
         page.wait_for_timeout(3000)
 
@@ -483,7 +483,7 @@ def _playwright_scrape(username: str) -> dict | None:
                 _log("playwright: connected to existing Chrome via CDP")
                 ctx = browser.contexts[0] if browser.contexts else browser.new_context()
                 page = ctx.new_page()
-                result = _scrape_page(page)
+                result = _inspect_page(page)
                 page.close()
                 browser.close()
                 if result:
@@ -493,7 +493,7 @@ def _playwright_scrape(username: str) -> dict | None:
 
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            result = _scrape_page(page)
+            result = _inspect_page(page)
             browser.close()
             return result
     except Exception as e:
@@ -520,7 +520,7 @@ def lookup_profile(username: str, tiers: list[str] | None = None) -> dict:
         "reddit_profile": _reddit_profile,
         "exa": _exa_search,
         "duckduckgo": _ddg_search,
-        "playwright": _playwright_scrape,
+        "playwright": _rendered_profile,
     }
     run_tiers = tiers or ["reddit_profile", "exa", "duckduckgo", "playwright"]
     attempts = []

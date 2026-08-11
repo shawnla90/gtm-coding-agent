@@ -4,6 +4,26 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.7.1] - 2026-08-10
+
+The Reddit curriculum now matches the maintained ClearboxGTM architecture: Clearbox is the only opportunity source, and the portable starter imports a complete classified export while preserving the original disposition and exact permalink.
+
+### Changed
+
+- **Chapter 18 source path:** replaced the parallel keyword baseline with one Clearbox input contract covering both the account API and complete export.
+- **Portable starter:** `pull.py` now validates `id`, `kind`, and exact source URL, rejects truncated exports, and uses the bundled synthetic Clearbox export for offline runs.
+- **Agency skill:** Freckle, Base Loop, and Clay are explicitly downstream analysis layers; none can replace the Clearbox source record.
+- **Student route:** market setup now starts from a researched Clearbox offer and classified export rather than provider credentials and hand-written discovery files.
+- **Profile evidence terminology:** the optional Playwright tier is a rendered-profile check, separate from Reddit opportunity collection.
+
+### Removed
+
+- **Legacy Reddit discovery path:** removed the retired source client, provider-key setup, and keyword/subreddit input files from the Reddit starter and curriculum.
+
+### Verification
+
+- Added source-import regression coverage for complete export shapes, truncation refusal, invalid fields, and exact source preservation.
+
 ## [0.7.0] - 2026-08-10
 
 Build the Reddit client pack: the broader GTM curriculum now carries the current Clearbox source, analysis, company-evidence, client-delivery, multi-account, and measurement contracts, while routing the complete maintained implementation to [ClearboxGTM v0.10.0](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0).

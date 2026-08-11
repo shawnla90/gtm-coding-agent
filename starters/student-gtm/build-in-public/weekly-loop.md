@@ -69,10 +69,11 @@ video good.
 
 ## Step 1. Read the queue, answer one thread, pick the project (Mon, 30 min)
 
-Open what the signal pull returned. `config/subreddits.txt` and
-`config/keywords.txt` in this starter are the rooms and the phrases;
+Use `config/subreddits.txt` and `config/keywords.txt` as human reading and
+offer-research notes. Configure the matching Clearbox offer, then use
 `starters/reddit-buyer-signals/` ([Chapter 18](../../../chapters/18-reddit-buyer-signals.md))
-is what scores them so your thirty minutes goes to threads that are live.
+to score the complete classified export so your thirty minutes goes to threads
+that are live.
 
 Two things come out of that half hour.
 

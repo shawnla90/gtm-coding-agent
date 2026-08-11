@@ -288,7 +288,7 @@ One delivered project with a real user beats ten toy projects, and it is the onl
 ## Take it further
 
 - **Clip the weekly recording.** The loop hands off to `starters/podcast-shorts/` for transcript-anchored vertical clips. That starter and its chapter ship on their own branch, so if the folder is not in your checkout yet, keep recording anyway and clip the backlog when it lands.
-- **Score the rooms before you post in them.** `starters/reddit-buyer-signals/` ([Chapter 18](../../chapters/18-reddit-buyer-signals.md)) pulls the recent threads in your subreddits and scores them, so your Monday goes to the conversations that are actually live. Copy it into `signals/` and keep the database out of git.
+- **Score the rooms before you post in them.** Configure a matching Clearbox offer, then use `starters/reddit-buyer-signals/` ([Chapter 18](../../chapters/18-reddit-buyer-signals.md)) to import and score the complete classified export. Keep the local database out of git.
 - **Put the portfolio on a URL.** `portfolio/README.md` is already the index. GitHub Pages renders it for free, and a link reads better on a resume than a repo tree.
 - **Grow the voice profile.** Every recording produces a transcript. Feed them into `voice/core-voice.md` using [Chapter 09](../../chapters/09-voice-dna-content.md) so your posts sound like you talking, because they are.
 - **Automate the reminder.** A cron job that opens `weekly-loop.md` every Monday morning costs one line and removes the decision ([Chapter 05](../../chapters/05-automation-agents.md)).

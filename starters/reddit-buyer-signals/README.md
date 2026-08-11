@@ -1,185 +1,101 @@
 # Reddit Buyer Signals
 
-Turn the Reddit conversations your buyers are having right now into a color-coded, scored content plan, then a deck you can pitch. Connect Google over the CLI, pull recent buyer threads, score every topic 1 to 5, and get a shared Google Sheet plus an editable Google Slides deck. This is the full loop, not a read-only analysis toy. You own all of it.
+This portable curriculum starter turns Clearbox-classified Reddit opportunities into a local, source-linked content plan. Clearbox owns the opportunity disposition and exact permalink. The starter teaches the import, mining, scoring, and reporting pattern without adding a parallel Reddit discovery source.
 
-Part of the [GTM Coding Agent Starter Kit](../../README.md). Read [Chapter 18](../../chapters/18-reddit-buyer-signals.md).
+The maintained eleven-view client-pack builder, public demo, Notion guide, and agency operations live in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM).
 
-## What it does
+## The architecture
 
+```text
+Clearbox offer
+    ↓
+complete opportunity export
+    ↓
+id + kind + exact Reddit permalink
+    ↓
+local SQLite → buyer language → topic scores
+    ↓
+Google Sheet + optional deck
 ```
-config/ (subreddits + keywords)
-        │
-        ▼
-  recent Reddit pull  ──►  SQLite (local)  ──►  mine buyer language  ──►  score 1-5
-   (last 30 days only)                                                        │
-        ▲                                                                     ▼
-   two sources                                           color-coded Google Sheet  +  Google Slides deck
-   rapidapi | clearbox
-```
 
-- **`init_db.py`** creates the local SQLite database, idempotent, safe to re-run.
-- **`pull.py`** pulls recent buyer threads from Reddit through a recency guardrail (last 30 days) and a relevance filter, from one of two sources (see below).
-- **`mine.py`** turns raw threads into real buyer language (questions, comparisons, pains) and clusters it into scored content topics. Optionally polishes the topic titles with `claude -p` on your subscription, no API key.
-- **`score.py`** scores every topic 1 to 5 on buyer intent, demand, competitive fit, and how widely the threads are read, and writes a one-line reason you get to keep.
-- **`build_sheet.py`** renders it all as a Google Sheet: score gradient red to green, tier colors, a dashboard tab, frozen headers, filters, shared anyone-with-link. Rebuilds in place so the link never changes.
-- **`build_deck.py`** (optional) builds a short editable Google Slides deck from the same scored data.
+## Source contract
 
-The styling engine is `lib/sheet_engine.py`. It is the real, reusable piece. See [ENGINE.md](ENGINE.md).
+Every imported opportunity must keep:
 
-### From signal to service
+- `id`: stable Clearbox opportunity identifier
+- `kind`: `lead`, `engage`, or `competitor`
+- `url` or `permalink`: exact Reddit source URL
 
-The same classified signal feeds five more modules that turn it into an operated client offer. Each is a single file, reads the pipeline's data, and re-points by argument. [ENGINE.md](ENGINE.md) documents them in full.
+`pull.py` refuses truncated exports, missing identifiers, invalid dispositions, and missing source URLs. It imports data only. It does not discover Reddit content, post, vote, send DMs, or mark work complete.
 
-- **`geo.py`** the buyer questions to track, each checked for retrieval visibility through a hard-capped Exa pass. Exa retrieval is not labeled as an observed AI answer or citation.
-- **`competitor.py`** the competitor narrative read straight from Clearbox's opportunity classification (the classification is the relevant-mention signal, not literal brand counting), plus a generated sentiment read and a share-of-voice view.
-- **`digest.py`** the daily digest of engage threads with the drafted reply, new leads, and competitor mentions, as a header line plus one block per opportunity ordered by priority. Render-only by default; add `--post --webhook-secret <SECRET_NAME>` to post to an incoming webhook.
-- **`unmask.py`** the company-evidence gate. Only an exact company domain published on the author's own Reddit profile is automatically enrichment-eligible. Search hits, thread domains, and brand-like handles stay manual-review candidates. The enrichment seam supports Freckle, Base Loop, Clay, Apollo, or another backend.
-- **`content.py`** scaffold a LinkedIn, Reddit, and blog content pack from one buyer question in the brand voice, plus an anti-slop check subcommand.
+## Run the synthetic offline path
 
 ```bash
-python3 geo.py --brand "Acme PM" --db data/signals.db --out data/geo_terms.json
-python3 competitor.py --own "Acme PM" --competitor "Rival PM" --out data/competitor_analysis.json
-python3 digest.py --client "Acme PM" --out data/slack_digest.txt
-python3 unmask.py --ops data/ops_classified.json --out data/unmasked.json          # add --enrich to live-enrich
-python3 content.py scaffold --client "Acme PM" --topic "how to keep one source of truth across two CRMs" --out content/pack-01
-python3 content.py check content/pack-01/linkedin.md
-```
-
-The example throughout is a project-management SaaS for small teams (call it "Acme PM"). Point it at your own market by editing two config files and two Python maps.
-
-## Prerequisites
-
-- Python 3.9+
-- A Google account (personal or Workspace) that will own the sheet and deck
-- One data source: a reddit34 RapidAPI key for the live pull, or nothing at all for the bundled offline sample
-
-## Setup
-
-### 1. Clone and enter the starter
-
-```bash
-git clone https://github.com/shawnla90/gtm-coding-agent.git
-cd gtm-coding-agent/starters/reddit-buyer-signals
-```
-
-### 2. Install the dependencies
-
-```bash
+cd starters/reddit-buyer-signals
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
+bash run.sh --offline
 ```
 
-### 3. Connect Google Workspace (the step many copy-paste guides skip)
+The bundled fixture is a synthetic Clearbox export. The offline run includes every fixture date so the demo remains stable as it ages. It follows the same source contract as a real build and does not overwrite `data/clearbox_export.json`; live exports still use the recency window.
 
-The builder writes to Google Sheets and Slides as you, over OAuth. The first build fails without a token, so do this once:
+## Run from a complete Clearbox export
+
+```bash
+CLEARBOX_EXPORT=/absolute/path/to/clearbox-opportunities.json bash run.sh
+```
+
+The default path is `data/clearbox_export.json`. The local market-read pipeline keeps the last 30 days by default; set `MAX_AGE_DAYS=60` for a wider window.
+
+## What each module does
+
+- **`init_db.py`** creates or migrates the local SQLite database.
+- **`pull.py`** imports and validates the complete Clearbox export.
+- **`mine.py`** extracts buyer questions, comparisons, pains, and topic clusters.
+- **`score.py`** scores topics from 1 to 5 with a visible reason.
+- **`build_sheet.py`** renders the lower-level Google Sheet.
+- **`build_deck.py`** optionally builds an editable Slides deck.
+- **`geo.py`** checks retrieval visibility. It does not claim an AI answer or citation.
+- **`competitor.py`** summarizes Clearbox competitor dispositions and labeled generated sentiment.
+- **`unmask.py`** applies the public company-disclosure review gate before enrichment.
+- **`content.py`** scaffolds drafts and keeps publishing human-authorized.
+- **`digest.py`** renders the operator digest and posts only with an explicit flag.
+
+See [ENGINE.md](ENGINE.md) for the data and scoring contracts.
+
+## Connect Google Workspace
+
+Run the one-time OAuth setup before publishing the Sheet or deck:
 
 ```bash
 python3 setup_oauth.py
 ```
 
-If you have never made a Google OAuth client, the script prints the exact steps: create a Google Cloud project, enable the Sheets and Drive APIs, make a Desktop OAuth client, download the JSON to `~/.config/gspread/client_secret.json`, then re-run. A browser opens, you sign in, and the token lands at `~/.config/gspread/token.json`. That is the connection that makes everything else work.
+Rebuilds use the stored document identifiers so shared links remain stable.
 
-### 4. Run the pipeline
+## Add an analysis layer
 
-Try it offline first, no key required. This copies the bundled sample export in and runs the whole loop on it:
+Freckle, Base Loop, Clay, or a local script can add priority scores, tiers, action lanes, buyer language, reply angles, and evidence fields. Those tools do not own the source record. Preserve the Clearbox `id`, `kind`, and exact permalink, and flag any proposed disposition conflict for human review.
 
-```bash
-bash run.sh --offline
-```
+For the complete API-to-eleven-view-Sheet-and-Notion workflow, use the [ClearboxGTM client value-pack guide](https://github.com/shawnla90/ClearboxGTM/blob/main/skills/reddit-agency/CLIENT-VALUE-PACK.md).
 
-Then run it live against real Reddit with your key:
+## Measurement boundary
 
-```bash
-export RAPIDAPI_KEY=your_reddit34_key
-bash run.sh
-```
+Keep these receipts separate:
 
-It prints a Google Sheet URL at the end. Open it. That is your buyer signal, scored and color-coded. For the deck, run the optional sixth step:
+1. exact Reddit artifact health
+2. search discovery
+3. retrieval visibility
+4. observed AI answer appearance
+5. exact source citation
+6. engagement or business outcome
 
-```bash
-python3 build_deck.py
-```
+A retrieval result is not an AI citation. A citation is not proof that one comment caused a recommendation. Every claim stays attached to its own receipt.
 
-## Use your own niche
+## Automation boundary
 
-The whole engine points at one market. Move it to yours in four edits:
-
-1. **`config/subreddits.txt`** the communities your buyers post in.
-2. **`config/keywords.txt`** the "X vs Y" and "best tool for" searches your buyers run.
-3. **`lib/relevance.py`** the `BRANDS` (the tools buyers compare you against), `CATEGORY` nouns (so off-topic threads get filtered out), and `TOPIC_KEYWORDS` (how threads auto-tag into topics).
-4. **`score.py`** the `CARRIED` tuple (the competitor set a topic can map to for a higher score).
-
-Set your product name so the outputs read as yours:
-
-```bash
-BRAND="Your Product" bash run.sh
-BRAND="Your Product" python3 build_deck.py
-```
-
-The rules are plain Python, not a black box.
-
-## Two data sources
-
-`pull.py` reads from one of two sources, chosen with `REDDIT_SOURCE`. Both feed the exact same pipeline, so the sheet and deck look identical either way. The difference is how good the input is.
-
-- **RapidAPI (`REDDIT_SOURCE=rapidapi`, the default).** A quick baseline. It runs keyword searches and subreddit pulls through the reddit34 RapidAPI, then filters by relevance and recency on the way in. Fast and cheap, good enough to see the gap and build the first version. It matches on keywords, so some noise gets through and some intent gets missed.
-- **Clearbox (`REDDIT_SOURCE=clearbox`).** The accurate, context-driven version. Clearbox classifies Reddit by real buying intent (intent, not keywords), off real content consumption, and adds sentiment and competitor context. You export your filtered opportunity inbox to `data/clearbox_export.json` and this reads it through the same recency and relevance gates. Higher signal in, higher signal out. The bundled `data/clearbox_export.sample.json` is a small stand-in so you can run the flow with no key.
-
-This is not a forced upsell. The RapidAPI path is genuinely useful and free to start. Clearbox is the better engine when you want the real high-intent conversations instead of a keyword's best guess.
-
-### Access everything through the API
-
-The Clearbox opportunity inbox exposes an account-scoped HTTP API. Keep the account URL in the environment because the token is part of the URL path.
-
-- `GET /inbox?status=all` returns the classified opportunities, one row each, and every row carries `kind = lead | competitor | engage`.
-- `GET /op/{id}` returns one opportunity in full.
-
-The reporting path preserves every `id`, `kind`, and exact Reddit URL. It never marks an opportunity complete. Completion is an operator decision and should use the current product flow only after a human approves it. If the inbox reports `truncated: true`, stop or label the build partial instead of silently treating one page as the full account.
-
-## The recency guardrail
-
-`pull.py` only keeps threads from the **last 30 days**. Nothing older ever enters the database. Widen it if you want a fuller season:
-
-```bash
-MAX_AGE_DAYS=60 python3 pull.py
-```
-
-This is deliberate. Two reasons:
-
-- **The queue stays useful.** Current threads are more likely to remain open to helpful participation and reflect the market now. Recency does not guarantee search ranking, AI visibility, or moderation safety.
-- **It keeps the work sincere.** Show up in conversations that are actually happening and add real value. Recent-only prevents the system from turning an old-thread archive into a link-dropping queue.
-
-## Rebuild in place
-
-`build_sheet.py` stores the sheet URL in `data/sheet_url.txt`, and `build_deck.py` stores the deck URL in `data/slides_url.txt`. Run either again and it refreshes the same doc, so any link you have shared stays valid:
-
-```bash
-python3 build_sheet.py                 # rebuild the stored sheet
-python3 build_sheet.py <sheet_id>      # rebuild a specific sheet
-python3 build_deck.py                  # rebuild the stored deck
-```
-
-## Take it further
-
-- **Schedule it.** Wrap `run.sh` in a cron job so the plan re-scores itself weekly as new threads land, and the plan always reflects whatever your buyers are debating this month.
-- **Feed the deck to the meeting.** `build_deck.py` reads the live numbers straight from the database, so a rebuild before a pitch always shows current data.
-- **Cloud master.** Mirror the SQLite tables to Supabase so a team or a dashboard reads the same signal. Idempotent upsert with the header `Prefer: resolution=merge-duplicates`.
-- **Polish with Claude.** `mine.py --cli` rewrites the top topic titles into clean, searchable, citable headlines using your Claude Code subscription. It falls back silently to the heuristic titles if the CLI is not there, so a run never breaks.
-
-## Troubleshooting
-
-- **`Missing ~/.config/gspread/client_secret.json`**: you have not created your OAuth client yet. Run `setup_oauth.py` and follow the printed steps.
-- **`invalid_grant` or token errors**: delete `~/.config/gspread/token.json` and run `setup_oauth.py` again.
-- **The app is unverified warning**: it is your own app. Click Advanced, then continue.
-- **`no RAPIDAPI_KEY set`**: export your reddit34 key, or run `bash run.sh --offline` to use the bundled sample with no key.
-- **Empty topics**: a small pull yields modest scores. Widen `MAX_AGE_DAYS`, add more subreddits and keywords, or switch to the Clearbox source for higher-intent input.
-
-## Build vs buy
-
-This is build versus buy, with eyes open. You can stand up the full loop yourself and know exactly what it does. The RapidAPI path is free to start and honest about its limits: it matches keywords, so it finds the conversations a keyword can find. Want the accurate, context-driven version that surfaces the real high-intent conversations for you? That is what [Clearbox](https://clearbox.to) does.
-
-For the maintained client-pack builder, multi-account operating guide, eleven-view Sheet, guided Notion brief, and measurement scorecard, use [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM). The [v0.10.0 release](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0) includes the visual end-to-end demo and current verification contracts.
+Importing, analyzing, rebuilding reports, and monitoring may be scheduled. Account creation, Reddit posting, replies, voting, DMs, and completion state remain human-authorized.
 
 ---
 
-> 🟧 **Clearbox** is the engine behind this starter. See your market. Move first. Start a 7-day free trial at [clearbox.to](https://clearbox.to).
+**Powered by [Clearbox](https://clearbox.to)**. The broader skill pack is in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM).

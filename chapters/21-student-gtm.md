@@ -308,30 +308,21 @@ around thirty clips, all dated, all yours.
 
 ## Configure the signal engine on the people who hire you
 
-Chapter 18 builds a Reddit buyer-signal engine. Pull the recent threads where
-buyers compare tools, filter for relevance, score them, and publish against the
-gap. It is written for a company pointed at its buyers.
+Chapter 18 builds a Reddit buyer-signal engine from a complete Clearbox
+opportunity export. It preserves the source disposition and permalink, scores
+the buyer language, and shows you the gap. It is written for a company pointed
+at its buyers.
 
 Point it at the market you want to be hired into instead, and the same pipeline
 becomes a standing brief on your future employer's problems.
 
-The change is two text files:
+Configure a Clearbox offer around the market you want to enter. Give the offer
+the communities, buyer language, competitors, pains, and outcomes that define
+the people who could hire you. Clearbox returns the classified source records;
+the local starter turns them into the working brief.
 
-```text
-# signals/config/subreddits.txt
-sales
-SaaS
-startups
-smallbusiness
-marketing
-
-# signals/config/keywords.txt
-our crm data is a mess
-cold email deliverability
-hiring a gtm engineer
-outbound stopped working
-how do you track attribution
-```
+Use the offer-context interview in ClearboxGTM to research those fields instead
+of typing a keyword list from memory.
 
 Run the offline sample first so you can see the shape with no key and no cost:
 
@@ -340,23 +331,18 @@ cd starters/reddit-buyer-signals
 bash run.sh --offline
 ```
 
-Then run it live. The key comes from the environment and never from a file you
-might commit:
+Then export the complete classified inbox and run it locally:
 
 ```bash
-export RAPIDAPI_KEY="..."     # read via os.environ, gitignored, never in code
-python3 pull.py --days 30
-python3 mine.py
-python3 score.py
+CLEARBOX_EXPORT=/absolute/path/to/clearbox-opportunities.json bash run.sh
 ```
 
 ### Write your own offer while you are in there
 
-Those two text files aim the engine at a market. The passes downstream of them
-want one more thing, and it is the interesting one: the competitor and visibility
-work in Chapter 18 takes a brand and the names it is up against. Configuring the
-engine makes you write an offer. A name, a one-liner, the selling points, and the
-competitors.
+The offer context aims the engine at a market. The downstream competitor and
+visibility work takes a brand and the names it is up against. Configuring the
+engine makes you write an offer: a name, a one-liner, the selling points, and
+the competitors.
 
 Do that exercise with yourself as the product. It is the highest-value first rep
 in this whole chapter, because saying what a thing does, for whom, in one
@@ -598,11 +584,11 @@ Do this over the next seven days. It fits around a full course load.
    pick, runs `git init`, and makes the first commit. Then use the interview
    prompt above to finish `me/profile.md`, `me/skills.md`, `me/gaps.md`, and
    `me/target-roles.md`. Be honest in `gaps.md` or the rest of it stops working.
-2. **Configure the signal engine and write your own offer.** Copy
-   `starters/reddit-buyer-signals/`, edit `signals/config/subreddits.txt` and
-   `signals/config/keywords.txt` for the market you want to be hired into, run
-   `bash run.sh --offline` to see the shape, and write the four-line offer with
-   yourself as the product.
+2. **Configure the signal engine and write your own offer.** Use
+   `signals/config/subreddits.txt` and `signals/config/keywords.txt` as human
+   reading and offer-research notes, configure the matching Clearbox offer,
+   then run `starters/reddit-buyer-signals/run.sh --offline` to inspect the
+   source contract. Write the four-line offer with yourself as the product.
 3. **Ask one campus organization for one problem.** Send the paragraph. Take
    whatever they say yes to, even if it sounds too small.
 4. **Build it on Wednesday with the recording running.** Screen and mic, the

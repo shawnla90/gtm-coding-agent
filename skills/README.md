@@ -2,7 +2,7 @@
 
 Installable Claude Code skills. Drop any directory into `~/.claude/skills/` (or point your agent at it in place) and the skill becomes invocable. Each one is self-contained: the SKILL.md is the instruction set, and sibling files (FACTCHECK gates, templates, pastable prompts) are its working parts.
 
-These four are the portable Reddit motion. The focused implementation lives in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM), alongside the maintained client-pack builder, orchestration playbooks, multi-account operations, measurement scorecard, visual demo, and proof. Start with the [v0.10.0 client-pack release](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0).
+These four are the portable Reddit motion. The focused implementation lives in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM), alongside the maintained client-pack builder, orchestration playbooks, multi-account operations, measurement scorecard, visual demo, and proof. Start with the [latest ClearboxGTM release](https://github.com/shawnla90/ClearboxGTM/releases/latest).
 
 | Skill | What it does | Pairs with |
 |---|---|---|

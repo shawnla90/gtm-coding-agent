@@ -100,7 +100,7 @@ class ProfileLookupTests(unittest.TestCase):
         )
         with (
             patch.object(profile_lookup, "_exa_search", return_value=candidate),
-            patch.object(profile_lookup, "_playwright_scrape", return_value=direct),
+            patch.object(profile_lookup, "_rendered_profile", return_value=direct),
             patch.object(profile_lookup.time, "sleep", return_value=None),
         ):
             result = profile_lookup.lookup_profile("test", tiers=["exa", "playwright"])

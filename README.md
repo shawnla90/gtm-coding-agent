@@ -10,11 +10,11 @@ Structured context + coding agents + Python scripts. Build alongside the tools y
 
 ## New: build the Reddit client pack end to end
 
-<p align="center"><a href="https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0"><img src="https://raw.githubusercontent.com/shawnla90/ClearboxGTM/main/assets/gallery/client-pack-tour.gif" alt="ClearboxGTM client value pack: API dispositions to eleven-view Sheet and guided Notion brief" width="100%"></a></p>
+<p align="center"><a href="https://github.com/shawnla90/ClearboxGTM/releases/latest"><img src="https://raw.githubusercontent.com/shawnla90/ClearboxGTM/main/assets/gallery/client-pack-tour.gif" alt="ClearboxGTM client value pack: API dispositions to eleven-view Sheet and guided Notion brief" width="100%"></a></p>
 
 Chapters 18 and 19 now teach the current contract: Clearbox owns the source disposition and exact Reddit permalink; Freckle, Base Loop, or Clay may add analysis; the client receives one eleven-view working Sheet and one guided Notion brief; and retrieval, observed AI appearance, exact citation, engagement, and business outcomes remain separate receipts.
 
-This repo carries the broader GTM curriculum and portable starter. The complete maintained Reddit-growth implementation lives in **[ClearboxGTM](https://github.com/shawnla90/ClearboxGTM)**. See **[v0.10.0, The client pack you can see](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0)** for the live synthetic Sheet and Notion demo, visual walkthrough, agency skill, multi-account guide, attribution scorecard, fixtures, and builder.
+This repo carries the broader GTM curriculum and portable starter. The complete maintained Reddit-growth implementation lives in **[ClearboxGTM](https://github.com/shawnla90/ClearboxGTM)**. See the **[latest ClearboxGTM release](https://github.com/shawnla90/ClearboxGTM/releases/latest)** for the live synthetic Sheet and Notion demo, visual walkthrough, agency skill, multi-account guide, attribution scorecard, fixtures, and builder.
 
 ---
 
@@ -169,7 +169,7 @@ The full Reddit motion has its own repo: **[ClearboxGTM](https://github.com/shaw
 
 **Chapters 18–19 - Reddit client value pack:**
 
-[![ClearboxGTM client pack walkthrough](https://raw.githubusercontent.com/shawnla90/ClearboxGTM/main/assets/gallery/client-pack-tour-poster.png)](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0)
+[![ClearboxGTM client pack walkthrough](https://raw.githubusercontent.com/shawnla90/ClearboxGTM/main/assets/gallery/client-pack-tour-poster.png)](https://github.com/shawnla90/ClearboxGTM/releases/latest)
 
 *Clearbox API dispositions → optional Freckle, Base Loop, or Clay analysis → eleven-view Sheet → guided Notion brief. The demo uses synthetic fixtures.*
 

@@ -111,7 +111,7 @@ The expanded [`reddit-agency` skill](../skills/reddit-agency/SKILL.md) mirrors t
 - AI visibility and business-outcome receipts
 - stable report automation
 
-The maintained executable builder lives in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM). Its [v0.10.0 release](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0) includes the current dashboard, live synthetic Sheet and Notion demo, GIF walkthrough, source, fixtures, tests, and verification gate.
+The maintained executable builder lives in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM). Its [latest release](https://github.com/shawnla90/ClearboxGTM/releases/latest) includes the current dashboard, live synthetic Sheet and Notion demo, GIF walkthrough, source, fixtures, tests, and verification gate.
 
 The client-facing relationship is simple:
 

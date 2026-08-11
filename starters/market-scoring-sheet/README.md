@@ -94,7 +94,7 @@ python3 build_sheet.py <sheet_id>      # rebuild a specific sheet
 
 - **Cloud master:** mirror the SQLite table to Supabase so a team or a dashboard reads the same data. Idempotent upsert with the header `Prefer: resolution=merge-duplicates`.
 - **Schedule it:** wrap `run.sh` in a cron job, or hand the recurring run to an orchestration layer like Deepline (`deepline auth register`, then run it as a play on a cadence).
-- **Niche data:** Apollo is the source for B2B SaaS. For local markets (hotels, churches, service companies) swap in a RapidAPI provider in `enrich.py`.
+- **Niche data:** Apollo is the source for B2B SaaS. For local markets (hotels, churches, service companies), swap in an appropriate licensed data provider in `enrich.py`.
 
 ## Troubleshooting
 

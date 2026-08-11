@@ -1,21 +1,18 @@
 # The engine
 
-This starter is a thin pipeline over four reusable pieces, with a client-service layer on top. Each one does a single job, holds no client data, and re-points at a different market by editing a list. This doc explains what they are so you can reuse them beyond this starter.
+This starter is a thin pipeline over four reusable pieces, with a client-service layer on top. Each piece does one job, holds no client data, and re-points through the Clearbox offer configuration.
 
-## `lib/reddit_client.py` - the Reddit source
+## `pull.py` - the Clearbox source contract
 
-A thin, polite client for the reddit34 RapidAPI. It pulls the buyer talk that AI models read and cite: posts by subreddit, posts by keyword search, and the top comments on a thread. It reads the key from `RAPIDAPI_KEY`, sleeps between calls to stay under the rate limit, retries transient errors, and backs off on 429, so a long pull does not get you throttled.
+Clearbox is the source of record for Reddit opportunities. `pull.py` imports a complete Clearbox export into local SQLite. Every row must preserve:
 
-Four confirmed endpoints, wrapped as four functions:
+| Field | Contract |
+|---|---|
+| `id` | Stable Clearbox opportunity identifier |
+| `kind` | Original `lead`, `engage`, or `competitor` disposition |
+| `url` or `permalink` | Exact Reddit source URL |
 
-| Function | Endpoint | What it returns |
-|----------|----------|-----------------|
-| `search(query)` | `getSearchPosts` | keyword search across all of Reddit |
-| `posts_by_subreddit(sub, sort)` | `getPostsBySubreddit` | newest or hot posts in a subreddit |
-| `top_posts_by_subreddit(sub, window)` | `getTopPostsBySubreddit` | top posts in a time window |
-| `comments(permalink)` | `getPostCommentsWithSortV2` | top comments on one thread (needs the FULL url) |
-
-Each returns a flat list of dicts, tolerating the API's nested shape. Swap this module for a different data source (an official API, a scraper, a Clearbox export) and the rest of the pipeline does not change, because everything downstream reads from SQLite, not from the client.
+The importer refuses truncated exports and missing or invalid source fields. The bundled offline fixture follows the same contract. Freckle, Base Loop, and Clay may add analysis downstream, but they may not replace the Clearbox disposition or permalink.
 
 ## `lib/relevance.py` - the vocabulary and the filters
 
@@ -26,7 +23,7 @@ The single file that points the whole engine at a market. Editing the lists here
 - **`TOPIC_KEYWORDS`** maps keywords to topic slugs. `auto_tags(text)` returns the topics a thread or quote belongs to, which is how buyer language clusters into content topics.
 - **`classify(text)`** returns the buyer-language kind: `comparison`, `pain`, `recommendation`, `question`, or `None`. Comparisons and recommendations are the highest-intent buyer talk, and they drive the intent score.
 
-Because `pull.py` and `mine.py` both import this file, the same definition of "relevant" gates ingestion and classification. One edit, whole engine re-pointed.
+`mine.py` uses this vocabulary to classify the imported source text into buyer-language themes. The Clearbox opportunity disposition remains separate and authoritative.
 
 ## `lib/sheet_engine.py` - the color-coded sheet builder
 
@@ -99,7 +96,7 @@ python3 content.py check content/pack-01/linkedin.md
 
 Everything flows through SQLite (`data/signals.db`), so each stage is independent and idempotent. Four tables:
 
-- **`reddit_threads`** raw threads, deduped by `external_id`, gated by recency and relevance at insert.
+- **`reddit_threads`** Clearbox opportunities, deduped by `external_id`, with `clearbox_kind` and the exact source URL preserved.
 - **`thread_comments`** top comments on high-engagement threads (buyer language lives here too).
 - **`buyer_language`** extracted questions, comparisons, and pains, each tagged with a kind and the brands it mentions.
 - **`content_topics`** the scored plan: clustered topics with intent, mentions, engagement, evidence, score, tier, and reason.
