@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+*.pyc
+__pycache__/
+data/*.db
+data/sheet_url.txt
+.DS_Store

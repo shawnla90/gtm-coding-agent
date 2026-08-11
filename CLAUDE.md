@@ -94,6 +94,7 @@ When the user returns after setup:
 - **"unmask the leads" / "company evidence" / "slack digest"** → Chapter 19 and `starters/reddit-buyer-signals/` (`unmask.py`, `digest.py`). Use `--profile` for the evidence-bearing lookup. Only exact company-domain evidence on the author's Reddit profile is automatically enrichment-eligible; search, thread, social, and handle matches require manual review. Render reporting automatically, but keep public Reddit action and completion human-authorized.
 - **"podcast to shorts" / "clip this recording"** → Chapter 20 and `starters/podcast-shorts/`. Take one recording to a word-timestamped transcript, pick the cuts, render captioned vertical clips, and stage them as drafts.
 - **"student gtm" / "I'm a student"** → Chapter 21 and `starters/student-gtm/`. Run the interview, scaffold their own build-in-public repo, and set the weekly loop: build for a campus client, record it, ship it, write the gotchas, publish.
+- **"apollo prospecting" / "apollo workflow" / "expand buying committee"** → `starters/apollo-prospecting/`. Load source contacts from CSV, expand via Apollo API (free), score by title relevance x reachability tier, output to a color-coded Google Sheet. The search is free; the reveal costs credits. Score first, reveal the winners.
 
 ## Reference Paths
 
@@ -107,6 +108,7 @@ When the user returns after setup:
 - Reddit buyer-signals starter: `starters/reddit-buyer-signals/` (Chapters 18-19)
 - Podcast-to-shorts starter: `starters/podcast-shorts/` (Chapter 20)
 - Student GTM starter: `starters/student-gtm/` (Chapter 21)
+- Apollo prospecting starter: `starters/apollo-prospecting/`
 - Schema files: `starters/signals-dashboard/schema/`
 - Pipeline scripts: `starters/signals-dashboard/pipeline/`
 
