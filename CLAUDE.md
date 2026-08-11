@@ -90,8 +90,8 @@ When the user returns after setup:
 - **"build dashboard"** → Guide them to Chapter 11 and `starters/signals-dashboard (Ch 11) or nexus-intel (Ch 12)/`
 - **"set up supabase"** → Walk through schema setup from `starters/signals-dashboard/schema/`
 - **"deploy dashboard"** → Vercel deployment from the starter
-- **"reddit buyer signals" / "reddit agency"** → Chapter 18 and `starters/reddit-buyer-signals/`. Pull recent Reddit buyer talk, score it, build the sheet, and run the GEO / competitor / content skills.
-- **"unmask the leads" / "slack digest"** → Chapter 19 and `starters/reddit-buyer-signals/` (`unmask.py`, `digest.py`). Gate and enrich the self-disclosed leads, and push the daily digest. Use `--profile` to run the profile lookup waterfall (web search for identity signals beyond the thread text).
+- **"reddit buyer signals" / "reddit agency" / "client value pack"** → Chapter 18, `skills/reddit-agency/`, and `starters/reddit-buyer-signals/`. Preserve the Clearbox `id`, `kind`, and exact Reddit URL; add optional Freckle, Base Loop, or Clay analysis; and route the complete eleven-view Sheet plus guided Notion build to [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM).
+- **"unmask the leads" / "company evidence" / "slack digest"** → Chapter 19 and `starters/reddit-buyer-signals/` (`unmask.py`, `digest.py`). Use `--profile` for the evidence-bearing lookup. Only exact company-domain evidence on the author's Reddit profile is automatically enrichment-eligible; search, thread, social, and handle matches require manual review. Render reporting automatically, but keep public Reddit action and completion human-authorized.
 - **"podcast to shorts" / "clip this recording"** → Chapter 20 and `starters/podcast-shorts/`. Take one recording to a word-timestamped transcript, pick the cuts, render captioned vertical clips, and stage them as drafts.
 - **"student gtm" / "I'm a student"** → Chapter 21 and `starters/student-gtm/`. Run the interview, scaffold their own build-in-public repo, and set the weekly loop: build for a campus client, record it, ship it, write the gotchas, publish.
 

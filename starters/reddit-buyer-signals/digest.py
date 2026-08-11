@@ -1,39 +1,46 @@
 #!/usr/bin/env python3
-"""digest.py — the daily Slack digest of a client's Reddit opportunities, in Lucas's format.
+"""digest.py — the daily Slack digest of a client's Reddit opportunities.
+
+Original daily digest pattern by Lucas. Ported to the ClearboxGTM engine.
 
 The operated-service delivery: each day the account's engage threads (with the drafted value-first
-reply), new leads, and competitor mentions land in the client's Slack, not only in a sheet. Format
-follows DASHBOARD-SPEC S1 (do not redesign): a header line, then one block per opportunity, ordered
-by priority, capped. v1 is a text digest with permalinks (Lucas's model); interactive buttons need a
-bot token and are a later step.
+reply), new leads, and competitor mentions land in the client's Slack, not only in a sheet. Format:
+a header line, then one block per opportunity, ordered by priority, capped. v1 is a text digest with
+permalinks; interactive buttons need a bot token and are a later step.
 
   python3 digest.py --ops data/ops_classified.json --angles data/engage_angles.json \
       --client Acme PM --out data/slack_digest.txt            # render only
   python3 digest.py ... --post --webhook-secret SLACK_WEBHOOK_YOURCLIENT   # render + post live
 
 Posting reuses the incoming-webhook pattern (slack_post: POST {"text": ...}); the webhook URL is read
-from niobot secrets by name. Never posts without --post.
+from the env var of that name (or a local secrets store as fallback). Never posts without --post.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sqlite3
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-NIOBOT_DB = Path.home() / ".niobot" / "data" / "niobot.db"
+SECRETS_DB = os.environ.get("SECRETS_DB", "")  # optional: sqlite file with a secrets(key,value) table
 PRIO_RANK = {"high": 0, "med": 1, "low": 2, "": 3}
 
 
 def get_secret(key: str) -> str | None:
-    try:
-        with sqlite3.connect(str(NIOBOT_DB), timeout=10) as c:
-            row = c.execute("SELECT value FROM secrets WHERE key=?", (key,)).fetchone()
-            return row[0] if row else None
-    except sqlite3.Error:
-        return None
+    v = os.environ.get(key)
+    if v:
+        return v.strip()
+    if SECRETS_DB:
+        try:
+            with sqlite3.connect(SECRETS_DB, timeout=10) as c:
+                row = c.execute("SELECT value FROM secrets WHERE key=?", (key,)).fetchone()
+                return row[0] if row else None
+        except sqlite3.Error:
+            return None
+    return None
 
 
 def slack_post(webhook_url: str, text: str) -> bool:
@@ -118,7 +125,7 @@ def main() -> int:
             return 0
         url = get_secret(args.webhook_secret)
         if not url:
-            print(f"  no webhook in niobot secrets under '{args.webhook_secret}'; not posting")
+            print(f"  no webhook found under '{args.webhook_secret}' (env var or SECRETS_DB); not posting")
             return 0
         ok = slack_post(url, text)
         print(f"  posted to Slack via {args.webhook_secret}: {'ok' if ok else 'failed'}")

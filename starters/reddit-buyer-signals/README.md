@@ -30,10 +30,10 @@ The styling engine is `lib/sheet_engine.py`. It is the real, reusable piece. See
 
 The same classified signal feeds five more modules that turn it into an operated client offer. Each is a single file, reads the pipeline's data, and re-points by argument. [ENGINE.md](ENGINE.md) documents them in full.
 
-- **`geo.py`** the buyer questions to own so AI cites the brand, each checked for current answer-engine visibility through a hard-capped Exa pass.
+- **`geo.py`** the buyer questions to track, each checked for retrieval visibility through a hard-capped Exa pass. Exa retrieval is not labeled as an observed AI answer or citation.
 - **`competitor.py`** the competitor narrative read straight from Clearbox's opportunity classification (the classification is the relevant-mention signal, not literal brand counting), plus a generated sentiment read and a share-of-voice view.
 - **`digest.py`** the daily digest of engage threads with the drafted reply, new leads, and competitor mentions, as a header line plus one block per opportunity ordered by priority. Render-only by default; add `--post --webhook-secret <SECRET_NAME>` to post to an incoming webhook.
-- **`unmask.py`** the disclosure gate (enrich the company not the person, and only when the author self-disclosed a company by naming it, linking a site, or posting as a brand handle), then a pluggable enrichment backend (Freckle by default, swap in Clay or Apollo) returning the company, the ICP tier, and buying-role contacts.
+- **`unmask.py`** the company-evidence gate. Only an exact company domain published on the author's own Reddit profile is automatically enrichment-eligible. Search hits, thread domains, and brand-like handles stay manual-review candidates. The enrichment seam supports Freckle, Base Loop, Clay, Apollo, or another backend.
 - **`content.py`** scaffold a LinkedIn, Reddit, and blog content pack from one buyer question in the brand voice, plus an anti-slop check subcommand.
 
 ```bash
@@ -129,13 +129,12 @@ This is not a forced upsell. The RapidAPI path is genuinely useful and free to s
 
 ### Access everything through the API
 
-The Clearbox opportunity inbox is a pull-only HTTP API, so the Clearbox path in this starter is a handful of GET requests you own.
+The Clearbox opportunity inbox exposes an account-scoped HTTP API. Keep the account URL in the environment because the token is part of the URL path.
 
-- `GET /inbox` returns the classified opportunities, one row each, and every row carries `kind = lead | competitor | engage`.
+- `GET /inbox?status=all` returns the classified opportunities, one row each, and every row carries `kind = lead | competitor | engage`.
 - `GET /op/{id}` returns one opportunity in full.
-- `GET /op/{id}/done` marks that opportunity handled.
 
-Two things trip people up. The token is a path segment in the URL, not a header, so it rides inside the path itself. And Cloudflare returns 403 to a default urllib User-Agent, so send a browser User-Agent on every request. There are no POST routes. Every call is a read, and the one state change, marking an op done, is itself a GET.
+The reporting path preserves every `id`, `kind`, and exact Reddit URL. It never marks an opportunity complete. Completion is an operator decision and should use the current product flow only after a human approves it. If the inbox reports `truncated: true`, stop or label the build partial instead of silently treating one page as the full account.
 
 ## The recency guardrail
 
@@ -145,10 +144,10 @@ Two things trip people up. The token is a path segment in the URL, not a header,
 MAX_AGE_DAYS=60 python3 pull.py
 ```
 
-This is deliberate, and it is the whole point. Two reasons:
+This is deliberate. Two reasons:
 
-- **AI cites what is current.** Models weight fresh, active threads. A live conversation with a few hundred interactions is already high-read, and it is the one that shows up in an answer.
-- **It keeps you sincere.** The way to grow on Reddit is to show up in conversations that are actually happening and add real value. Dredging up year-old threads to drop a link is how you get flagged and banned. Recent-only forces you to engage with live discussions, which is the honest way to earn a mention in the first place.
+- **The queue stays useful.** Current threads are more likely to remain open to helpful participation and reflect the market now. Recency does not guarantee search ranking, AI visibility, or moderation safety.
+- **It keeps the work sincere.** Show up in conversations that are actually happening and add real value. Recent-only prevents the system from turning an old-thread archive into a link-dropping queue.
 
 ## Rebuild in place
 
@@ -178,6 +177,8 @@ python3 build_deck.py                  # rebuild the stored deck
 ## Build vs buy
 
 This is build versus buy, with eyes open. You can stand up the full loop yourself and know exactly what it does. The RapidAPI path is free to start and honest about its limits: it matches keywords, so it finds the conversations a keyword can find. Want the accurate, context-driven version that surfaces the real high-intent conversations for you? That is what [Clearbox](https://clearbox.to) does.
+
+For the maintained client-pack builder, multi-account operating guide, eleven-view Sheet, guided Notion brief, and measurement scorecard, use [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM). The [v0.10.0 release](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0) includes the visual end-to-end demo and current verification contracts.
 
 ---
 

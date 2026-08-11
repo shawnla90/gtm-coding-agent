@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""geo.py — the GEO terms a client should own, with their current answer-engine visibility.
+"""geo.py — the GEO terms a client should own, with current retrieval visibility.
 
 "GEO term" = a buyer question a RevOps/GTM leader would type or ask an AI, that the client can answer
 authoritatively. The terms come from the real buyer language the account surfaced (generated into
 clean queries upstream, or derived from content_topics here as a fallback). Each term is then checked
-for CURRENT answer-engine visibility with a HARD-CAPPED Exa pass (does the client already show up when
-a buyer asks this?), so the output is both the plan and the gap.
+for CURRENT retrieval visibility with a HARD-CAPPED Exa pass (does the client show up in an independent
+search result set for this question?), so the output is both the plan and a leading indicator. It does
+not prove an AI answer named or cited the client.
 
   python3 geo.py --gen data/geo_terms_gen.json --brand Acme PM --db reddit-buyer-signals/data/signals.db --out data/geo_terms.json
 
@@ -22,7 +23,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from lib.exa_client import ai_visibility, get_key  # type: ignore
+from lib.exa_client import retrieval_visibility, get_key  # type: ignore
 
 
 def load_generated(path: Path) -> list[dict]:
@@ -67,9 +68,9 @@ def main() -> int:
     order = {"high": 0, "mid": 1, "low": 2}
     terms.sort(key=lambda t: order.get((t.get("intent") or "mid").lower(), 1))
 
-    # capped visibility check on the top terms only
+    # capped retrieval check on the top terms only
     check_terms = [t["term"] for t in terms[: args.check] if t.get("term")]
-    vis = ai_visibility(args.brand, check_terms) if get_key() else {"available": False}
+    vis = retrieval_visibility(args.brand, check_terms) if get_key() else {"available": False}
     appears_by_q = {d["query"]: d["appears"] for d in vis.get("queries", [])}
 
     out = []
@@ -81,21 +82,22 @@ def main() -> int:
             "intent": t.get("intent", "mid"),
             "why_you_own_it": t.get("why", ""),
             "buyer_evidence": (t.get("evidence") or "")[:180],
-            "currently_cited_by_ai": ("yes" if appears_by_q[term] else "no") if checked else "not checked",
+            "currently_retrieved_by_exa": ("yes" if appears_by_q[term] else "no") if checked else "not checked",
         })
 
     result = {
         "brand": args.brand,
-        "ai_visibility_score": vis.get("score") if vis.get("available") else None,
-        "visibility_checked": vis.get("checked", 0),
-        "note": ("share of the checked buyer questions where the brand already surfaces in AI answers"
-                 if vis.get("available") else "Exa visibility unavailable; terms listed without a live score"),
+        "retrieval_visibility_score": vis.get("score") if vis.get("available") else None,
+        "retrieval_checked": vis.get("checked", 0),
+        "note": ("share of checked buyer questions where the brand surfaces in Exa search results; "
+                 "this is not an observed AI answer or citation"
+                 if vis.get("available") else "Exa retrieval unavailable; terms listed without a live score"),
         "terms": out,
     }
     Path(args.out).write_text(json.dumps(result, indent=2, ensure_ascii=False))
-    cited = sum(1 for t in out if t["currently_cited_by_ai"] == "yes")
-    print(f"GEO terms: {len(out)} · visibility-checked {vis.get('checked', 0)} · "
-          f"already cited {cited} · score {result['ai_visibility_score']} -> {args.out}")
+    retrieved = sum(1 for t in out if t["currently_retrieved_by_exa"] == "yes")
+    print(f"GEO terms: {len(out)} · retrieval-checked {vis.get('checked', 0)} · "
+          f"brand retrieved {retrieved} · score {result['retrieval_visibility_score']} -> {args.out}")
     return 0
 
 

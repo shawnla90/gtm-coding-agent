@@ -4,6 +4,23 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.7.0] - 2026-08-10
+
+Build the Reddit client pack: the broader GTM curriculum now carries the current Clearbox source, analysis, company-evidence, client-delivery, multi-account, and measurement contracts, while routing the complete maintained implementation to [ClearboxGTM v0.10.0](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0).
+
+### Added
+
+- **Expanded `reddit-agency` skill pack:** the eleven-view Google Sheet, guided Notion value brief, Plan Setup, Freckle/Base Loop/Clay adapter contract, multi-account operations guide, evidence ledger, and reusable AI visibility scorecard now ship with the broader skill library.
+- **Visual Reddit-growth entry point:** the README now shows the end-to-end client-pack walkthrough and links directly to the focused ClearboxGTM release, live synthetic demo, builder, and verification assets.
+- **Profile-gate regression tests:** direct Reddit-profile disclosure, search-only candidates, thread-domain candidates, no-evidence states, and lookup errors are covered independently.
+
+### Changed
+
+- **Chapters 18 and 19:** replaced ranking and citation promises with the source-to-receipt operating model: Clearbox owns `id`, `kind`, and the exact Reddit URL; analysis tools add fields; public actions stay human-authorized; and retrieval, observed AI appearance, exact citation, engagement, and business outcomes remain separate evidence levels.
+- **Reddit starter disclosure gate:** only an exact company domain published on the author's own Reddit profile is automatically enrichment-eligible. Search, thread, social, and brand-handle matches now require manual review, and lookup failures remain distinct from no public evidence.
+- **GEO measurement:** Exa output is now labeled `retrieval_visibility`, not AI answer visibility or citation. Environment-based secret loading replaces private workstation assumptions.
+- **Repository routing:** README, `CLAUDE.md`, skill discovery, starter docs, and both Reddit chapters now distinguish this repo's portable curriculum from the maintained focused implementation in ClearboxGTM.
+
 ## [0.6.0] - 2026-08-10
 
 ### Added

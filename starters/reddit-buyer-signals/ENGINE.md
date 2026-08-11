@@ -49,11 +49,11 @@ Transparent rules, not a black box. Every content topic gets a 0-100 total from 
 
 ## The client-service layer
 
-The four pieces above are the reusable engine. These five modules sit on top and turn the scored signal into an operated client offer: what to own in AI answers, where a competitor is winning, what to send each day, which leads disclosed a company, and the content that answers the buyer question. Each is a single file, read-only except for its `--out`, and re-points by argument.
+The four pieces above are the reusable engine. These five modules sit on top and turn the scored signal into an operated client offer: which buyer questions to track, where a competitor is winning, what to send each day, which company evidence is eligible for enrichment, and the content that answers the buyer question. Each re-points by argument.
 
-### `geo.py` - the GEO terms and their AI visibility
+### `geo.py` - the GEO terms and their retrieval visibility
 
-A "GEO term" is a buyer question a GTM or RevOps leader would type or ask an AI, one the brand can answer with authority. The terms come from the real buyer language the account surfaced, generated into clean queries upstream, or derived from `content_topics` as a fallback. Each term is then checked for current answer-engine visibility with a hard-capped Exa pass (does the brand already surface when a buyer asks this?), so the output holds the plan and the gap in one file. An absent Exa key degrades to terms without a visibility score, and the cap on `lib/exa_client.MAX_QUERIES` keeps a run cheap.
+A "GEO term" is a buyer question a GTM or RevOps leader would type or ask an AI, one the brand can answer with authority. The terms come from the real buyer language the account surfaced, generated into clean queries upstream, or derived from `content_topics` as a fallback. Each term is then checked for current retrieval visibility with a hard-capped Exa pass. This shows whether the brand surfaces in Exa's result set, not whether an answer engine named or cited it. An absent Exa key degrades to terms without a retrieval score. Observed AI visibility requires a separate prompt receipt with the answer and exact citations.
 
 ```bash
 python3 geo.py --brand "Acme PM" --db data/signals.db --out data/geo_terms.json
@@ -69,20 +69,21 @@ python3 competitor.py --own "Acme PM" --competitor "Rival PM" --out data/competi
 
 ### `digest.py` - the daily client digest
 
-The operated-service delivery. Each day the account's engage threads (with the drafted, value-first reply), new leads, and competitor mentions land in the client's Slack, as a header line and then one block per opportunity, ordered by priority and capped. It renders to a text file by default; add `--post --webhook-secret <SECRET_NAME>` and it posts to an incoming webhook, with the URL read from the niobot secrets store by name. It never posts without `--post`.
+The operated-service delivery. Each day the account's engage threads (with the drafted, value-first reply), new leads, and competitor mentions land in the client's Slack, as a header line and then one block per opportunity, ordered by priority and capped. It renders to a text file by default; add `--post --webhook-secret <SECRET_NAME>` and it posts to an incoming webhook, with the URL read from the environment variable of that name or an optional `SECRETS_DB` SQLite store. It never posts without `--post`.
 
 ```bash
 python3 digest.py --client "Acme PM" --out data/slack_digest.txt
 python3 digest.py --client "Acme PM" --out data/slack_digest.txt --post --webhook-secret SLACK_WEBHOOK_YOURCLIENT
 ```
 
-### `unmask.py` - the disclosure gate and lead enrichment
+### `unmask.py` - the profile review gate and company enrichment
 
-Reddit is pseudonymous, so this enriches the company, never the person, and only when the author tied themselves to a company in the thread by naming it, linking a site, or posting as a brand handle. Pseudonymous threads stay Reddit conversations. The default run is the gate alone, with no external calls, reporting who disclosed a company and the domain. Add `--enrich` and each disclosed domain goes through a pluggable enrichment backend: Freckle by default (a saved workflow returning the company, the ICP tier, and the buying-role contacts), swappable for Clay, Apollo, or any waterfall a client already runs. It never enriches without `--enrich`.
+Reddit is pseudonymous, so this enriches the company, never the person. Only an exact company domain published on the author's own Reddit profile, preserved with its evidence URL and excerpt, is automatically eligible. Search results, domains mentioned in a thread, social links, and brand-like handles are plausible candidates that require manual review. `no_public_evidence` and `lookup_error` remain separate states. Add `--profile` to run the full lookup and `--enrich` to send only eligible domains through the pluggable backend: Freckle by default, swappable for Base Loop, Clay, Deepline, Apollo, or another waterfall. It never enriches without `--enrich`.
 
 ```bash
 python3 unmask.py --ops data/ops_classified.json --out data/unmasked.json
-python3 unmask.py --ops data/ops_classified.json --out data/unmasked.json --enrich
+python3 unmask.py --ops data/ops_classified.json --profile --out data/unmasked.json
+python3 unmask.py --ops data/ops_classified.json --profile --out data/unmasked.json --enrich
 ```
 
 ### `content.py` - scaffold and anti-slop-check a content pack

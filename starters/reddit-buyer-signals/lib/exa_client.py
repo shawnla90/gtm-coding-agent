@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""exa_client.py — a tiny, HARD-CAPPED Exa client for AI-visibility checks.
+"""exa_client.py — a tiny, HARD-CAPPED Exa client for retrieval checks.
 
-Answer-engine visibility is "when a buyer asks AI this question, does the brand show up in what
-the model reads?" Exa /search returns what the answer engines cite. This client runs a SMALL,
-capped set of those queries so a visibility check never burns the balance. Key from niobot secrets
-(EXA_API_KEY). Every function degrades to {available: False} on any error, never raises.
+Exa /search returns an independent search result set. It can show whether a brand or source is
+retrievable for a buyer question, but it cannot prove that ChatGPT, Claude, Perplexity, Google, or
+another answer engine named or cited that result. That requires a receipt from the answer itself.
+This client runs a SMALL, capped query set so a retrieval check never burns the balance. Key from
+the EXA_API_KEY env var. Every function degrades to {available: False} on any error, never raises.
 
 CAP: MAX_QUERIES per call (default 8). A caller cannot exceed it even by passing more queries.
 """
@@ -18,19 +19,21 @@ from pathlib import Path
 
 EXA_API = "https://api.exa.ai"
 MAX_QUERIES = int(os.environ.get("EXA_MAX_QUERIES", "8"))  # hard cap, protects the balance
-NIOBOT_DB = Path.home() / ".niobot" / "data" / "niobot.db"
+SECRETS_DB = os.environ.get("SECRETS_DB", "")  # optional: sqlite file with a secrets(key,value) table
 
 
 def get_key() -> str | None:
     k = os.environ.get("EXA_API_KEY")
     if k:
         return k.strip()
-    try:
-        with sqlite3.connect(str(NIOBOT_DB), timeout=10) as c:
-            row = c.execute("SELECT value FROM secrets WHERE key='EXA_API_KEY'").fetchone()
-            return row[0] if row else None
-    except sqlite3.Error:
-        return None
+    if SECRETS_DB:
+        try:
+            with sqlite3.connect(SECRETS_DB, timeout=10) as c:
+                row = c.execute("SELECT value FROM secrets WHERE key='EXA_API_KEY'").fetchone()
+                return row[0] if row else None
+        except sqlite3.Error:
+            return None
+    return None
 
 
 def _search(query: str, key: str, num: int = 10) -> dict:
@@ -42,8 +45,8 @@ def _search(query: str, key: str, num: int = 10) -> dict:
         return json.load(r)
 
 
-def ai_visibility(name: str, queries: list[str], key: str | None = None) -> dict:
-    """Share of buyer-intent queries where `name` surfaces in the Exa answer set. Capped."""
+def retrieval_visibility(name: str, queries: list[str], key: str | None = None) -> dict:
+    """Share of buyer-intent queries where `name` surfaces in Exa results. Capped."""
     key = key or get_key()
     if not key:
         return {"available": False, "reason": "no EXA_API_KEY"}
@@ -61,3 +64,8 @@ def ai_visibility(name: str, queries: list[str], key: str | None = None) -> dict
     return {"score": round(100 * hits / checked) if checked else 0,
             "checked": checked, "capped_at": MAX_QUERIES, "queries": detail,
             "available": checked > 0}
+
+
+def ai_visibility(name: str, queries: list[str], key: str | None = None) -> dict:
+    """Backward-compatible alias. The evidence is retrieval visibility, not AI citation."""
+    return retrieval_visibility(name, queries, key)

@@ -8,6 +8,16 @@ Structured context + coding agents + Python scripts. Build alongside the tools y
 
 ---
 
+## New: build the Reddit client pack end to end
+
+<p align="center"><a href="https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0"><img src="https://raw.githubusercontent.com/shawnla90/ClearboxGTM/main/assets/gallery/client-pack-tour.gif" alt="ClearboxGTM client value pack: API dispositions to eleven-view Sheet and guided Notion brief" width="100%"></a></p>
+
+Chapters 18 and 19 now teach the current contract: Clearbox owns the source disposition and exact Reddit permalink; Freckle, Base Loop, or Clay may add analysis; the client receives one eleven-view working Sheet and one guided Notion brief; and retrieval, observed AI appearance, exact citation, engagement, and business outcomes remain separate receipts.
+
+This repo carries the broader GTM curriculum and portable starter. The complete maintained Reddit-growth implementation lives in **[ClearboxGTM](https://github.com/shawnla90/ClearboxGTM)**. See **[v0.10.0, The client pack you can see](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0)** for the live synthetic Sheet and Notion demo, visual walkthrough, agency skill, multi-account guide, attribution scorecard, fixtures, and builder.
+
+---
+
 ## Anatomy of This Repo
 
 ```
@@ -35,7 +45,7 @@ gtm-coding-agent/
 │   ├── 16-programmatic-landing-pages-hubspot-cms.md  #  HubSpot CMS Pages API + subagent columns
 │   ├── 17-client-onboarding-miro-boards.md  #  Miro onboarding boards + client docs package
 │   ├── 18-reddit-buyer-signals.md          #   Reddit buyer signals + GEO/competitor/content
-│   ├── 19-lead-unmasking-and-slack-digest.md  #  disclosure-gate + profile lookup + Slack digest
+│   ├── 19-lead-unmasking-and-slack-digest.md  #  company-evidence gate + client packs + digest
 │   ├── 20-podcast-to-shorts.md             #   one recording → captioned vertical clip drafts
 │   └── 21-student-gtm.md                   #   campus network → public GTM track record
 │
@@ -43,7 +53,7 @@ gtm-coding-agent/
 │   ├── clearbox-onboard/                  #   domain → researched Clearbox offer pack + pastable prompt
 │   ├── reddit-onboard/                    #   personalized route through the public playbook → Notion
 │   ├── reddit-engage/                     #   value-first replies, approve-each-one human gate
-│   └── reddit-agency/                     #   win-a-client package: sheet, deck, command center
+│   └── reddit-agency/                     #   11-view Sheet + guided brief + multi-account scorecard
 │
 ├── starters/                              # runnable starter folders (CLI + data)
 │   ├── reddit-buyer-signals/              #   Reddit signals + GEO/competitor/unmask/digest (Ch 18-19)
@@ -131,7 +141,7 @@ gtm-coding-agent/
 | **Templates** | **Prompts** |
 | CLAUDE.md variants, voice DNA, content formats, partner structures. Copy into your projects, fill in the blanks. | 6 battle-tested AI prompts for ICP building, positioning, competitor analysis, signal mapping, email sequences, and content repurposing. |
 | **Starter Projects** | |
-| Nine forkable starters. **Reddit buyer signals** (Ch 18-19) reads your market on Reddit, classifies each thread by intent, surfaces GEO terms and the competitor narrative, drafts content, and unmasks the leads who self-disclose a company. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. **CRM Automation** (Ch 13) re-enriches 60-day-old HubSpot deals and writes the verdict back as custom properties. **Podcast to Shorts** (Ch 20) turns one recording into captioned vertical clips staged as drafts, cut against a word-timestamped transcript. **Student GTM** (Ch 21) interviews a student and scaffolds their own repo, weekly recording loop, gotchas log, and campus client offer. Deploy any of them in minutes. | |
+| Nine forkable starters. **Reddit buyer signals** (Ch 18-19) preserves Clearbox dispositions and exact permalinks, measures Exa retrieval without calling it an AI citation, and enriches only exact company domains self-disclosed on the author's Reddit profile; search, thread, and handle matches stay in manual review. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. **CRM Automation** (Ch 13) re-enriches 60-day-old HubSpot deals and writes the verdict back as custom properties. **Podcast to Shorts** (Ch 20) turns one recording into captioned vertical clips staged as drafts, cut against a word-timestamped transcript. **Student GTM** (Ch 21) interviews a student and scaffolds their own repo, weekly recording loop, gotchas log, and campus client offer. Deploy any of them in minutes. | |
 
 ---
 
@@ -149,13 +159,19 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 
 🟧 The Reddit buyer-signal engine in this kit (Chapters 18 and 19) runs on **Clearbox**. Clearbox reads what your market is actually asking across Reddit, classifies each thread by buying intent, and hands you the leads, the competitor mentions, and the conversations worth joining. The kit is the open-source how. Clearbox is the engine that makes it live.
 
-The full Reddit motion has its own repo: **[ClearboxGTM](https://github.com/shawnla90/ClearboxGTM)** — the four skills in `skills/`, this kit's buyer-signals engine, the orchestration playbooks (Freckle, Deepline, Notion), and the generated proof (1.5M+ tracked views on one real account), all in one place you can hand to a client or run for your own.
+The full Reddit motion has its own repo: **[ClearboxGTM](https://github.com/shawnla90/ClearboxGTM)**. It contains the maintained buyer-signal engine, client-pack builder, Freckle/Base Loop/Clay analysis path, public agency skills, multi-account controls, evidence scorecard, generated proof, and the visual client delivery system you can hand to a client or run for your own.
 
 **See your market. Move first.** Start a 7-day free trial at **[clearbox.to](https://clearbox.to)**.
 
 ---
 
 ## See It In Action
+
+**Chapters 18–19 - Reddit client value pack:**
+
+[![ClearboxGTM client pack walkthrough](https://raw.githubusercontent.com/shawnla90/ClearboxGTM/main/assets/gallery/client-pack-tour-poster.png)](https://github.com/shawnla90/ClearboxGTM/releases/tag/v0.10.0)
+
+*Clearbox API dispositions → optional Freckle, Base Loop, or Clay analysis → eleven-view Sheet → guided Notion brief. The demo uses synthetic fixtures.*
 
 **Chapter 11 - Signals Dashboard (Supabase + Recharts):**
 
@@ -252,8 +268,8 @@ New chapters and starters ship as tagged **[Releases](https://github.com/shawnla
 | 15 - Meta Ad Intelligence | Scrape the Meta Ad Library, classify creatives via Claude subprocess, pair declared strategy with demand signals |
 | 16 - Programmatic Landing Pages | Brief + subagent columns + HubSpot CMS Pages API v3. Personalized DRAFT landing pages, one command, controlled list |
 | 17 - Client Onboarding Miro Boards | Build a client-visible GTM engine map, docs package, and screenshot QA loop before kickoff |
-| 18 - Reddit Buyer Signals | Turn recent Reddit buyer talk into a scored content plan, GEO terms to own, a competitor narrative from Clearbox classification, and content drafts, all off a pull-only API |
-| 19 - Lead Unmasking & Slack Digest | Gate and enrich the leads who self-disclose a company, then push a daily Slack digest of the threads worth working |
+| 18 - Reddit Buyer Signals | Preserve classified buyer signals and exact permalinks, add Freckle/Base Loop/Clay analysis, build the eleven-view client pack, and measure each evidence level separately |
+| 19 - Company Evidence, Client Packs & Digest | Separate direct Reddit-profile disclosure from candidates and lookup errors, enrich only verified companies, then deliver stable client surfaces and the daily queue |
 | 20 - Podcast to Shorts | Turn one recording into captioned vertical clips staged as drafts, cut against a word-timestamped transcript |
 | 21 - Student GTM | Build a public go-to-market track record in one semester with no budget, no title, and the campus network you already have |
 
