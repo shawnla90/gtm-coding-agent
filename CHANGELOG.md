@@ -4,6 +4,19 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.7.2] - 2026-08-11
+
+The API-key story now goes past "put it in `.env`": the curriculum teaches the local secrets vault — one SQLite database outside every git repository, from which coding agents check keys out into gitignored `.env` files on demand. The Apollo starter demos the pattern live.
+
+### Added
+
+- **Chapter 04 "Level Up: The Local Secrets Vault":** build a `~/.gtm-vault/vault.db` in two minutes — schema, `chmod 600/700` permissions, store/check-out one-liners, why one vault beats `.env` sprawl (single source of truth, disposable runtime copies, queryable inventory), and the honest caveats (plaintext at rest, full-disk encryption as backstop, backups carry a copy, upgrade paths to keychain/SQLCipher/1Password CLI).
+- **Apollo starter vault demo:** the starter's agent instructions now treat the API-key step as a teaching moment — show the key is in no repo, list vault key names only, pipe the value silently into `.env`, verify with a boolean + length, smoke-test on the free `organizations/enrich` endpoint. README links the full chapter walkthrough.
+
+### Changed
+
+- **Apollo starter setup:** the agent pulls the key from a local vault when one exists instead of asking the user to paste it.
+
 ## [0.7.1] - 2026-08-10
 
 The Reddit curriculum now matches the maintained ClearboxGTM architecture: Clearbox is the only opportunity source, and the portable starter imports a complete classified export while preserving the original disposition and exact permalink.

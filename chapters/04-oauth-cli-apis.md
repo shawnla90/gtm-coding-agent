@@ -257,6 +257,68 @@ aws configure
 
 ---
 
+## Level Up: The Local Secrets Vault
+
+The `.env` pattern works for one project. By project five, it breaks down: the same Apollo key pasted into five `.env` files, no idea which projects have the old key when you rotate it, and every new starter begins with "go find your API key again."
+
+The fix is to invert where secrets live. Git is for code you want to share and track. Secrets are the one thing you never want shared or tracked — so they live in the opposite place: **one local database, outside every repository.**
+
+```
+~/.gtm-vault/vault.db          <- SQLite file in your home directory
+                                  NOT inside any git repo. Git doesn't know it exists.
+
+your-project/.env              <- disposable runtime copy (gitignored)
+another-project/.env           <- disposable runtime copy (gitignored)
+```
+
+The secret flows vault → runtime file. Neither end ever touches version control.
+
+**Build it in two minutes:**
+
+```bash
+mkdir -p ~/.gtm-vault
+sqlite3 ~/.gtm-vault/vault.db "
+CREATE TABLE IF NOT EXISTS secrets (
+  key         TEXT PRIMARY KEY,
+  value       TEXT NOT NULL,
+  category    TEXT,
+  description TEXT,
+  rotated_at  TEXT,
+  created_at  TEXT DEFAULT CURRENT_TIMESTAMP
+);"
+chmod 700 ~/.gtm-vault && chmod 600 ~/.gtm-vault/vault.db
+```
+
+The `chmod` lines matter: `600` means only your user account can read the file. A secrets file readable by every process on the machine is a secrets file in name only.
+
+**Store a key once:**
+
+```bash
+sqlite3 ~/.gtm-vault/vault.db \
+  "INSERT OR REPLACE INTO secrets (key, value, category) VALUES ('APOLLO_API_KEY', 'paste-key-here', 'enrichment');"
+```
+
+**Check a key out into any project** — no `cd` required, it's just a file path:
+
+```bash
+printf 'APOLLO_API_KEY=%s\n' \
+  "$(sqlite3 ~/.gtm-vault/vault.db "SELECT value FROM secrets WHERE key='APOLLO_API_KEY';")" \
+  > .env
+```
+
+This is the part that makes it agent-native. When your coding agent hits a project that needs a key, you don't hunt through old projects or password managers — you say "pull the Apollo key from my vault" and the agent runs the query and pipes the value straight into the gitignored `.env`. The key never appears on screen, never enters the conversation, never touches git.
+
+**Why this beats scattered `.env` files:**
+
+- **One source of truth.** Rotate a key in one place; every project re-pulls the fresh copy on next run.
+- **Downstream `.env` files become disposable.** If a laptop clone or a leaked folder exposes one, the vault is untouched — you rotate one key and move on.
+- **Queryable.** `SELECT key, category FROM secrets` is your integration inventory. The Exercise below stops being a manual audit.
+- **The audit test still applies.** `git log --all -p | grep -i api_key` inside any repo should return nothing — same test as rule 2, now trivially true because keys were never in a repo to begin with.
+
+**The honest caveats.** Values in the vault are plaintext — same trade-off as `.env` files, acceptable on a single-user machine with full-disk encryption (FileVault on macOS, BitLocker on Windows). Know that Time Machine or cloud-sync backups of your home folder carry a copy. If your threat model outgrows this, the upgrade path is the system keychain (rule 3), SQLCipher, or a password-manager CLI like `op` (1Password). But for a solo operator or small team, a locked-down local vault is a real step up from `.env` sprawl — and it's the pattern the [Apollo prospecting starter](../starters/apollo-prospecting/) demos live.
+
+---
+
 ## Exercise: Map Your Tool Connections
 
 Take your current GTM stack and categorize each tool:
@@ -278,6 +340,7 @@ Fill this out for your stack. For each tool, note whether you need to: install a
 - Three patterns: OAuth (MCP servers), CLI (terminal tools), API (Python scripts). Every integration is one of these.
 - MCP is the future — use it when a server exists. CLI is the workhorse for cloud services. API wrappers are your fallback for everything else.
 - API keys live in `.env`, never in code. CLI credentials go in the keychain. No exceptions.
+- Past a few projects, graduate to a local secrets vault: one SQLite file outside every repo, keys checked out into gitignored `.env` files on demand.
 - The decision framework is simple: MCP server exists? Use it. CLI exists? Script it. Neither? Write a Python wrapper.
 
 ---

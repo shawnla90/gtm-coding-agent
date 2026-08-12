@@ -123,6 +123,18 @@ Your key lives in `.env` (gitignored, never committed). The `.env.example` templ
 .gitignore    <- blocks .env and .env.* from being tracked
 ```
 
+### Level Up: Pull the Key from a Local Vault
+
+Pasting keys into `.env` files works for one project. Past a few projects, the better pattern is a **local secrets vault**: one SQLite database in your home directory, outside every git repo, holding all your keys. When a project needs one, your agent queries the vault and pipes the value straight into the gitignored `.env` — the key never appears on screen and never touches version control at either end:
+
+```bash
+printf 'APOLLO_API_KEY=%s\n' \
+  "$(sqlite3 ~/.gtm-vault/vault.db "SELECT value FROM secrets WHERE key='APOLLO_API_KEY';")" \
+  > .env
+```
+
+Rotate a key once in the vault and every project re-pulls the fresh copy. The full build-your-own walkthrough (schema, permissions, caveats) is in [Chapter 04](../../chapters/04-oauth-cli-apis.md#level-up-the-local-secrets-vault).
+
 ## Your Own Source List
 
 Create a CSV with these columns and pass it to the pipeline:

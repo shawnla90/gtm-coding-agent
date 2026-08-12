@@ -6,7 +6,7 @@ You are inside the Apollo prospecting starter. This pipeline turns a source list
 
 Walk through these checks one at a time:
 
-1. **API key**: Check for `.env` in this directory. If missing, tell them to `cp .env.example .env` and paste their Apollo API key (get it at https://app.apollo.io/settings/integrations/api). Stress: `.env` is gitignored and must never be committed.
+1. **API key**: Check for `.env` in this directory. If missing, tell them to `cp .env.example .env` and paste their Apollo API key (get it at https://app.apollo.io/settings/integrations/api). Stress: `.env` is gitignored and must never be committed. If the user keeps keys in a local secrets vault (a SQLite db outside any repo), pull it instead of asking them to paste: query the vault and pipe the value into `.env` without ever printing it — see "The secrets-vault explainer" below.
 
 2. **Google Sheets auth**: Check for `~/.config/gspread/token.json`. If missing, run `python3 setup_oauth.py` and walk them through the OAuth consent flow. They need a Google Cloud project with Sheets + Drive APIs enabled.
 
@@ -49,6 +49,26 @@ python3 score.py
 python3 reveal.py --top 5
 python3 build_sheet.py
 ```
+
+## The secrets-vault explainer (part of the demo)
+
+When demoing this starter, the API-key step IS a teaching moment — don't skip past it. The point to land:
+
+**"The key isn't in this repo, and it isn't in git anywhere. It lives in one local SQLite vault, outside every repository, and the agent checks it out on demand."**
+
+Demo flow:
+
+1. Show the key is NOT in the repo: `.env` is gitignored, `git log --all -p | grep -i apollo` returns nothing.
+2. Show where it DOES live: a SQLite db in the home directory (e.g. `~/.gtm-vault/vault.db`) that no git repo contains. List key **names only** — never SELECT values to the screen: `sqlite3 <vault> "SELECT key, category FROM secrets;"`
+3. Pull it live, silently — query piped straight into `.env` so the value never appears on screen or in the conversation:
+   ```bash
+   printf 'APOLLO_API_KEY=%s\n' "$(sqlite3 <vault> "SELECT value FROM secrets WHERE key='APOLLO_API_KEY';")" > .env
+   ```
+4. Verify without revealing: load with dotenv, print only a boolean and length, then smoke-test with the FREE `organizations/enrich` endpoint (0 credits).
+
+Talk track: "Git is for code I want to share and track. Secrets are the one thing I never want shared or tracked — so they live in the opposite place. One vault, outside version control; every project's `.env` is a disposable copy the agent regenerates on demand. Rotate once, every project picks it up."
+
+Hygiene to mention (and check): vault file is `chmod 600`, its directory `chmod 700`; values are plaintext, so full-disk encryption is the backstop; backups of the home folder carry a copy. Full walkthrough: `chapters/04-oauth-cli-apis.md`, "Level Up: The Local Secrets Vault".
 
 ## Data safety
 
