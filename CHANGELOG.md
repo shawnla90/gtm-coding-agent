@@ -4,6 +4,21 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.8.0] - 2026-08-12
+
+The Apollo starter learns to grow the list itself. `waterfall.py` expands a source list with lookalike companies through gated searches that drain from deepest intent to shallowest — job postings for the pain, fresh funding, tech-stack twins, then plain firmographics — so every company arrives tagged with why it made the list. Apollo does not expose buying intent through the API; the gate tag is the intent layer you build yourself.
+
+### Added
+
+- **`waterfall.py`:** gated lookalike expansion to a target list size. Gates: T0 external evidence (`--clearbox` CSV), T1 hiring-for-the-pain (job titles + posting recency), T2 fresh funding (amount window as a round-stage proxy), T3 tech-stack twins (verified technology UIDs), T4 firmographic fingerprint. Flags: `--target`, `--double` (target = seed-list size), `--seed`, `--dry-run` (per-gate market sizing, writes nothing). Output is `init_db.py`-compatible, so it feeds the existing expand → score → reveal → sheet pipeline directly.
+- **`waterfall_config.example.json`:** copy to the gitignored `waterfall_config.json` and tune to your ICP. Optional per-gate `cap` keeps one deep gate from filling the whole list, so the output stays a mix of intent tiers.
+- **`search_companies()`** in the starter's Apollo client (`mixed_companies/search` — company search, no credits drawn).
+- **Bonus columns:** per-company `intent_strength` (populates when the plan carries intent), six-month headcount growth, and printed revenue land in the output when Apollo returns them.
+
+### Fixed
+
+- **Staffing-agency noise in job-posting gates:** staffing/recruiting firms post roles for their clients and would otherwise flood any hiring gate; they are dropped by NAICS prefix (`5613`, `541612` by default, configurable).
+
 ## [0.7.2] - 2026-08-11
 
 The API-key story now goes past "put it in `.env`": the curriculum teaches the local secrets vault — one SQLite database outside every git repository, from which coding agents check keys out into gitignored `.env` files on demand. The Apollo starter demos the pattern live.

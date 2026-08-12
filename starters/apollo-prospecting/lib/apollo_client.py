@@ -69,6 +69,14 @@ def enrich_company(domain: str) -> dict | None:
     return post("organizations/enrich", {"domain": domain})
 
 
+def search_companies(page: int = 1, per_page: int = 100, **filters) -> dict:
+    """mixed_companies/search -- FREE (0 credits). Returns the raw response
+    dict with 'organizations' and 'pagination' keys."""
+    body = {"page": page, "per_page": per_page}
+    body.update(filters)
+    return post("mixed_companies/search", body) or {}
+
+
 def match_person(first_name: str, last_name: str = None,
                  domain: str = None, title: str = None,
                  apollo_id: str = None) -> dict | None:

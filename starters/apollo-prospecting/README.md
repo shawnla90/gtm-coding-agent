@@ -101,6 +101,46 @@ Renders the scored data as a multi-tab Google Sheet:
 
 Rebuilds in place by sheet ID so the link never changes on a re-run.
 
+## Waterfall: Grow the List with Intent Gates
+
+`waterfall.py` takes the company list you already have and grows it with lookalikes until it hits a target size -- draining search gates from deepest intent to shallowest, so every new company arrives tagged with **why** it made the list.
+
+Apollo does not expose its buying-intent (Bombora topic) data through the API. The gate tag is the intent layer you build yourself, from behavior the API does expose:
+
+| Gate | Signal | Why it means intent |
+|------|--------|---------------------|
+| T0 | External evidence (e.g. a Reddit buyer-signal export) | Someone at the company is asking about the problem in public |
+| T1 | Hiring for the pain | Job postings for the roles you configure = budget + urgency |
+| T2 | Fresh funding | Latest round inside your amount window = money to spend |
+| T3 | Tech-stack twins | Runs the tools your best accounts run |
+| T4 | Firmographic lookalike | Right size, industry, geo -- fits the profile, no behavior signal yet |
+
+```bash
+# 1. Configure your ICP (the config is gitignored -- your ICP stays local)
+cp waterfall_config.example.json waterfall_config.json
+# Edit: industries, employee ranges, hiring titles, funding window, tech UIDs
+
+# 2. Size the market per gate before committing to anything
+python3 waterfall.py --target 150 --dry-run
+
+# 3. Fill the list, deepest intent first
+python3 waterfall.py --target 150
+python3 waterfall.py --seed my_list.csv --double         # target = 2x your list
+python3 waterfall.py --clearbox evidence.csv --target 150  # seed T0 from evidence
+
+# 4. Feed it straight into the pipeline
+python3 init_db.py waterfall_output.csv
+```
+
+Details that matter in practice:
+
+- **Per-gate caps.** A deep gate with thousands of matches would fill the whole list; an optional `"cap"` per gate in the config keeps the mix (e.g. 60/40/30, remainder from T4).
+- **Staffing-agency filter.** Job-posting gates attract staffing and recruiting firms posting roles for their clients. They're dropped by NAICS prefix (`5613`, `541612` by default).
+- **Bonus columns.** Search responses carry Apollo's per-company `intent_strength`, six-month headcount growth, and printed revenue -- they land in the output when present.
+- **Cost.** Every gate query is a company search; reveals are the step that draws credits, later in the pipeline, and the scripts print what they're about to spend first.
+
+Output: `waterfall_output.csv` (gitignored) with `init_db.py`-compatible columns plus `gate`, `gate_evidence`, `apollo_intent`, `headcount_growth_6mo`, `revenue`.
+
 ## What Costs Credits (and What Does Not)
 
 | Endpoint | Cost | What you get |

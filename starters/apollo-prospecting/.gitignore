@@ -1,6 +1,8 @@
 .env
 .env.*
 !.env.example
+waterfall_config.json
+waterfall_output.csv
 *.pyc
 __pycache__/
 data/*.db

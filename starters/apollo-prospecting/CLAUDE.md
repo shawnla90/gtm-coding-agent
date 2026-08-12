@@ -40,6 +40,18 @@ init_db.py -> expand.py -> score.py -> reveal.py -> build_sheet.py
 
 The key teaching point: score first using free availability flags, then only reveal the top-ranked contacts. This is the "score first, reveal the winners" pattern.
 
+## Waterfall (lookalike expansion with intent gates)
+
+On "waterfall", "grow the list", "lookalike expansion", or "intent gates": `waterfall.py` grows the source list with lookalike companies until it hits `--target`, draining gates from deepest intent to shallowest. Every company comes out tagged with the gate it passed -- that tag is the user's self-built intent layer (Apollo does not expose buying intent through the API).
+
+```
+T0 external evidence -> T1 hiring for the pain -> T2 fresh funding -> T3 tech-stack twins -> T4 firmographic
+```
+
+Setup: `cp waterfall_config.example.json waterfall_config.json` and tune it to THEIR ICP (industries, employee ranges, hiring titles, funding window, technology UIDs). The real config and `waterfall_output.csv` are gitignored -- never commit either. Verify technology UIDs live before writing them into a config (search with one UID, check the count is nonzero).
+
+Run order: `--dry-run` first to show per-gate market size, then the real run, then `python3 init_db.py waterfall_output.csv` to feed the standard pipeline. Gate queries are company searches (`mixed_companies/search`); per-gate `"cap"` values keep one deep gate from filling the whole list; staffing/recruiting noise is dropped by NAICS prefix.
+
 ## Single-company demo
 
 For a live demo, run one company at a time:

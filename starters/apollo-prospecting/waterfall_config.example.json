@@ -1,0 +1,30 @@
+{
+  "_comment": "Copy to waterfall_config.json (gitignored) and tune to YOUR ICP. Technology UIDs must be valid Apollo UIDs -- verify one first: apollo companies search --technology <uid> --per-page 1. Funding is an amount proxy for round stage (the API has no stage filter). Optional per-gate 'cap' limits how many companies one gate may contribute -- without caps, a deep gate with thousands of matches fills the whole list and the shallower gates never fire.",
+  "target": 50,
+  "fingerprint": {
+    "industries": ["information technology & services", "computer software"],
+    "employees": ["51,200", "201,500", "501,1000"],
+    "locations": ["united states"]
+  },
+  "gates": {
+    "T1": {
+      "hiring_for": ["Sales Development", "Revenue Operations", "Demand Generation"],
+      "job_posted_days": 60,
+      "cap": 20
+    },
+    "T2": {
+      "funding_min": 10000000,
+      "funding_max": 200000000,
+      "funding_months": 24,
+      "cap": 15
+    },
+    "T3": {
+      "technologies": ["hubspot", "salesforce"],
+      "cap": 10
+    }
+  },
+  "exclude": {
+    "_comment": "NAICS prefixes to drop. 5613 = staffing/recruiting (they post jobs FOR clients, the classic job-posting-gate false positive), 541612 = HR consulting.",
+    "naics_prefixes": ["5613", "541612"]
+  }
+}
