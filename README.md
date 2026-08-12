@@ -56,6 +56,7 @@ gtm-coding-agent/
 │   └── reddit-agency/                     #   11-view Sheet + guided brief + multi-account scorecard
 │
 ├── starters/                              # runnable starter folders (CLI + data)
+│   ├── apollo-prospecting/                #   Apollo waterfall: 5 intent gates → color-coded sheet (v0.8.0)
 │   ├── reddit-buyer-signals/              #   Reddit signals + GEO/competitor/unmask/digest (Ch 18-19)
 │   ├── hubspot-landing-engine/            #   brief → subagent columns → HubSpot CMS DRAFT pages (Ch 16)
 │   ├── market-scoring-sheet/              #   CSV → color-coded 1-5 scored Google Sheet
@@ -141,7 +142,7 @@ gtm-coding-agent/
 | **Templates** | **Prompts** |
 | CLAUDE.md variants, voice DNA, content formats, partner structures. Copy into your projects, fill in the blanks. | 6 battle-tested AI prompts for ICP building, positioning, competitor analysis, signal mapping, email sequences, and content repurposing. |
 | **Starter Projects** | |
-| Nine forkable starters. **Reddit buyer signals** (Ch 18-19) preserves Clearbox dispositions and exact permalinks, measures Exa retrieval without calling it an AI citation, and enriches only exact company domains self-disclosed on the author's Reddit profile; search, thread, and handle matches stay in manual review. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. **CRM Automation** (Ch 13) re-enriches 60-day-old HubSpot deals and writes the verdict back as custom properties. **Podcast to Shorts** (Ch 20) turns one recording into captioned vertical clips staged as drafts, cut against a word-timestamped transcript. **Student GTM** (Ch 21) interviews a student and scaffolds their own repo, weekly recording loop, gotchas log, and campus client offer. Deploy any of them in minutes. | |
+| Ten forkable starters. **Apollo prospecting** (v0.8.0) grows a seed list through five intent gates, deepest intent first, and ships a color-coded Google Sheet; searches are free, credits only on reveal. **Reddit buyer signals** (Ch 18-19) preserves Clearbox dispositions and exact permalinks, measures Exa retrieval without calling it an AI citation, and enriches only exact company domains self-disclosed on the author's Reddit profile; search, thread, and handle matches stay in manual review. **Signals dashboard** (Ch 11) is Next.js + Supabase with 5 operational pages. **Nexus Intel** (Ch 12) is a Clay-companion intel engine with SQLite-in-git, d3-force graph, Apify CLI scrapers, and Claude subprocess analysis. **CRM Automation** (Ch 13) re-enriches 60-day-old HubSpot deals and writes the verdict back as custom properties. **Podcast to Shorts** (Ch 20) turns one recording into captioned vertical clips staged as drafts, cut against a word-timestamped transcript. **Student GTM** (Ch 21) interviews a student and scaffolds their own repo, weekly recording loop, gotchas log, and campus client offer. Deploy any of them in minutes. | |
 
 ---
 
