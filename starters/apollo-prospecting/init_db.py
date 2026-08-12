@@ -31,20 +31,26 @@ CREATE TABLE IF NOT EXISTS expanded_contacts (
   source_domain TEXT,
   company       TEXT,
   domain        TEXT,
+  apollo_id     TEXT,
   first_name    TEXT,
+  last_name     TEXT,
   title         TEXT,
   persona       TEXT,
   email_status  TEXT,
   has_phone     TEXT,
+  email         TEXT,
+  phone         TEXT,
   linkedin_url  TEXT,
   city          TEXT,
+  state         TEXT,
+  country       TEXT,
   title_score   REAL,
   reachability  TEXT,
   composite_score REAL,
   rank          INTEGER
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_expanded_name_domain_title
-  ON expanded_contacts(first_name, domain, title);
+  ON expanded_contacts(first_name, last_name, domain, title);
 """
 
 

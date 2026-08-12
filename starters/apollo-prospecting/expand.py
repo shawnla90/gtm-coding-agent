@@ -70,10 +70,16 @@ def expand_domain(con, domain):
     if not people:
         return 0
 
+    sample = people[0]
+    print(f"  [diag] API fields on first result: {sorted(sample.keys())}")
+    for field in ("last_name", "linkedin_url", "city", "state", "country"):
+        print(f"  [diag] {field} = {repr(sample.get(field))}")
+
     inserted = 0
     for p in people:
         title = p.get("title", "")
         first_name = p.get("first_name", "")
+        last_name = p.get("last_name") or p.get("last_name_obfuscated") or ""
         phones = p.get("phone_numbers") or []
         has_phone = bool(
             p.get("has_direct_phone") == "Yes"
@@ -85,10 +91,11 @@ def expand_domain(con, domain):
 
         cur = con.execute(
             "INSERT OR IGNORE INTO expanded_contacts "
-            "(source_domain, company, domain, first_name, title, persona, "
+            "(source_domain, company, domain, apollo_id, first_name, last_name, title, persona, "
             " email_status, has_phone, linkedin_url, city) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?)",
-            (domain, org_name, domain, first_name, title, "",
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            (domain, org_name, domain, p.get("id", ""),
+             first_name, last_name, title, "",
              es, "yes" if has_phone else "no",
              p.get("linkedin_url", ""), p.get("city", "")),
         )

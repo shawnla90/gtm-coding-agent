@@ -67,3 +67,19 @@ def search_people(org_ids: list = None, titles: list = None,
 
 def enrich_company(domain: str) -> dict | None:
     return post("organizations/enrich", {"domain": domain})
+
+
+def match_person(first_name: str, last_name: str = None,
+                 domain: str = None, title: str = None,
+                 apollo_id: str = None) -> dict | None:
+    body = {"first_name": first_name, "reveal_personal_emails": False}
+    if last_name:
+        body["last_name"] = last_name
+    if domain:
+        body["domain"] = domain
+    if title:
+        body["title"] = title
+    if apollo_id:
+        body["id"] = apollo_id
+    data = post("people/match", body)
+    return (data or {}).get("person")

@@ -21,6 +21,7 @@ python3 setup_oauth.py
 # 4. Run the pipeline
 bash run.sh                    # uses sample_contacts.csv (25 companies)
 bash run.sh my_list.csv        # use your own source list
+bash run.sh --no-reveal        # free search data only (no credits spent)
 ```
 
 ## The Pipeline
@@ -31,6 +32,8 @@ init_db.py    CSV -> SQLite (source_contacts table)
 expand.py     Apollo API: companies -> decision makers (FREE)
      |
 score.py      Title relevance x reachability tier scoring
+     |
+reveal.py     Apollo API: reveal emails, phones, LinkedIn (PAID)
      |
 build_sheet.py  SQLite -> 4-tab Google Sheet via sheet_engine
 ```
@@ -51,6 +54,18 @@ python3 expand.py --domains mixpanel.com   # one company (demo mode)
 ### score.py
 
 Scores every candidate with a composite: title relevance (additive keyword weights) multiplied by a reachability tier multiplier.
+
+### reveal.py
+
+Reveals actual emails, phone numbers, LinkedIn URLs, full names, and cities for ranked contacts via Apollo's `people/match` endpoint. Costs 1 export credit per person.
+
+```bash
+python3 reveal.py              # reveal all ranked contacts
+python3 reveal.py --top 20     # reveal only the top 20 by score
+python3 reveal.py --dry-run    # preview the cost without spending credits
+```
+
+Emails and phones are obfuscated in the spreadsheet output for privacy.
 
 | Keyword | Points |
 |---------|--------|
@@ -79,9 +94,9 @@ Picks top 5 per company with persona diversity (at least one from sales, marketi
 
 Renders the scored data as a multi-tab Google Sheet:
 
-- **Dashboard** -- KPIs: source contacts, expansion count, tier distribution, persona mix
+- **Dashboard** -- KPIs: source contacts, expansion count, tier distribution, persona mix, cost guide
 - **Source List** -- your original contacts
-- **Buying Committee** -- ranked + color-coded by tier and persona
+- **Buying Committee** -- ranked + color-coded by tier, persona, and cost (FREE / $ / $$). Columns: rank, composite_score, reachability, cost, full_name, title, persona, company, domain, email_status, has_phone, linkedin_url, city, title_score
 - **Scoring Model** -- the weights table for reference
 
 Rebuilds in place by sheet ID so the link never changes on a re-run.
@@ -90,12 +105,13 @@ Rebuilds in place by sheet ID so the link never changes on a re-run.
 
 | Endpoint | Cost | What you get |
 |----------|------|-------------|
-| `mixed_people/api_search` | **Free** | Names, titles, email/phone availability FLAGS |
+| `mixed_people/api_search` | **Free** | First names, obfuscated last names, titles, email/phone availability FLAGS |
 | `organizations/enrich` | **Free** | Company info by domain |
-| Email reveal | 1 credit | Actual email address |
-| Mobile reveal | Mobile credit | Direct-dial phone number |
+| Email reveal | 1 export credit | Actual email address |
+| Mobile reveal | 1 mobile credit | Direct-dial phone number |
+| Full enrichment | 1 credit | Full last name, LinkedIn URL, city, state |
 
-The expansion play scores contacts using the free availability flags. Build the full ranked list first, then only reveal the winners. 25 companies with 5 contacts each = 125 scored contacts at zero credit cost. Then reveal only the top 20 by composite score. That is 20 credits instead of 125.
+The output sheet marks every row: **FREE** (search data only), **$** (one reveal available), or **$$** (both email + phone available). Score first using the free availability flags, then only reveal the winners. 25 companies with 5 contacts each = 125 scored contacts at zero credit cost. Reveal only the top 20 by composite score = 20 credits instead of 125.
 
 ## Protect Your API Key
 

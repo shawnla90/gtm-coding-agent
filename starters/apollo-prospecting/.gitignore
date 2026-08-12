@@ -4,5 +4,7 @@
 *.pyc
 __pycache__/
 data/*.db
+data/*.db-shm
+data/*.db-wal
 data/sheet_url.txt
 .DS_Store

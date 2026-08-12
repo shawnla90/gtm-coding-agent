@@ -46,8 +46,9 @@ def main():
 
     # --- Tab 3: Buying Committee (ranked only) ---
     exp_cur = con.execute(
-        "SELECT composite_score, rank, reachability, persona, first_name, title, "
-        "company, domain, title_score, email_status, has_phone, city "
+        "SELECT composite_score, rank, reachability, persona, first_name, last_name, "
+        "title, company, domain, title_score, email_status, has_phone, "
+        "email, phone, linkedin_url, city "
         "FROM expanded_contacts WHERE rank IS NOT NULL "
         "ORDER BY composite_score DESC, company"
     )
@@ -55,6 +56,38 @@ def main():
     exp_df = pd.DataFrame([dict(zip(exp_cols, r)) for r in exp_cur.fetchall()], columns=exp_cols)
     for c in exp_df.columns:
         exp_df[c] = exp_df[c].fillna("").astype(str)
+
+    exp_df["full_name"] = (exp_df["first_name"].str.strip() + " " + exp_df["last_name"].str.strip()).str.strip()
+
+    def _obfuscate_email(email):
+        if not email or "@" not in email:
+            return email
+        local, domain = email.rsplit("@", 1)
+        if len(local) <= 2:
+            return f"{local[0]}***@{domain}"
+        return f"{local[0]}***{local[-1]}@{domain}"
+
+    def _obfuscate_phone(phone):
+        if not phone:
+            return phone
+        digits = "".join(c for c in phone if c.isdigit())
+        if len(digits) < 4:
+            return "***"
+        return f"+{digits[:1]}-***-***-{digits[-4:]}"
+
+    exp_df["email"] = exp_df["email"].apply(_obfuscate_email)
+    exp_df["phone"] = exp_df["phone"].apply(_obfuscate_phone)
+
+    def _cost(row):
+        has_email = row.get("email_status") in ("verified", "available")
+        has_phone = row.get("has_phone") == "yes"
+        if has_email and has_phone:
+            return "$$"
+        if has_email or has_phone:
+            return "$"
+        return "FREE"
+
+    exp_df["cost"] = exp_df.apply(_cost, axis=1)
 
     # --- KPIs ---
     total_source = len(src_df)
@@ -101,12 +134,17 @@ def main():
             {"kind": "bullet", "label": "Yellow (T3) = catch-all. Test before sending."},
             {"kind": "bullet", "label": "Grey (T4) = no verified channel yet. LinkedIn first."},
             {"kind": "blank", "label": ""},
+            {"kind": "section", "label": "COST GUIDE"},
+            {"kind": "bullet", "label": "FREE = names, titles, email/phone availability flags (0 credits)"},
+            {"kind": "bullet", "label": "$ = one paid reveal available (email OR phone)"},
+            {"kind": "bullet", "label": "$$ = both email + phone available to reveal"},
             {"kind": "bullet", "label": "Score first, reveal the winners. The search is free; the reveal costs credits."},
         ],
     }
 
     TIER_MAP = {"T1": GREEN, "T2": BLUE, "T3": YELLOW, "T4": GREY}
     PERSONA_MAP = {"sales": GREEN, "marketing": BLUE, "product": "D5A6E6"}
+    COST_MAP = {"FREE": GREEN_LT, "$": YELLOW, "$$": "F4A460"}
 
     source_tab = {
         "title": f"Source List ({total_source})",
@@ -119,14 +157,18 @@ def main():
     committee_tab = {
         "title": f"Buying Committee ({total_expanded})",
         "df": exp_df,
-        "cols": ["composite_score", "rank", "reachability", "persona", "first_name",
-                 "title", "company", "domain", "title_score", "email_status", "has_phone", "city"],
-        "widths": {"first_name": 120, "title": 240, "company": 160, "domain": 160, "city": 120},
+        "cols": ["rank", "composite_score", "reachability", "cost", "full_name",
+                 "title", "persona", "company", "domain",
+                 "email", "phone", "linkedin_url", "city", "title_score"],
+        "widths": {"full_name": 180, "title": 240, "company": 160, "domain": 160,
+                   "city": 120, "cost": 80, "email": 200, "phone": 140,
+                   "linkedin_url": 240},
         "numeric": ["composite_score", "rank", "title_score"],
         "cf": [
             {"col": "composite_score", "type": "grad", "stops": (0, 80, 200)},
             {"col": "reachability", "type": "map", "map": TIER_MAP},
             {"col": "persona", "type": "map", "map": PERSONA_MAP},
+            {"col": "cost", "type": "map", "map": COST_MAP},
         ],
     }
 

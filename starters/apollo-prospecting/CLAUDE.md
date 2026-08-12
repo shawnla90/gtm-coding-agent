@@ -19,13 +19,14 @@ Walk through these checks one at a time:
 ## The pipeline
 
 ```
-init_db.py -> expand.py -> score.py -> build_sheet.py
+init_db.py -> expand.py -> score.py -> reveal.py -> build_sheet.py
 ```
 
 - `init_db.py` loads the CSV into SQLite at `data/apollo.db`
 - `expand.py` calls Apollo API (FREE -- 0 credits) to find decision makers
 - `score.py` applies title_score x reachability_mult, ranks top 5 per company
-- `build_sheet.py` renders a 4-tab Google Sheet via the vendored sheet_engine
+- `reveal.py` reveals actual emails, phones, LinkedIn, full names (PAID -- 1 credit per person). Supports `--top N`, `--dry-run`. Skip with `bash run.sh --no-reveal`.
+- `build_sheet.py` renders a 4-tab Google Sheet via the vendored sheet_engine. Emails and phones are obfuscated.
 
 ## API cost breakdown
 
@@ -45,6 +46,7 @@ For a live demo, run one company at a time:
 ```bash
 python3 expand.py --domains mixpanel.com
 python3 score.py
+python3 reveal.py --top 5
 python3 build_sheet.py
 ```
 
@@ -53,4 +55,4 @@ python3 build_sheet.py
 - `.env` is gitignored. If `git log --all -p | grep APOLLO` returns anything, stop and fix.
 - `data/apollo.db` is gitignored. Never commit the database.
 - `sample_contacts.csv` has first names only (no last names, emails, or phone numbers).
-- Expansion results in the database show first names and availability FLAGS, not actual emails or phone numbers.
+- Expansion results in the database show first names, obfuscated last names (e.g., "Mo***m"), and availability FLAGS — not actual emails, phone numbers, or LinkedIn URLs. Full contact data requires paid enrichment/reveal.
