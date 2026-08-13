@@ -9,7 +9,7 @@ set -e
 cd "$(dirname "$0")"
 PY="${PYTHON:-python3}"
 
-CSV="${1:-sample_contacts.csv}"
+CSV="sample_contacts.csv"
 NO_REVEAL=false
 for arg in "$@"; do
   case "$arg" in
