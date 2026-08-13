@@ -66,7 +66,7 @@ cd gtm-coding-agent/starters/apollo-prospecting
 
 Go to [Apollo Settings > Integrations > API](https://app.apollo.io/settings/integrations/api) and copy your key.
 
-### 3. Create your .env file
+### 3A. Create your .env file (quick start)
 
 ```bash
 cp .env.example .env
@@ -74,6 +74,50 @@ cp .env.example .env
 ```
 
 > ⚠️ Your key lives in `.env`, which is gitignored. It never touches version control. The test: `git log --all -p | grep APOLLO` should return nothing.
+
+This is all the repo requires — the scripts read `APOLLO_API_KEY` from the environment or `.env` and nothing else. If you're setting up for the first time, do 3A and move on. Come back to 3B when you have keys in more than one project.
+
+### 3B. Level up: pull the key from a local secrets vault (more secure)
+
+The problem with pasting keys: every project gets its own copy, and when you rotate the key you have to remember every place it lives. The fix is one SQLite vault **outside every git repo**, holding all your keys. Each project's `.env` becomes a disposable copy your coding agent regenerates on demand.
+
+One-time vault setup:
+
+```bash
+mkdir -p ~/.gtm-vault && chmod 700 ~/.gtm-vault
+sqlite3 ~/.gtm-vault/vault.db \
+  "CREATE TABLE IF NOT EXISTS secrets (key TEXT PRIMARY KEY, value TEXT, category TEXT);"
+chmod 600 ~/.gtm-vault/vault.db
+sqlite3 ~/.gtm-vault/vault.db \
+  "INSERT OR REPLACE INTO secrets VALUES ('APOLLO_API_KEY', 'paste-your-key-here', 'apollo');"
+```
+
+Then in any project that needs the key, regenerate `.env` without the value ever appearing on screen:
+
+```bash
+printf 'APOLLO_API_KEY=%s\n' \
+  "$(sqlite3 ~/.gtm-vault/vault.db \
+     "SELECT value FROM secrets WHERE key='APOLLO_API_KEY';")" > .env
+```
+
+Verify without revealing — print only that it loaded and how long it is:
+
+```bash
+python3 -c "
+from dotenv import load_dotenv; import os
+load_dotenv()
+k = os.getenv('APOLLO_API_KEY','')
+print('key loaded:', bool(k), '| length:', len(k))"
+```
+
+Why this is the better pattern:
+
+- **Git is for code you want shared and tracked. Secrets are the opposite** — so they live in the opposite place.
+- **Rotate once, every project picks it up.** Update the vault row, regenerate each `.env` on demand.
+- **Your agent can fetch keys silently.** Ask it to "pull the Apollo key from the vault" — the value pipes straight into `.env` and never appears in the conversation or on screen.
+- **List key names, never values.** To see what's in the vault: `sqlite3 ~/.gtm-vault/vault.db "SELECT key, category FROM secrets;"`
+
+Hygiene: the vault file is `chmod 600`, its directory `chmod 700`, and values are plaintext — so full-disk encryption (FileVault) is the backstop, and remember home-folder backups carry a copy. Full walkthrough: Chapter 04, "Level Up: The Local Secrets Vault."
 
 ### 4. Install dependencies
 
@@ -202,6 +246,8 @@ The verification test:
 git log --all -p | grep APOLLO
 # Should return nothing. If it does, rotate your key immediately.
 ```
+
+Running the vault pattern from Step 3B? Then `.env` is just a disposable copy — the real key lives in `~/.gtm-vault/vault.db`, outside every repo, and this test should still return nothing.
 
 ---
 
