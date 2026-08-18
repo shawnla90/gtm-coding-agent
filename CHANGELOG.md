@@ -4,6 +4,23 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.9.0] - 2026-08-18
+
+The fifth installable skill: the batch reply pass. One gated, ≤18-word suggested-reply template per classified opportunity — the agent drafts, `replies.py check` enforces the hard cap and the slop gate, the human edits and posts. NO-REPLY rows are logged with a reason, never answered. The maintained version lives in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM).
+
+### Added
+
+- **`skills/reply-engine/`** — the ≤18-word binding cap (15–18 target, `wc -w` semantics, `<N>/18` rendered per draft), deterministic GO/REVIEW/NO-REPLY gates with per-op overrides, the `suggested_replies.json` contract, the rules-pinned Suggested Replies sheet tab schema, distilled voice rules, and fictional worked examples with word counts, including a NO-REPLY and an override case.
+- **`starters/reddit-buyer-signals/replies.py`** — the runnable module: `scaffold` (contract from the classified export), `check` (cap + slop + gate validity, nonzero exit), `sheet` (adds only the Suggested Replies tab to an existing sheet), `angles` (feeds `digest.py`).
+
+### Changed
+
+- `skills/README.md` and the README anatomy now index five skills.
+
+### Verification
+
+- Every worked example verified at ≤18 words with `wc -w`; `replies.py check` run green against the examples; `python3 -m compileall` clean on the starter.
+
 ## [0.8.0] - 2026-08-12
 
 The Apollo starter learns to grow the list itself. `waterfall.py` expands a source list with lookalike companies through gated searches that drain from deepest intent to shallowest — job postings for the pain, fresh funding, tech-stack twins, then plain firmographics — so every company arrives tagged with why it made the list. Apollo does not expose buying intent through the API; the gate tag is the intent layer you build yourself.

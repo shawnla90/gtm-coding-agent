@@ -53,7 +53,8 @@ gtm-coding-agent/
 │   ├── clearbox-onboard/                  #   domain → researched Clearbox offer pack + pastable prompt
 │   ├── reddit-onboard/                    #   personalized route through the public playbook → Notion
 │   ├── reddit-engage/                     #   value-first replies, approve-each-one human gate
-│   └── reddit-agency/                     #   11-view Sheet + guided brief + multi-account scorecard
+│   ├── reddit-agency/                     #   11-view Sheet + guided brief + multi-account scorecard
+│   └── reply-engine/                      #   gated ≤18-word reply templates + rules-pinned sheet tab
 │
 ├── starters/                              # runnable starter folders (CLI + data)
 │   ├── apollo-prospecting/                #   Apollo waterfall: 5 intent gates → color-coded sheet (v0.8.0)
