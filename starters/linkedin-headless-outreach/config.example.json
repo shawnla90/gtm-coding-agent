@@ -1,0 +1,14 @@
+{
+  "self_member_id": "PUT-YOUR-MEMBER-ID-HERE",
+  "daily_cr_cap": 30,
+  "daily_msg_cap": 30,
+  "cap_jitter": 8,
+  "wakeup_skip_probability": 0.2,
+  "business_hours": { "days": [1, 2, 3, 4, 5], "start_hour": 8, "end_hour": 20 },
+  "copy": {
+    "cr_note": "{firstName}, building <what you build> for <who it's for>. it <one concrete thing it does>. would value your read. mind connecting?",
+    "msg1_first": "hey {firstName}, been heads-down building <thing>. it <what it does in one sentence>. ran it myself first: <one real number>. curious what you'd make of it.",
+    "msg1_accepted": "thanks {firstName}. <thing> <what it does in one sentence>. ran it myself: <one real number>. want the writeup?",
+    "msg2": "{firstName}, here either way. the full writeup: <link>. curious what you think."
+  }
+}

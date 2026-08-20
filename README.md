@@ -47,7 +47,8 @@ gtm-coding-agent/
 │   ├── 18-reddit-buyer-signals.md          #   Reddit buyer signals + GEO/competitor/content
 │   ├── 19-lead-unmasking-and-slack-digest.md  #  company-evidence gate + client packs + digest
 │   ├── 20-podcast-to-shorts.md             #   one recording → captioned vertical clip drafts
-│   └── 21-student-gtm.md                   #   campus network → public GTM track record
+│   ├── 21-student-gtm.md                   #   campus network → public GTM track record
+│   └── 22-headless-linkedin-outreach.md    #   self-hosted Playwright outreach + SQLite ledger
 │
 ├── skills/                                # installable Claude Code skills (the Reddit motion)
 │   ├── clearbox-onboard/                  #   domain → researched Clearbox offer pack + pastable prompt
@@ -137,7 +138,7 @@ gtm-coding-agent/
 | | |
 |---|---|
 | **Interactive Onboarding** | **Educational Chapters** |
-| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 21 chapters from "what is a coding agent" to "decode competitor ad strategy via the public Meta Ad Library." Read in order or jump to what you need. |
+| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 22 chapters from "what is a coding agent" to "decode competitor ad strategy via the public Meta Ad Library." Read in order or jump to what you need. |
 | **GTM-OS Skeleton** | **Modes** |
 | A working folder structure for ICP, positioning, segments, campaigns, and content. Fork it. Fill it in. Run GTM from it. | 5 personas: solo founder, agency, single-client, ABM outbound, student. Each mode configures the skeleton differently. |
 | **Templates** | **Prompts** |
@@ -153,7 +154,7 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 
 **[The GTM Coding Agent Playbook on shawnos.ai](https://shawnos.ai/guide/gtm-coding-agent)**
 
-21 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
+22 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
 
 ---
 
@@ -274,6 +275,7 @@ New chapters and starters ship as tagged **[Releases](https://github.com/shawnla
 | 19 - Company Evidence, Client Packs & Digest | Separate direct Reddit-profile disclosure from candidates and lookup errors, enrich only verified companies, then deliver stable client surfaces and the daily queue |
 | 20 - Podcast to Shorts | Turn one recording into captioned vertical clips staged as drafts, cut against a word-timestamped transcript |
 | 21 - Student GTM | Build a public go-to-market track record in one semester with no budget, no title, and the campus network you already have |
+| 22 - Headless LinkedIn Outreach | Run outreach from your own account with a Playwright sender, a SQLite ledger, and a read-only observer — and see why the connection note, not the follow-up, is the campaign |
 
 ---
 

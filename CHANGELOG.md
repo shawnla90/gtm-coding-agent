@@ -4,6 +4,23 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.10.0] - 2026-08-20
+
+Chapter 22 and its starter: headless LinkedIn outreach from your own account. A three-week campaign against 1,297 GTM engineers — 601 connection requests, 299 accepted (49.8%), 35 replies — where 31 of the 35 replies came from the connection note alone, before any follow-up message existed. The chapter is the build, the full funnel, and the double-send incident that ended the campaign; the starter ships the fix.
+
+### Added
+
+- **`chapters/22-headless-linkedin-outreach.md`** — the build (dedicated Chrome profile, SQLite ledger, launchd timer, read-only reconcile observer), the copy, the verified funnel, and "The Re-Hit That Killed It": a write-after-send race that let a crash re-send a message, invisible to single-value status columns afterward. Frames the ToS/ban risk plainly — own account, own call, not a knock on managed tools.
+- **`starters/linkedin-headless-outreach/`** — runnable kit: `build_ledger.py` (CSV → ledger + `attempts` table), `login.js`, `run.js` (connect/messages/auto with **claim-before-click**: rows marked `sending` before the browser acts, stranded for review on crash instead of re-armed, plus date-seeded daily-cap wobble and random wake-up skips so the cadence stops being a metronome), `reconcile.js` (read-only, exact-slug + participant-URL-confirmed reply evidence with SHA-256), `ledger_status.js`, `config.example.json`, and macOS launchd templates.
+
+### Changed
+
+- `README.md` (chapter tree, What You'll Learn table, chapter counts) and `CLAUDE.md` (learning path, ongoing-behavior trigger, reference paths) now index 22 chapters and the new starter.
+
+### Verification
+
+- `node --check` clean on all four scripts; `python3 -m py_compile` clean on `build_ledger.py`; `plutil -lint` clean on both plists; `config.example.json` parses. Every funnel figure re-queried against the live ledger on 2026-08-20.
+
 ## [0.9.0] - 2026-08-18
 
 The fifth installable skill: the batch reply pass. One gated, ≤18-word suggested-reply template per classified opportunity — the agent drafts, `replies.py check` enforces the hard cap and the slop gate, the human edits and posts. NO-REPLY rows are logged with a reason, never answered. The maintained version lives in [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM).

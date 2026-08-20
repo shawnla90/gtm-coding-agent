@@ -72,6 +72,7 @@ Recommend 3-5 chapters based on their profile:
 | ABM + dashboard      | 07 → 08 → 11 → 06 → 05 |
 | RevOps / CRM automation | 04 → 07 → 08 → 13 → 05 |
 | Reddit / AI visibility | 04 → 06 → 07 → 08 → 18 → 19 |
+| LinkedIn outreach from your own account | 04 → 05 → 06 → 07 → 22 |
 | Student building a track record | 21 → 02 → 07 → 18 → 09 → 20 → 05 |
 
 Tell them: *"Start with Chapter XX. When you're done, come back and say 'next chapter' and I'll guide you through the next one."*
@@ -93,12 +94,13 @@ When the user returns after setup:
 - **"reddit buyer signals" / "reddit agency" / "client value pack"** → Chapter 18, `skills/reddit-agency/`, and `starters/reddit-buyer-signals/`. Preserve the Clearbox `id`, `kind`, and exact Reddit URL; add optional Freckle, Base Loop, or Clay analysis; and route the complete eleven-view Sheet plus guided Notion build to [ClearboxGTM](https://github.com/shawnla90/ClearboxGTM).
 - **"unmask the leads" / "company evidence" / "slack digest"** → Chapter 19 and `starters/reddit-buyer-signals/` (`unmask.py`, `digest.py`). Use `--profile` for the evidence-bearing lookup. Only exact company-domain evidence on the author's Reddit profile is automatically enrichment-eligible; search, thread, social, and handle matches require manual review. Render reporting automatically, but keep public Reddit action and completion human-authorized.
 - **"podcast to shorts" / "clip this recording"** → Chapter 20 and `starters/podcast-shorts/`. Take one recording to a word-timestamped transcript, pick the cuts, render captioned vertical clips, and stage them as drafts.
+- **"linkedin outreach" / "connection requests" / "headless linkedin" / "linkedin ledger"** → Chapter 22 and `starters/linkedin-headless-outreach/`. A self-hosted Playwright sender on the user's own account, a SQLite ledger with claim-before-click writes, and a read-only reconcile observer. Always surface the ToS/ban risk neutrally — it's their account and their call — and steer measurement (`reconcile.js`, run from day one) before volume. Never present it as a substitute-for-or-attack-on managed tools like HeyReach.
 - **"student gtm" / "I'm a student"** → Chapter 21 and `starters/student-gtm/`. Run the interview, scaffold their own build-in-public repo, and set the weekly loop: build for a campus client, record it, ship it, write the gotchas, publish.
 - **"apollo prospecting" / "apollo workflow" / "expand buying committee" / "waterfall" / "grow the list"** → `starters/apollo-prospecting/`. Load source contacts from CSV, expand via Apollo API (free), score by title relevance x reachability tier, output to a color-coded Google Sheet. The search is free; the reveal costs credits. Score first, reveal the winners. `waterfall.py` grows the company list itself: gated lookalike searches drain from deepest intent (job postings, funding, tech stack) to plain firmographics, tagging every company with why it made the list — a self-built intent layer.
 
 ## Reference Paths
 
-- Chapters: `chapters/01-*.md` through `chapters/21-*.md`
+- Chapters: `chapters/01-*.md` through `chapters/22-*.md`
 - Mode configs: `modes/*.md`
 - Templates: `templates/{claude-md,voice,content,partner}/`
 - Prompts: `prompts/*.md`
@@ -109,6 +111,7 @@ When the user returns after setup:
 - Podcast-to-shorts starter: `starters/podcast-shorts/` (Chapter 20)
 - Student GTM starter: `starters/student-gtm/` (Chapter 21)
 - Apollo prospecting starter: `starters/apollo-prospecting/`
+- LinkedIn headless outreach starter: `starters/linkedin-headless-outreach/` (Chapter 22)
 - Schema files: `starters/signals-dashboard/schema/`
 - Pipeline scripts: `starters/signals-dashboard/pipeline/`
 

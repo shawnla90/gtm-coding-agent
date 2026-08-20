@@ -1,0 +1,9 @@
+config.json
+pw-profile/
+li_outreach.db
+screenshots/
+.armed
+.run.lock
+*.log
+*.err
+node_modules/
