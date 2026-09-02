@@ -17,6 +17,8 @@ python3 budget.py               # three free calls: pools, phone tokens, endpoin
 bash run.sh                     # sample_contacts.csv, first pass only
 bash run.sh my_list.csv --full  # your list: employment check + second pass
 python3 grade.py --employment both --second-pass   # compare Apollo people/match with Moltsets on employment
+python3 import_graded.py results.csv               # rows graded elsewhere -> same sheet, no API calls
+python3 build_sheet.py --summary-only --share anyone_reader   # a linkable receipt with no contact rows
 ```
 
 Or skip the paste and read the key from a local vault: `export SECRETS_DB=~/.gtm-vault/vault.db`.
@@ -27,13 +29,17 @@ Or skip the paste and read the key from a local vault: `export SECRETS_DB=~/.gtm
 init_db.py     CSV -> SQLite (short schema or a raw Apollo export)
      |
 grade.py       reverse_linkedin_lookup (still there? + graded email) -> reverse_email_lookup (A-F)
-               -> on 404/F: search_people by name + DOMAIN, accept same-domain A/B only
+               -> on 404/F: search_business_profile_by_name by name + DOMAIN, accept same-domain A/B only
                -> LinkedIn-only rows: linkedin_to_best_email
                -> optional capped linkedin_to_mobile_phone for dead-email rows
+               -> if the list carried a verifier verdict: a delta class per row (how Moltsets moved it)
      |
 score.py       title relevance x grade multiplier, top 3 sendable per company
      |
-build_sheet.py 9-tab color-coded Google Sheet with a dashboard and a usage ledger
+build_sheet.py 11-tab color-coded Google Sheet with a dashboard, a usage ledger, and (with a verifier)
+               the Disagreements and Verifier vs Moltsets tabs
+
+import_graded.py   rows graded somewhere else -> the same database, so score.py + build_sheet.py run on them
 ```
 
 ### Grades and what they mean
@@ -73,9 +79,37 @@ Title weights: RevOps 100, Revenue 90, Growth 80, GTM 75, Sales 60, Marketing 55
 - **Route - LinkedIn**: D grades plus everyone the graph never found. The rows other tools throw away.
 - **Review - Hold**: free-mail addresses, A/B on a different domain, job changes.
 - **Suppressed**: the D rows, for the suppression list.
+- **Disagreements** (when your list carried a verifier verdict): every row whose delta class is not agree, not in graph, or no data. The rows worth a human's time, sorted by class then score.
+- **Verifier vs Moltsets** (same condition): the receipts, the verifier-status x Moltsets-outcome matrix, a per-pool table when the list had sending pools, the delta legend with counts, and how to read it.
 - **All Contacts**, **Grading Model** (the weights and meanings), **Moltsets Usage** (your own call ledger by endpoint).
 
-Rebuilds in place by sheet id so the link never changes. Emails and phones are obfuscated unless `--full-emails`.
+Rebuilds in place by sheet id so the link never changes. Emails and phones are obfuscated unless `--full-emails`; `--redact-names` masks last names and LinkedIn slugs for public stills. `--summary-only --share anyone_reader` builds a sheet with the Dashboard and the Verifier vs Moltsets tab and no contact rows: the version you can link to.
+
+## Bring Your Verifier
+
+You already run ZeroBounce (or NeverBounce, MillionVerifier, Bouncer) before a send. Keep doing that. The probe answers whether the mailbox accepts mail, on 100% of rows. Moltsets answers a different question on the rows it has seen: has this address been used, and who is this person today. Put the two side by side and the value is in the disagreements.
+
+If your CSV has a `zb_status`, `zerobounce_status`, `verifier_status`, or `verification_status` column, `init_db.py` picks it up by alias, normalizes the vocabulary to `valid | catch-all | unknown | invalid | do_not_mail | abuse`, and `grade.py` writes one delta class per row. No flag. Optional `pool` and `mx_provider` columns feed the per-pool table.
+
+| Delta class | Meaning | What you do |
+|---|---|---|
+| `agree` | verifier valid, Moltsets A/B on the same address | send first |
+| `molt_upgrades_catchall` | verifier catch-all, Moltsets A/B on observed activity | candidate to leave the isolated pool |
+| `molt_recovers_invalid` | verifier hard-fail, Moltsets found a same-domain A/B address | back into the list under the new address, re-probe first |
+| `molt_corrects_address` | verifier valid or catch-all, Moltsets prefers a different same-domain address | send to the address with activity |
+| `molt_contradicts_invalid` | verifier hard-fail, Moltsets A/B on the exact address | review; re-probe on another day |
+| `molt_grades_unknown` | verifier unknown, Moltsets A/B | send |
+| `molt_downgrades_valid` | verifier valid, Moltsets D | suppress; that row hits a warming mailbox |
+| `confirms_invalid` | both say no | drop from email, keep the person |
+| `molt_catchall` | Moltsets C | low-volume segment |
+| `molt_no_data` | Moltsets F: person known, address never seen | unproven, not bad; verifier's word stands |
+| `person_confirmed_other_email` | person at the listed company, graded address on another domain | informational; verifier's word stands |
+| `cross_domain_review` | person found at a different company | job change or wrong person, review |
+| `not_in_graph` | 404 twice | coverage gap, not a verdict; verifier's word stands |
+
+Receipts from a client's 10,088-contact list, already verified and pooled by ZeroBounce (2026-09-02): 6,776 agree · 819 corrected · 1,380 of 1,739 catch-all rows graded A/B · 75 of 725 drops recovered · 189 contradictions to review · 793 job changes the verifier had passed · 7 grade D, one of them marked valid · 1,206 F · 1,060 not in the graph. 14,087 calls, 0 phone tokens, $0 marginal.
+
+Already graded the list with another script? `python3 import_graded.py results.csv` maps the columns by alias (grade, molt_email, still_at_company, zb_status, pool, tier, route, delta_class...), recomputes routing and deltas where missing, and hands the rows to `score.py` and `build_sheet.py`. Nothing calls the API. `REACHABILITY_DB=data/other.db` keeps a second list in its own database with its own sheet URL file.
 
 ## What It Costs
 
@@ -96,7 +130,8 @@ Apollo's identity graph follows a person across jobs. Moltsets' graph is keyed o
 
 ## Gotchas (each one produces a wall of false misses)
 
-- `search_people` `company` is a **domain**, not a name.
+- `company` is a **domain**, not a name, on `search_people` and `search_business_profile_by_name` alike.
+- `search_people` is not a second pass. 0 for 181 and 0 for 54 on two lists; `search_business_profile_by_name` on the same rows recovered 436 of 2,722. The default changed in v0.12.0; `--second-pass-endpoint people` keeps the old one for comparison.
 - Free-mail addresses 404 on every lookup. A personal Gmail is an output, never an input.
 - A name-only match is a lead, not an identity. Accept only a candidate on the domain you already hold.
 - `location` is not a parameter. It is silently ignored.
@@ -112,6 +147,15 @@ Jordan,Lee,Head of Growth,Acme,acme.com,jordan@acme.com,https://www.linkedin.com
 ```
 
 Or drop in a raw Apollo people export; the loader reads its headers. Then `bash run.sh my_list.csv --full`.
+
+With a verifier verdict already on the row (any of `zb_status`, `zerobounce_status`, `verifier_status`, `verification_status`; optional `pool`, `mx_provider`):
+
+```csv
+first_name,last_name,title,company,domain,email,linkedin_url,zb_status,pool
+Jordan,Lee,Head of Growth,Acme,acme.com,jordan@acme.com,https://www.linkedin.com/in/jordanlee,valid,A
+```
+
+Same command. The sheet gains the Disagreements and Verifier vs Moltsets tabs.
 
 ## Links
 

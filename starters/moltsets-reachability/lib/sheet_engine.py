@@ -131,14 +131,41 @@ def data_tab(sh, reqs, title, df, cols, widths, cf, numeric):
     return ws
 
 
-def raw_tab(sh, reqs, title, values, widths=None, header=True):
-    """A simple value grid (scoring model, manifest, import log). values = list of rows."""
-    ws = sh.add_worksheet(title=title, rows=len(values) + 6, cols=max(len(r) for r in values) + 1)
+def raw_tab(sh, reqs, title, values, widths=None, header=True, row_colors=None, bold_rows=None, cell_colors=None,
+            align=None):
+    """A simple value grid (scoring model, manifest, import log). values = list of rows.
+    row_colors: {row_index: hex} paints a whole row. bold_rows: [row_index]. cell_colors: {(row, col): hex}.
+    align: "LEFT" | "RIGHT" | "CENTER" applies one horizontal alignment to the whole grid (mixed numbers and
+    text in one column otherwise zig-zag)."""
+    ncols = max(len(r) for r in values)
+    ws = sh.add_worksheet(title=title, rows=len(values) + 6, cols=ncols + 1)
     ws.append_rows(values, value_input_option="USER_ENTERED")
     if header:
         reqs += r_header(ws.id, len(values[0]))
+    if align:
+        reqs.append({"repeatCell": {"range": {"sheetId": ws.id, "startRowIndex": 0, "endRowIndex": len(values),
+                                              "startColumnIndex": 0, "endColumnIndex": ncols},
+                                    "cell": {"userEnteredFormat": {"horizontalAlignment": align}},
+                                    "fields": "userEnteredFormat.horizontalAlignment"}})
     for col, px in (widths or {}).items():
-        reqs.append(r_width(ws.id, col, px))
+        if col <= ncols:          # the grid has ncols + 1 columns; a width for a column that does not exist 400s the batch
+            reqs.append(r_width(ws.id, col, px))
+    for i, hexcol in (row_colors or {}).items():
+        reqs.append({"repeatCell": {"range": {"sheetId": ws.id, "startRowIndex": i, "endRowIndex": i + 1,
+                                              "startColumnIndex": 0, "endColumnIndex": ncols},
+                                    "cell": {"userEnteredFormat": {"backgroundColor": rgb(hexcol)}},
+                                    "fields": "userEnteredFormat.backgroundColor"}})
+    for i in (bold_rows or []):
+        reqs.append({"repeatCell": {"range": {"sheetId": ws.id, "startRowIndex": i, "endRowIndex": i + 1,
+                                              "startColumnIndex": 0, "endColumnIndex": ncols},
+                                    "cell": {"userEnteredFormat": {"textFormat": {"bold": True, "foregroundColor": rgb(NAVY)},
+                                                                   "backgroundColor": rgb("DCE6F1")}},
+                                    "fields": "userEnteredFormat(textFormat,backgroundColor)"}})
+    for (i, j), hexcol in (cell_colors or {}).items():
+        reqs.append({"repeatCell": {"range": {"sheetId": ws.id, "startRowIndex": i, "endRowIndex": i + 1,
+                                              "startColumnIndex": j, "endColumnIndex": j + 1},
+                                    "cell": {"userEnteredFormat": {"backgroundColor": rgb(hexcol)}},
+                                    "fields": "userEnteredFormat.backgroundColor"}})
     return ws
 
 
@@ -217,7 +244,8 @@ def build(config: dict):
     for t in config.get("tabs", []):
         data_tab(sh, reqs, t["title"], t["df"], t["cols"], t.get("widths", {}), t.get("cf", []), set(t.get("numeric", [])))
     for rt in config.get("raw_tabs", []):
-        raw_tab(sh, reqs, rt["title"], rt["values"], rt.get("widths", {}), rt.get("header", True))
+        raw_tab(sh, reqs, rt["title"], rt["values"], rt.get("widths", {}), rt.get("header", True),
+                rt.get("row_colors"), rt.get("bold_rows"), rt.get("cell_colors"), rt.get("align"))
 
     if reqs:
         sh.batch_update({"requests": reqs})

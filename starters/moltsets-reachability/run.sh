@@ -7,6 +7,11 @@
 #   bash run.sh my_list.csv --full       # Moltsets employment check + second pass
 #   bash run.sh my_list.csv --full --both # also run Apollo people/match and record agreement
 #   bash run.sh my_list.csv --phones 10  # also buy up to 10 mobiles for dead-email rows
+#   bash run.sh my_list.csv --full --people  # second pass via search_people instead of the business-profile search
+#
+# If the CSV carries your verifier's verdict (a zb_status / verifier_status column), every row also gets a
+# delta class and the sheet gains the Disagreements and Verifier vs Moltsets tabs. No flag needed.
+# REACHABILITY_DB=data/other.db bash run.sh ...  keeps a second list in its own database.
 set -e
 cd "$(dirname "$0")"
 PY="${PYTHON:-python3}"
@@ -17,6 +22,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --full) GRADE_ARGS+=(--second-pass) ;;
     --both) GRADE_ARGS+=(--employment both) ;;
+    --people) GRADE_ARGS+=(--second-pass-endpoint people) ;;
     --apollo|--second-pass|--redo) GRADE_ARGS+=("$1") ;;
     --phones) GRADE_ARGS+=(--phones "$2"); shift ;;
     --limit) GRADE_ARGS+=(--limit "$2"); shift ;;

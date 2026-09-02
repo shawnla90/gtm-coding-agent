@@ -12,12 +12,17 @@ Seniority). Header names are matched case-insensitively.
 """
 import argparse
 import csv
+import os
 import re
 import sqlite3
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lib.reachability import norm_verifier_status  # noqa: E402
+
 HERE = Path(__file__).resolve().parent
-DB = HERE / "data" / "reachability.db"
+DB = Path(os.environ.get("REACHABILITY_DB") or HERE / "data" / "reachability.db")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS contacts (
@@ -26,6 +31,8 @@ CREATE TABLE IF NOT EXISTS contacts (
   company       TEXT, domain TEXT,
   email         TEXT, apollo_email_status TEXT, apollo_catchall TEXT,
   linkedin_url  TEXT, seniority TEXT, industry TEXT, employees TEXT, country TEXT, source TEXT,
+  -- your verifier's verdict, if the list already went through one (ZeroBounce, NeverBounce, ...)
+  verifier_status TEXT, verifier_sub_status TEXT, verifier_raw TEXT, pool TEXT, mx_provider TEXT,
   -- Apollo employment check (optional)
   apollo_checked_at TEXT, apollo_current_company TEXT, apollo_current_domain TEXT,
   apollo_current_title TEXT, still_at_company TEXT,
@@ -35,8 +42,9 @@ CREATE TABLE IF NOT EXISTS contacts (
   -- Moltsets
   molt_route    TEXT, molt_http TEXT, molt_email TEXT, grade TEXT, grade_validated_at TEXT,
   molt_title    TEXT, molt_company TEXT, molt_company_domain TEXT, molt_linkedin TEXT,
-  second_pass   TEXT, second_pass_decision TEXT, candidates_json TEXT,
-  verdict       TEXT, tier TEXT, route TEXT,
+  second_pass   TEXT, second_pass_decision TEXT, second_pass_endpoint TEXT, candidates_json TEXT,
+  corrected     TEXT, molt_other_email_domain TEXT, molt_other_email_grade TEXT,
+  verdict       TEXT, tier TEXT, route TEXT, delta_class TEXT,
   mobile_phone  TEXT, phone_http TEXT,
   -- scoring
   title_score   REAL, persona TEXT, reach_mult REAL, composite_score REAL, rank INTEGER,
@@ -60,6 +68,12 @@ ALIASES = {
     "employees": ["# employees", "employees", "employee_count"],
     "country": ["country"],
     "source": ["source"],
+    # a verifier's verdict, when the list already went through one
+    "verifier_status": ["verifier_status", "zb_status", "zerobounce_status", "zerobounce", "verification_status",
+                        "verifier", "verification_result", "neverbounce_result", "bounce_status", "mv_result"],
+    "verifier_sub_status": ["verifier_sub_status", "zb_sub_status", "sub_status", "zerobounce_sub_status"],
+    "pool": ["pool", "sending_pool", "send_pool"],
+    "mx_provider": ["mx_provider", "mx", "email_provider", "mail_host", "provider"],
 }
 
 
@@ -111,21 +125,29 @@ def main():
         if args.limit and kept > args.limit:
             break
         domain = _domain(_pick(r, "domain")) or (email.split("@")[-1] if "@" in email else "")
+        vraw = _pick(r, "verifier_status")
         cur = con.execute(
             "INSERT OR IGNORE INTO contacts (first_name,last_name,title,company,domain,email,"
-            "apollo_email_status,apollo_catchall,linkedin_url,seniority,industry,employees,country,source) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "apollo_email_status,apollo_catchall,linkedin_url,seniority,industry,employees,country,source,"
+            "verifier_status,verifier_sub_status,verifier_raw,pool,mx_provider) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (_pick(r, "first_name"), _pick(r, "last_name"), _pick(r, "title"), _pick(r, "company"),
              domain, email, _pick(r, "apollo_email_status"), _pick(r, "apollo_catchall"), li,
              _pick(r, "seniority"), _pick(r, "industry"), _pick(r, "employees"), _pick(r, "country"),
-             args.source or _pick(r, "source")),
+             args.source or _pick(r, "source"),
+             norm_verifier_status(vraw), _pick(r, "verifier_sub_status"), vraw,
+             _pick(r, "pool").upper(), _pick(r, "mx_provider").lower()),
         )
         inserted += cur.rowcount
     con.commit()
     total = con.execute("SELECT COUNT(*) FROM contacts").fetchone()[0]
     domains = con.execute("SELECT COUNT(DISTINCT domain) FROM contacts").fetchone()[0]
+    with_verifier = con.execute("SELECT COUNT(*) FROM contacts WHERE COALESCE(verifier_status,'')!=''").fetchone()[0]
     print(f"loaded {Path(args.csv).name}: {len(rows)} rows in file, {inserted} new inserted, "
           f"{skipped} excluded, {total} total in db, {domains} distinct domains")
+    if with_verifier:
+        print(f"verifier verdict found on {with_verifier} rows (column detected by alias); "
+              f"grade.py will write a delta class per row and build_sheet.py adds the Verifier vs Moltsets tab")
     con.close()
 
 

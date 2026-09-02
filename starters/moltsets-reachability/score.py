@@ -9,6 +9,7 @@ D 0.15. D is not zero because the person is still reachable on LinkedIn; the she
   python3 score.py --top 5
 """
 import argparse
+import os
 import sqlite3
 import sys
 from pathlib import Path
@@ -17,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.reachability import classify_persona, composite  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-DB = HERE / "data" / "reachability.db"
+DB = Path(os.environ.get("REACHABILITY_DB") or HERE / "data" / "reachability.db")
 
 
 def main():

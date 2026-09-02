@@ -4,6 +4,32 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.12.0] - 2026-09-02
+
+The reachability starter learns to sit next to the verifier you already run. If your list carries a ZeroBounce (or NeverBounce, MillionVerifier, Bouncer) verdict, every row now gets a delta class: how Moltsets moved it relative to that verdict. The proving run was a client's 10,088-contact home-services list, already verified and pooled by ZeroBounce: 8,061 profiles returned (79.9%), 7,802 A/B (77.3%), 1,206 F, 1,060 never seen. Where the two agreed on the same address: 6,776 rows. Where they did not: 819 corrected same-domain addresses, 1,380 of 1,739 catch-all rows graded A/B on observed activity, 75 of 725 ZeroBounce drops recovered, 793 job changes, 7 grade D (one marked valid). 9,032 LinkedIn URLs on a list that shipped with none. 14,087 calls, 0 phone tokens, $0 marginal, about 75 minutes. Two corrections to 0.11.0 fall out of it: the grade mix is a property of the ICP (the 200 GTM engineers graded all A; this list graded 77% A with 12% F), and the second pass lands when it is `search_business_profile_by_name` (436 recovered of 2,722; `search_people` went 0 for 181, as it had gone 0 for 54 and 2 for 112 before).
+
+### Added
+
+- **Verifier column.** `init_db.py` detects `verifier_status` / `zb_status` / `zerobounce_status` / `verification_status` (plus `pool` and `mx_provider`) by header alias and normalizes any vendor's vocabulary to `valid | catch-all | unknown | invalid | do_not_mail | abuse` (`lib/reachability.py::norm_verifier_status`). No flag needed.
+- **Delta classes.** `lib/reachability.py::delta_class` (pure, 13 classes, `DELTA_LEGEND`): `agree` · `molt_upgrades_catchall` · `molt_recovers_invalid` · `molt_corrects_address` · `molt_contradicts_invalid` · `molt_grades_unknown` · `molt_downgrades_valid` · `confirms_invalid` · `molt_catchall` · `molt_no_data` · `person_confirmed_other_email` · `cross_domain_review` · `not_in_graph`. `grade.py` writes one per row when a verdict exists.
+- **Two new tabs in `build_sheet.py`.** *Disagreements*: every row whose delta is not agree, not in graph, or no data, sorted by class then score. *Verifier vs Moltsets*: receipts, the verifier-status x Moltsets-outcome matrix, a per-pool table when the list had sending pools, the delta legend with counts, and how to read it. The Dashboard gains a VERIFIER AGREEMENT block. Eleven tabs when everything is populated.
+- **`build_sheet.py --summary-only`**: Dashboard + Verifier vs Moltsets + Grading Model + Usage, no contact rows. With `--share anyone_reader` it is a linkable receipt with no PII.
+- **`import_graded.py`**: bring rows graded elsewhere (a campaign script, an older run, a colleague's export) into the starter database by header alias; routing and delta classes are recomputed when missing. `score.py` and `build_sheet.py` run unchanged on them. Nothing calls the API.
+- **`REACHABILITY_DB`** environment override on every script, so a second list gets its own database and its own sheet URL file.
+- `lib/moltsets_client.py::title_of`; `lib/sheet_engine.py::raw_tab` accepts `row_colors`, `bold_rows`, `cell_colors`.
+- 26 new unit tests (`VerifierNormalizeTests`, `DeltaClassTests`, `ProfileDecisionTests`, `ImportGradedTests`): 52 total, no network.
+
+### Changed
+
+- **Second pass endpoint.** `grade.py --second-pass` now calls `search_business_profile_by_name {name, company: DOMAIN}` and decides with `lib/reachability.py::profile_decision` (accept same-domain A/B · risky same-domain · profile without an email · cross-domain review, never adopted · name mismatch · no candidate). `--second-pass-endpoint people` keeps `search_people` for comparison; `run.sh --people` maps to it.
+- `sample_contacts.csv` carries a fictional `verifier_status` column so the sample renders the new tabs.
+- Chapter 23: new section "The Run at 10,088, Next to a Verifier"; "The Waterfall" and "The Run, Twice" corrected on the second pass; "The Sheet" lists eleven tabs; "What I Would Tell Adam" carries the four new questions. `skills/moltsets-reachability/SKILL.md` and `FACTCHECK.md`, the starter `README.md` and `CLAUDE.md`, and the repo indexes updated to match.
+
+### Verification
+
+- `python3 -m unittest discover -s tests -p "test_moltsets*.py"`: 52 tests OK. `python3 -m compileall starters/moltsets-reachability` clean. `bash -n run.sh` clean.
+- Live 2026-09-02: the fictional sample, 25 rows, graded end to end on free 404s (23 `reverse_email_lookup`, 24 `search_business_profile_by_name`, 1 `reverse_linkedin_lookup`, 1 `linkedin_to_best_email`; 0 records, 0 phone tokens). `import_graded.py` on the 10,088-row export reproduced the campaign memo row for row (every delta class, 819 corrections, 793 job changes, 9,032 LinkedIn URLs, all tiers). `build_sheet.py` produced the 11-tab private sheet in 21 s and the 4-tab summary sheet in 7 s.
+
 ## [0.11.0] - 2026-09-02
 
 Chapter 23, a sixth skill, and a new starter: email reachability graded A through F by Moltsets, the person confirmed still at the company, and every bad grade routed to another channel instead of deleted. The proving run graded the same 200 Apollo-Verified GTM engineers twice. Keyed on the email: 70 profiles, 60 graded (all A), 60 send-ready, 120 routed to LinkedIn. Keyed on the LinkedIn URL with `reverse_linkedin_lookup`: 196 profiles, 136 graded (135 A, 1 B), 113 send-ready (32 with a corrected same-domain address), 54 routed to LinkedIn, 27 job changes held. Apollo `people/match` ran alongside for the comparison and agreed with Moltsets on employment 181 of 193 times; on this list Apollo was redundant for that step, and the chapter says so.

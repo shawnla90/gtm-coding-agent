@@ -12,6 +12,7 @@
   python3 budget.py --json
 """
 import json
+import os
 import sqlite3
 import sys
 from pathlib import Path
@@ -20,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib import moltsets_client as M  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-DB = HERE / "data" / "reachability.db"
+DB = Path(os.environ.get("REACHABILITY_DB") or HERE / "data" / "reachability.db")
 
 
 def ledger(con):

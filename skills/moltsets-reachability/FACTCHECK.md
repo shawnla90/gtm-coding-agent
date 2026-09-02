@@ -58,6 +58,21 @@ Account (free): `get_account`, `get_billing`, `get_usage`
 - `search_people.query` is fuzzy across name, title, and headline. Name-only queries return role accounts and homonyms. Filter on real first+last, title keywords, and domain agreement.
 - `limit` max is 25 per docs.
 
+## Second pass endpoint (verified on two lists, 2026-09-01 and 2026-09-02)
+
+| Endpoint | Body | Shape back | As a second pass |
+|---|---|---|---|
+| `search_business_profile_by_name` | `{name: "First Last", company: "<domain>"}` | one flat profile (same keys as `reverse_email_lookup`) | 2,722 rows → 436 same-domain A/B accepted (16%), 37 of them on rows the verifier had dropped; 490 profiles with no confirmed email (F), 422 cross-domain (review), 77 name mismatches |
+| `search_people` | `{query: "First Last", company: "<domain>", limit: 5}` | list under `results.results` | 0 for 181 (home-services owners), 0 for 54 and 2 for 112 (GTM engineers). Not a second pass. |
+
+Decision rules live in `lib/reachability.py::profile_decision`: `accept_same_domain` (A/B on the queried or corporate domain, name matches) · `risky_same_domain` (C/D/F on the domain) · `profile_no_email` (person known, no work address; grade F) · `review_cross_domain` (graded address on another domain; never adopted, recorded as `molt_other_email_domain/grade`) · `name_mismatch` · `no_candidate` (404). Only on silence or F. Never on D.
+
+## Verifier deltas (v0.12.0)
+
+Normalization (`lib/reachability.py::norm_verifier_status`): valid / deliverable / ok / safe → `valid` · catch-all / catch_all / catchall / accept_all → `catch-all` · unknown / risky / timeout → `unknown` · invalid / undeliverable / bounce → `invalid` · do_not_mail / disposable / toxic → `do_not_mail` · abuse / spamtrap / spam_trap → `abuse`. Hard-fail set = `invalid, do_not_mail, abuse`. Empty stays empty (no verifier on that row); an unrecognized word is `unknown`.
+
+Delta classes are pure functions of (verifier status, grade, second-pass decision, corrected, still-at-company); they never call the API. The thirteen classes and their meanings are `DELTA_LEGEND`. Say "the verifier's verdict stands" for `not_in_graph`, `molt_no_data`, and `person_confirmed_other_email`. Say "review" for `molt_contradicts_invalid` and `cross_domain_review`. Never describe a corrected or recovered address as verified; it has not been SMTP-probed.
+
 ## Moltsets skills library (moltsets.com/library, enumerated 2026-09-01)
 
 26 skills: 25 cards plus the featured "Email Finder". Categories seen on the cards: Enrichment, Prospecting, Ad Audience, Identity Resolution, IP Intelligence. Four outcome groups: verified emails and mobiles; find new prospects; ad audiences (SHA256, MAID); website visitors (IP, RB2B). Authors: MoltSets (22), Robb Clarke (4 RB2B skills). Data connections listed: Claude Chat, CSV, Excel, Google Sheets, HubSpot, RB2B.

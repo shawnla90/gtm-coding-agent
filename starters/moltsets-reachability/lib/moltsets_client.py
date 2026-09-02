@@ -201,6 +201,17 @@ def linkedin_of(rec: dict) -> str:
     return ""
 
 
+def title_of(rec: dict) -> str:
+    """Current title, whichever key the endpoint used."""
+    if not isinstance(rec, dict):
+        return ""
+    for k in ("title", "job_title", "current_title", "headline"):
+        v = rec.get(k)
+        if v:
+            return str(v).strip()
+    return ""
+
+
 def company_of(rec: dict) -> tuple[str, str]:
     """(company_name, company_domain) across shapes."""
     if not isinstance(rec, dict):

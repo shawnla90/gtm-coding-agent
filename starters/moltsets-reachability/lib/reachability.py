@@ -195,6 +195,127 @@ def second_pass_decision(candidates: list[dict], company_domain: str, first: str
     return best, best_c
 
 
+# ----------------------------------------------------------------------------- verifier deltas
+# A list that has already been through an SMTP verifier (ZeroBounce, NeverBounce, MillionVerifier,
+# Bouncer...) carries a verdict per row. Normalize it to six values so the delta classes below are
+# vendor-neutral. The verifier answers "does this mailbox accept mail"; Moltsets answers "has this
+# address been seen in use, and who is this person today". The value is in the disagreements.
+VERIFIER_STATUS_ALIASES = {
+    "valid": "valid", "deliverable": "valid", "ok": "valid", "safe": "valid", "good": "valid", "verified": "valid",
+    "catch-all": "catch-all", "catch_all": "catch-all", "catchall": "catch-all", "accept_all": "catch-all",
+    "accept-all": "catch-all", "accept all": "catch-all",
+    "unknown": "unknown", "risky": "unknown", "timeout": "unknown", "greylisted": "unknown", "unverifiable": "unknown",
+    "invalid": "invalid", "undeliverable": "invalid", "bad": "invalid", "bounce": "invalid", "hard_bounce": "invalid",
+    "do_not_mail": "do_not_mail", "do-not-mail": "do_not_mail", "disposable": "do_not_mail", "toxic": "do_not_mail",
+    "abuse": "abuse", "spamtrap": "abuse", "spam_trap": "abuse", "spam-trap": "abuse", "complainer": "abuse",
+}
+VERIFIER_STATUSES = ("valid", "catch-all", "unknown", "invalid", "do_not_mail", "abuse")
+HARD_FAIL = {"invalid", "do_not_mail", "abuse"}
+
+DELTA_LEGEND = [
+    ("agree", "verifier valid and Moltsets A/B on the same address: send first"),
+    ("molt_upgrades_catchall", "verifier catch-all, Moltsets A/B on observed activity: candidate to leave the isolated pool"),
+    ("molt_recovers_invalid", "verifier hard-fail, Moltsets found a same-domain A/B address: back into the list under the new address"),
+    ("molt_corrects_address", "verifier valid or catch-all on the list address, Moltsets prefers a different same-domain A/B address"),
+    ("molt_contradicts_invalid", "verifier hard-fail on this exact address, Moltsets A/B on it: review, re-probe before any send"),
+    ("molt_grades_unknown", "verifier unknown or no verdict, Moltsets A/B"),
+    ("molt_downgrades_valid", "verifier valid, Moltsets D (bounce, complaint, spam trap): suppress"),
+    ("confirms_invalid", "verifier hard-fail and Moltsets D or not found: both say no"),
+    ("molt_catchall", "Moltsets C: catch-all confirmed, mailbox still unconfirmed"),
+    ("molt_no_data", "Moltsets F: person known, no activity on this address; unproven, not bad"),
+    ("person_confirmed_other_email", "person confirmed at the listed company; Moltsets' graded address is on another domain (previous employer). Verifier verdict stands"),
+    ("cross_domain_review", "person found at a different company: job change or wrong person, review"),
+    ("not_in_graph", "404 and nothing on the second pass: coverage gap, not a verdict"),
+]
+DELTA_CLASSES = tuple(k for k, _ in DELTA_LEGEND)
+
+
+def norm_verifier_status(raw: str | None) -> str:
+    """Map any verifier's status word onto valid | catch-all | unknown | invalid | do_not_mail | abuse.
+    Empty input stays empty (no verifier ran on this row)."""
+    v = (raw or "").strip().lower().replace("-", "-")
+    if not v:
+        return ""
+    return VERIFIER_STATUS_ALIASES.get(v, VERIFIER_STATUS_ALIASES.get(v.replace(" ", "_"), "unknown"))
+
+
+def delta_class(verifier_status: str | None, grade: str | None, http: str | None = "",
+                sp_decision: str | None = "", corrected: str | bool = "no",
+                still_at_company: str = "unknown") -> str:
+    """How Moltsets moved the row relative to the verifier's verdict. Pure function.
+    `corrected` is "yes"/"no" (or a bool): Moltsets' graded address differs from the list address."""
+    z = norm_verifier_status(verifier_status)
+    g = (grade or "").strip().upper()[:1]
+    c = corrected is True or str(corrected).lower() == "yes"
+    if sp_decision == "review_cross_domain":
+        return "person_confirmed_other_email" if still_at_company == "yes" else "cross_domain_review"
+    if c and g in ("A", "B"):
+        return "molt_recovers_invalid" if z in HARD_FAIL else "molt_corrects_address"
+    if g in ("A", "B"):
+        if z == "valid":
+            return "agree"
+        if z == "catch-all":
+            return "molt_upgrades_catchall"
+        if z in HARD_FAIL:
+            return "molt_contradicts_invalid"
+        return "molt_grades_unknown"
+    if g == "D":
+        return "confirms_invalid" if z in HARD_FAIL else "molt_downgrades_valid"
+    if g == "C":
+        return "molt_catchall"
+    if g == "F":
+        return "molt_no_data"
+    if sp_decision == "name_mismatch":
+        return "not_in_graph"
+    if z in HARD_FAIL:
+        return "confirms_invalid"
+    return "not_in_graph"
+
+
+def name_matches(first: str, last: str, res_first: str | None, res_last: str | None) -> bool:
+    """Loose name check for a single-profile response: prefix tolerant on first names (Bob / Robert
+    is NOT matched, Chris / Christopher is), suffix tolerant on last names (hyphenated, married)."""
+    rf, rl = (res_first or "").strip().lower(), (res_last or "").strip().lower()
+    f, l = (first or "").strip().lower(), (last or "").strip().lower()
+    if not rf and not rl:
+        return True   # the endpoint matched on the name we sent; nothing to contradict
+    first_ok = (not f or not rf) or rf == f or rf.startswith(f) or f.startswith(rf)
+    last_ok = (not l or not rl) or rl == l or l.endswith(rl) or rl.endswith(l)
+    return first_ok and last_ok
+
+
+def profile_decision(res: dict | None, http, queried_domain: str, corporate_domain: str = "",
+                     first: str = "", last: str = "") -> tuple[str, dict]:
+    """Decide on one `search_business_profile_by_name` response (flat profile, not a list).
+    accept_same_domain   graded A/B work email on the queried domain, name matches
+    risky_same_domain    work email on the queried domain but graded C/D/F
+    profile_no_email     the person came back (LinkedIn, title, company) with no confirmed work email
+    review_cross_domain  work email on a different domain: job change or a different person
+    name_mismatch        a profile came back under a different name
+    no_candidate         404 or empty
+    Returns (decision, snapshot) where snapshot is a small dict for candidates_json."""
+    from lib import moltsets_client as M  # local import keeps this module import-light for tests
+    if http != 200 or not isinstance(res, dict) or not res:
+        return "no_candidate", {}
+    cn, cd = M.company_of(res)
+    snap = {"name": res.get("full_name") or f"{res.get('first_name', '')} {res.get('last_name', '')}".strip(),
+            "title": M.title_of(res), "company": cn, "company_domain": cd,
+            "email_domain": dom(M.email_of(res)), "grade": M.grade_of(res),
+            "validated_at": M.validated_at_of(res), "linkedin": M.linkedin_of(res),
+            "role_start": res.get("current_role_start_date")}
+    if not name_matches(first, last, res.get("first_name"), res.get("last_name")):
+        return "name_mismatch", snap
+    em = M.email_of(res)
+    if not em:
+        return "profile_no_email", snap
+    bd = dom(em)
+    wanted = [d.lower().strip() for d in (queried_domain, corporate_domain) if d]
+    same = any(bd == d or bd.endswith("." + d) or d.endswith("." + bd) for d in wanted)
+    if not same:
+        return "review_cross_domain", snap
+    return ("accept_same_domain" if M.grade_of(res) in ("A", "B") else "risky_same_domain"), snap
+
+
 def composite(title: str | None, grade: str | None) -> tuple[int, float, float]:
     """(title_score, multiplier, composite)."""
     ts = score_title(title)

@@ -11,10 +11,16 @@ For every contact not yet graded:
      If the current company disagrees with the listed one, the row is a job change: hold, re-source,
      skip the stale email.
   1. reverse_email_lookup on the business email (when step 0 did not already grade it).
-  2. (--second-pass) on 404 / F: search_people {query: name, company: DOMAIN}. Accept only a
-     same-domain grade A/B candidate whose name matches.
+  2. (--second-pass) on 404 / F: search_business_profile_by_name {name, company: DOMAIN} (default;
+     --second-pass-endpoint people swaps in search_people, which went 0 for 181 and 0 for 54 on two
+     lists). Accept only a same-domain grade A/B result whose name matches. A different domain is a
+     different person until proven otherwise.
   3. LinkedIn-only rows with no email after all that: linkedin_to_best_email.
   4. (--phones N) dead-email rows only: linkedin_to_mobile_phone, one phone token per HIT, capped.
+
+If the list carried a verifier verdict (init_db.py detects zb_status / verifier_status), every row also
+gets a delta class: how Moltsets moved it relative to the verifier (agree, corrects the address,
+recovers a drop, upgrades a catch-all, downgrades a valid to D, ...). The value is in the disagreements.
 
 Every call is logged to data/reachability.db moltsets_api_log and every row is committed as it
 finishes: a crash costs one record, a rerun never re-spends. Floor guard on records_remaining_5h.
@@ -26,6 +32,7 @@ finishes: a crash costs one record, a rerun never re-spends. Floor guard on reco
 """
 import argparse
 import json
+import os
 import sqlite3
 import sys
 from datetime import datetime, timezone
@@ -34,13 +41,18 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib import moltsets_client as M  # noqa: E402
 from lib import apollo_client as A  # noqa: E402
-from lib.reachability import classify, combine_employment, companies_match, second_pass_decision  # noqa: E402
+from lib.reachability import (classify, combine_employment, companies_match, delta_class,  # noqa: E402
+                              profile_decision, second_pass_decision)
 
 HERE = Path(__file__).resolve().parent
-DB = HERE / "data" / "reachability.db"
+DB = Path(os.environ.get("REACHABILITY_DB") or HERE / "data" / "reachability.db")
 
 NEW_COLUMNS = {"molt_current_company": "TEXT", "molt_current_domain": "TEXT", "molt_current_title": "TEXT",
-               "employment_source": "TEXT", "employment_agree": "TEXT"}
+               "employment_source": "TEXT", "employment_agree": "TEXT",
+               # v0.12.0: verifier column + delta classes + business-profile second pass
+               "verifier_status": "TEXT", "verifier_sub_status": "TEXT", "verifier_raw": "TEXT", "pool": "TEXT",
+               "mx_provider": "TEXT", "second_pass_endpoint": "TEXT", "corrected": "TEXT",
+               "molt_other_email_domain": "TEXT", "molt_other_email_grade": "TEXT", "delta_class": "TEXT"}
 
 
 def now():
@@ -67,7 +79,9 @@ def main():
     ap.add_argument("--employment", choices=["moltsets", "apollo", "both", "none"], default=None,
                     help="who answers 'still at the company?' (default moltsets)")
     ap.add_argument("--apollo", action="store_true", help="shorthand for --employment apollo")
-    ap.add_argument("--second-pass", action="store_true", help="search_people by name + domain on 404 / F")
+    ap.add_argument("--second-pass", action="store_true", help="name + domain search on 404 / F (business-profile endpoint)")
+    ap.add_argument("--second-pass-endpoint", choices=["profile", "people"], default="profile",
+                    help="profile = search_business_profile_by_name (default, recovers); people = search_people (0 for 181 on the last list)")
     ap.add_argument("--phones", type=int, default=0, help="buy up to N mobile numbers for dead-email rows")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--redo", action="store_true", help="re-grade rows that already have a verdict")
@@ -177,24 +191,56 @@ def main():
                 elif st == 404:
                     stats["rel_404"] += 1
                 M.pause()
-            # 2. second pass
+            # 2. second pass: name + company DOMAIN. Only on silence or F, never on D (D is an answer).
             if args.second_pass and email and (not grade or grade == "F") and r["domain"] and budget.records_ok():
-                q = f"{r['first_name']} {r['last_name']}".strip()
-                body = {"query": q, "company": r["domain"], "limit": 5}
-                st2, res2, md2 = M.call("search_people", body)
-                budget.absorb(M.log_call(con, "search_people", body, st2, res2, md2, note=args.note + " second-pass"))
-                stats["sp_calls"] += 1
-                cands = res2.get("results") if isinstance(res2, dict) else []
-                cands = cands if isinstance(cands, list) else []
-                decision, cand = second_pass_decision(cands, r["domain"], r["first_name"], r["last_name"])
-                upd.update(second_pass="yes", second_pass_decision=decision, candidates_json=json.dumps(cands[:3]))
-                if decision == "accept_same_domain" and cand:
-                    stats["sp_recovered"] += 1
-                    grade, molt_email = M.grade_of(cand), M.email_of(cand)
-                    validated, molt_li = M.validated_at_of(cand), M.linkedin_of(cand)
-                    molt_title = cand.get("title") or ""
-                    molt_company, molt_cdom = M.company_of(cand)
-                    route_used = "search_people"
+                q = f"{r['first_name'] or ''} {r['last_name'] or ''}".strip()
+                if args.second_pass_endpoint == "profile":
+                    # one flat profile back (same shape as reverse_email_lookup); the domain is the identity check
+                    body = {"name": q, "company": r["domain"]}
+                    st2, res2, md2 = M.call("search_business_profile_by_name", body)
+                    budget.absorb(M.log_call(con, "search_business_profile_by_name", body, st2, res2, md2,
+                                             note=args.note + " second-pass"))
+                    stats["sp_calls"] += 1
+                    decision, snap = profile_decision(res2 if st2 == 200 else {}, st2, r["domain"], "",
+                                                      r["first_name"] or "", r["last_name"] or "")
+                    upd.update(second_pass="yes", second_pass_decision=decision,
+                               second_pass_endpoint="search_business_profile_by_name",
+                               candidates_json=json.dumps(snap)[:4000])
+                    if decision in ("accept_same_domain", "risky_same_domain", "profile_no_email", "review_cross_domain"):
+                        g2, e2 = M.grade_of(res2), M.email_of(res2)
+                        molt_li = molt_li or M.linkedin_of(res2)
+                        molt_title = molt_title or M.title_of(res2)
+                        c2, cd2 = M.company_of(res2)
+                        molt_company, molt_cdom = molt_company or c2, molt_cdom or cd2
+                        if decision == "profile_no_email":
+                            grade = grade or "F"          # person known, no confirmed work address
+                        elif decision == "review_cross_domain":
+                            # person found; the graded address lives on another domain. Never adopt it.
+                            upd.update(molt_other_email_domain=M.dom(e2), molt_other_email_grade=g2)
+                            grade = grade or "F"
+                        else:
+                            grade, molt_email, validated = (g2 or "F"), e2, M.validated_at_of(res2)
+                            route_used = "search_business_profile_by_name"
+                            if decision == "accept_same_domain":
+                                stats["sp_recovered"] += 1
+                else:
+                    body = {"query": q, "company": r["domain"], "limit": 5}
+                    st2, res2, md2 = M.call("search_people", body)
+                    budget.absorb(M.log_call(con, "search_people", body, st2, res2, md2, note=args.note + " second-pass"))
+                    stats["sp_calls"] += 1
+                    cands = res2.get("results") if isinstance(res2, dict) else []
+                    cands = cands if isinstance(cands, list) else []
+                    decision, cand = second_pass_decision(cands, r["domain"], r["first_name"] or "", r["last_name"] or "")
+                    upd.update(second_pass="yes", second_pass_decision=decision, second_pass_endpoint="search_people",
+                               candidates_json=json.dumps(cands[:3]))
+                    if decision == "accept_same_domain" and cand:
+                        stats["sp_recovered"] += 1
+                        grade, molt_email = M.grade_of(cand), M.email_of(cand)
+                        validated, molt_li = M.validated_at_of(cand), M.linkedin_of(cand)
+                        molt_title = M.title_of(cand)
+                        molt_company, molt_cdom = M.company_of(cand)
+                        route_used = "search_people"
+                stats[f"sp_{decision}"] = stats.get(f"sp_{decision}", 0) + 1
                 M.pause()
             # 3. LinkedIn-only rows
             if li and not email and not grade and budget.records_ok():
@@ -212,10 +258,19 @@ def main():
         corrected = bool(molt_email and email and molt_email != email)
         verdict, tier, route = classify(email or molt_email, grade, r["domain"], has_linkedin=bool(li or molt_li),
                                         second_pass_done=(upd.get("second_pass") == "yes"), still_at_company=still)
-        if route_used in ("search_people", "reverse_linkedin_lookup") and tier == "T1_send" and corrected:
+        if route_used in ("search_people", "search_business_profile_by_name", "reverse_linkedin_lookup") \
+                and tier == "T1_send" and corrected:
             verdict, tier = "corrected", "T1_send_corrected"
         if route == "second_pass" and not args.second_pass:
             route = "linkedin" if (li or molt_li) else "hold"
+
+        # verifier delta: only when the list carried a verdict for this row
+        vstat = r["verifier_status"] if "verifier_status" in r.keys() else ""
+        dc = delta_class(vstat, grade, http, upd.get("second_pass_decision") or "",
+                         "yes" if corrected else "no", still) if vstat else ""
+        upd.update(corrected="yes" if corrected else "no", delta_class=dc)
+        if dc:
+            stats[f"delta_{dc}"] = stats.get(f"delta_{dc}", 0) + 1
 
         # 4. phones for dead-email rows only
         if phones_left > 0 and (li or molt_li) and tier in ("SUPPRESS", "HOLD_not_found") and budget.phone_ok():
@@ -243,14 +298,16 @@ def main():
         mark = {"T1_send": "+", "T1_send_corrected": "+", "T2_catchall": "~", "SUPPRESS": "X",
                 "HOLD_not_found": "?", "HOLD_job_change": ">"}.get(tier, ".")
         agree_txt = f" agree={emp_agree}" if employment == "both" else ""
+        delta_txt = f" {dc}" if dc else ""
         print(f"[{i}/{len(rows)}] {mark} {(r['first_name'] or '?')[:14]:14} {(r['domain'] or '')[:26]:26} "
-              f"{grade or '-':1} {tier:18} {route:18} still={still}{agree_txt}")
+              f"{grade or '-':1} {tier:18} {route:18} still={still}{agree_txt}{delta_txt}")
 
     print("\n" + "=" * 64)
     for k, v in stats.items():
         print(f"  {k:20} {v}")
     print(f"  records_remaining_5h (last seen) {budget.records_5h}  phone_tokens {budget.phone_tokens}")
-    summary = HERE / "data" / "grade_summary.json"
+    stem = "" if DB == HERE / "data" / "reachability.db" else DB.stem + "_"
+    summary = DB.parent / f"{stem}grade_summary.json"      # per database, so two lists never share receipts
     summary.write_text(json.dumps({"ran_at": now(), "employment": employment, "stats": stats, "account": snap,
                                    "records_remaining_5h": budget.records_5h,
                                    "phone_tokens_remaining": budget.phone_tokens}, indent=2))
