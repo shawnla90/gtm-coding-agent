@@ -101,6 +101,24 @@ def companies_match(listed: str | None, current: str | None,
     return "moved"
 
 
+def combine_employment(apollo: str = "unknown", moltsets: str = "unknown") -> tuple[str, str, str]:
+    """(still_at_company, employment_source, employment_agree) from two independent checks.
+    Conservative: if either source says moved, the row is a job change (hold + re-source)."""
+    a, m = (apollo or "unknown"), (moltsets or "unknown")
+    if a != "unknown" and m != "unknown":
+        agree = "yes" if a == m else "no"
+        source = "both"
+    elif m != "unknown":
+        agree, source = "n/a", "moltsets"
+    elif a != "unknown":
+        agree, source = "n/a", "apollo"
+    else:
+        return "unknown", "none", "n/a"
+    if "moved" in (a, m):
+        return "moved", source, agree
+    return "yes", source, agree
+
+
 def score_title(title: str | None) -> int:
     if not title:
         return 0

@@ -1,26 +1,24 @@
 # Chapter 23: Reachability Grading
 
-**This chapter is for founders, GTM engineers, and agency operators who have a list of "verified" emails and no idea which ones will actually land. You will grade every address A through F with Moltsets, confirm the person is still at the company with Apollo, and route the rows a bad grade would normally kill into a channel that still works, all in a color-coded Google Sheet you can read in ten seconds. The proving run: 200 GTM engineers, every email marked Verified in Apollo. 60 came out send-ready. 120 came out with a LinkedIn route instead of a trash can. 18 had already changed jobs.**
+**This chapter is for founders, GTM engineers, and agency operators who have a list of "verified" emails and no idea which ones will actually land. You will grade every address A through F with Moltsets, confirm the person is still at the company, and route the rows a bad grade would normally kill into a channel that still works, all in a color-coded Google Sheet you can read in ten seconds. The proving run: 200 GTM engineers, every email marked Verified in Apollo, graded twice. Keyed on the email, 60 came out send-ready. Keyed on the LinkedIn URL, the same people gave 113. 54 went to LinkedIn instead of a trash can, and 27 had already changed jobs.**
 
 ---
 
 ## TL;DR
 
 - **A grade is a fact about a mailbox, not a verdict on a person.** Moltsets grades an address A (valid, seen replying or opening) through D (hard invalid, complaint, spam trap). F means no data. A 404 means the graph has never seen the address. Only D is a reason to stop emailing, and even D is not a reason to drop the row.
-- **Relevance, timing, reachability.** Title weights score relevance. Apollo `people/match` on the LinkedIn URL answers timing (still there, or moved?). The Moltsets grade answers reachability. The sheet's `route` column is what you do when one of the three says no.
+- **Relevance, timing, reachability.** Title weights score relevance. A lookup on the LinkedIn URL answers timing (still there, or moved?). The grade answers reachability. The sheet's `route` column is what you do when one of the three says no.
+- **Key the graph on the URL.** `reverse_linkedin_lookup` found 196 of 200 profiles and graded 134 addresses where the email-keyed lookup found 70 and graded 60. Same people, same night.
 - **Misses are free.** A Moltsets 404 consumes no record. That changes the economics of a second pass: you can afford to look again by name and company domain before you give up.
 - **Every row keeps a channel.** A/B email. C small monitored segment. D LinkedIn, then a mobile if you have tokens. F and 404 second pass, then LinkedIn. Moved: re-source at the new company. Nothing is deleted because a vendor was silent.
+- **Apollo, said plainly.** I used it for the employment check, then found the Moltsets library already covers that step. Both ran on all 200 and agreed 181 of 193 times. Apollo was redundant here; it still stands alone on the intent-gated company waterfall.
 - **The build is `starters/moltsets-reachability/`.** Four scripts and a budget tool. Runs on the same title weights and sheet engine as the Apollo starter.
 
 ---
 
 ## The Origin
 
-I had 1,297 GTM engineers from an Apollo export, every one with a Verified email, and a campaign to run against them. Verified is a snapshot: the last time Apollo checked, the mailbox accepted. It does not say whether the mailbox has ever seen a reply, whether the domain accepts everything, or whether the person still works there.
-
-Moltsets is Adam Robinson's people-search API. It is keyed on business identity and it grades addresses with delivery evidence, not SMTP pings: an A has a known reply, open, or click behind it. I had been using it as a validation gate on other lists since August (805 reverse lookups, 526 hits, 0 errors, 0 tokens spent). What I had not built was the part after the grade. Every tool I had seen treats a bad grade as a suppression. The person is still real. The address is what died.
-
-So the sheet got a `route` column, and the route comes from the grade.
+I had 1,297 GTM engineers from an Apollo export, every one with a Verified email. Verified is a snapshot: the last time Apollo checked, the mailbox accepted. It says nothing about replies, catch-all domains, or whether the person still works there. Moltsets is Adam Robinson's people-search API, keyed on business identity, and it grades addresses with delivery evidence: an A has a known reply, open, or click behind it. I had used it as a validation gate since August. What I had not built was the part after the grade. Every tool I had seen treats a bad grade as a suppression. The person is still real. The address is what died. So the sheet got a `route` column, and the route comes from the grade.
 
 ---
 
@@ -48,7 +46,7 @@ Two more things the docs do not say loudly enough. A personal Gmail is an output
 | Piece | Tool | What it does |
 |---|---|---|
 | Load | `init_db.py` | CSV (short schema or raw Apollo export) → SQLite |
-| Timing | Apollo `people/match` | LinkedIn URL → current company; disagree with the list = moved |
+| Timing | Moltsets `reverse_linkedin_lookup` (or Apollo `people/match`, or both) | LinkedIn URL → current company; disagree with the list = moved. The URL pass also returns the graded address when the graph has one |
 | Grade | Moltsets `reverse_email_lookup` | business email → A-F, confirmed address, validation date |
 | Second pass | Moltsets `search_people` | name + company **domain** → accept only same-domain A/B |
 | LinkedIn-only | Moltsets `linkedin_to_best_email` | URL → best address + grade |
@@ -65,8 +63,9 @@ Keys are read env-first, then `.env`, then a local SQLite vault via `SECRETS_DB`
 
 ```
 for each contact:
-  0. --apollo      people/match(linkedin_url)
+  0. --employment  reverse_linkedin_lookup(linkedin_url)   (moltsets, default; or apollo, or both)
                    company disagrees with the list?  -> job_changed, route resource, skip the email
+                   graded business email present?    -> take it, skip step 1
   1.               reverse_email_lookup(email)        -> grade, confirmed address, validated_at
   2. --second-pass grade in ('', 'F')?                -> search_people(query=name, company=DOMAIN)
                    accept ONLY same-domain A/B with a matching name
@@ -76,7 +75,7 @@ for each contact:
   commit the row
 ```
 
-Order matters. Apollo first, because grading an address the person left last quarter is a wasted record and a bounce waiting to happen. Second pass only on silence or F, never on D; D is an answer. Phones last, capped, and only for rows where email is not an option.
+Order matters. Employment first, because grading an address the person left last quarter is a wasted record and a bounce waiting to happen. Second pass only on silence or F, never on D; D is an answer. Phones last, capped, and only for rows where email is not an option.
 
 The classifier is forty lines and pure, so it is unit-tested without a network:
 
@@ -111,7 +110,7 @@ Moltsets meters four things and none of them is a per-lookup credit:
 
 A 404 consumes nothing. A crash in your own client mid-batch still consumes the record for the row it was on, with no refund, and the API keeps no history for you. So `grade.py` commits every row as it finishes, reads `records_remaining_5h` off every response, and stops at a floor. `budget.py` shows the pools with three free calls, plus your own ledger by endpoint: calls, hits, not-found, errors, tokens.
 
-Tonight's run consumed 70 enrich records for 70 hits and 12 search records for 122 second-pass calls. The 112 misses cost nothing.
+The URL-keyed run consumed 228 enrich records and 5 search records. The not-found rows cost nothing.
 
 ---
 
@@ -131,28 +130,27 @@ D is not zero on purpose. Head of Growth on a grade A address scores 100. The sa
 
 ---
 
-## The Run
+## The Run, Twice
 
-200 US GTM engineers from the 1,297-row export, 181 companies, 153 of them "Entry" seniority at startups. One name excluded because they were already in my pipeline. `bash run.sh gtme.csv --full`, no phones.
+200 US GTM engineers from the 1,297-row export, 181 companies, 153 of them "Entry" seniority at startups. One name excluded because they were already in my pipeline. No phones.
 
-| Step | Result |
-|---|---|
-| Apollo `people/match` | 200 checked: 180 still there, 18 moved, 2 unknown |
-| `reverse_email_lookup` | 182 calls (the 18 movers were skipped): 70 profiles found, 112 not in the graph |
-| Grades on the first pass | 60 confirmed work emails, every one grade A; 10 profiles came back without a confirmed address |
-| Second pass by name + domain | 122 calls: 2 recovered as same-domain A, 4 cross-domain (held), 116 no candidate |
-| Send ready | 60 |
-| Held | 2 A's on a different domain than the listed company, 18 job changes |
-| Routed to LinkedIn | 120 |
-| Records consumed | 70 enrich, 12 search. Phone tokens: 0 of 29 remaining. Errors: 0. |
+| | Keyed on the email | Keyed on the LinkedIn URL |
+|---|---|---|
+| Profiles found | 70 of 182 | 196 of 200 |
+| Graded addresses | 60, all A | 136: 135 A, 1 B |
+| Send-ready | 60 | 113, of which 32 were a different same-domain address than the export held |
+| Routed to LinkedIn | 120 | 54 |
+| Job changes held | 18 | 27 |
+| Second pass recovered | 2 of 112 | 0 of 54 |
+| Records consumed | 70 enrich, 12 search | 228 enrich, 5 search |
 
 Three things worth saying plainly.
 
-**The graph is thin on this ICP.** 38% found. On a list of marketing leaders at agencies the same endpoint found 65%. Early-career people at companies under 100 employees are where a business-identity graph has the least to work with. A 22% first-pass rate on a 40-person sample of the same list two nights earlier said the same thing.
+**The key matters more than the ICP.** By email, 38% of these early-career startup people were in the graph. By LinkedIn URL, 98% had a profile and 68% had a graded address. A business-identity graph knows the person better than it knows the mailbox. Lead with the URL.
 
-**When it hits, it hits.** Every confirmed address was an A. On 407 Apollo-Verified addresses on another list, the grades were A 297, B 2, and 82 not found. Apollo Verified plus a Moltsets A has not bounced for me yet. `reverse_email_lookup` behaves like a confirmation endpoint: it returns the address it can stand behind. The B, C, D, and F grades show up through `search_people` and `linkedin_to_best_email`, where the API is offering you a candidate rather than confirming yours.
+**When it confirms, it confirms.** Every graded address was an A except one B. `reverse_email_lookup` behaves like a confirmation endpoint: it returns the address it can stand behind. The B, C, D, and F grades show up through `search_people` and `linkedin_to_best_email`, where the API offers a candidate rather than confirming yours. And 32 of the 113 send-ready rows carried a different address than the export, on the same domain. The pattern guess was wrong; the confirmed address was right.
 
-**The second pass rarely lands, and that is information.** 2 of 112. When the reverse lookup says 404 on this ICP, the person is not in the graph under any address. Build the second pass, keep it, and stop expecting it to rescue the list. Its real job is catching the job-changers Moltsets knows about under a new domain, which is a hold, not a send.
+**The second pass rarely lands, and that is information.** 0 of 54, 2 of 112. When both lookups come back empty, the person is not in the graph under any address. Keep the second pass for the movers it catches under a new domain, and stop expecting it to rescue a list.
 
 ---
 
@@ -163,8 +161,8 @@ Nine tabs when every tier is populated; seven tonight because nothing graded C o
 - **Dashboard**: graded share, send-ready share, grade distribution, route mix, Apollo still / moved / unknown, first-pass hit rate, what the second pass recovered, records and tokens consumed.
 - **Send Ready**: A/B on the company's domain, ranked top 3 per company with persona diversity.
 - **Send Low Volume**: C, when there is any.
-- **Route - LinkedIn**: the 120 rows a suppress-only tool would have deleted. Connection note first.
-- **Review - Hold**: the 2 cross-domain A's and the 18 job changes.
+- **Route - LinkedIn**: the 54 rows a suppress-only tool would have deleted. Connection note first.
+- **Review - Hold**: the 6 cross-domain or free-mail rows and the 27 job changes, with an agree/disagree column when two employment sources ran.
 - **Suppressed**: D rows, for the sequencer's suppression list. D rows also appear in Route - LinkedIn, on purpose.
 - **All Contacts**, **Grading Model** (the weights and meanings, so the sheet explains itself), **Moltsets Usage** (your ledger by endpoint).
 
@@ -172,9 +170,11 @@ Grade cells are colored A green, B light green, C amber, D red, F orange, unknow
 
 ---
 
-## Apollo and Moltsets Are Not the Same Question
+## The Apollo Part, Said Plainly
 
-Apollo's identity graph follows a person across jobs. That is what made `people/match` on a LinkedIn URL the right first step: it caught 18 movers tonight and 5 of 40 on the earlier sample, and Moltsets caught none of those because its graph is keyed on the address the person had. Moltsets grades whether an address delivers, with reply and open evidence Apollo does not have. Use each for its question. The sheet is where the two answers meet.
+I used Apollo `people/match` for the still-at-the-company check because that is what I knew. Then I read the Moltsets skills library: Enrich a LinkedIn Profile, Find and Enrich by Name, Find Employees at a Company, Find Contacts at Target Accounts, HubSpot Buying Committee Expansion. I did not know those were in there, and they cover what this repo's Apollo starter does.
+
+So the second run used `--employment both`. The two sources agreed 181 times out of 193. Apollo flagged 18 job changes, Moltsets 23, and the 12 disagreements split both ways: Moltsets sometimes lists an advisory seat or a side project as the current company, Apollo sometimes returns "Stealth". Neither is an oracle, so the sheet holds a row when either says moved. On this list Apollo was redundant for the employment step. I will be testing the rest of the library against what I still run on Apollo, and the FACTCHECK in `skills/moltsets-reachability/` keeps the overlap table current. Where Apollo stands alone for now is the intent-gated company waterfall in `starters/apollo-prospecting/waterfall.py`: job postings, funding rounds, tech-stack twins. Moltsets does not have that.
 
 ---
 
@@ -188,7 +188,7 @@ python3 setup_oauth.py          # once
 
 python3 budget.py               # free; do this before any batch
 bash run.sh                     # 25 fictional rows, first pass only
-bash run.sh my_list.csv --full  # Apollo check + second pass on your list
+bash run.sh my_list.csv --full  # employment check + second pass on your list
 ```
 
 Read the Dashboard back in this order: loaded, graded, send-ready; first-pass hit rate and second-pass recovery; grade distribution; route mix; still / moved; what it cost. The misses are receipts. Say "not in the graph", never "invalid".
@@ -197,6 +197,6 @@ Read the Dashboard back in this order: loaded, graded, send-ready; first-pass hi
 
 ## What I Would Tell Adam
 
-The grade is the product, and the library does not have the piece after it. Seventy-six skills on moltsets.com cover enrichment, prospecting, ad audiences, and visitor identification, with Google Sheets listed as a data connection. None of them turns a D into a LinkedIn task or an F into a second look. That is the skill in this chapter. The misses are in here too, on purpose: coverage on early-career startup people, a second pass that rarely lands, a `location` parameter the API ignores, and a D/F table that deserves to be on every reference page.
+The grade is the product, and the library does not have the piece after it. Twenty-six skills on moltsets.com cover enrichment, prospecting, ad audiences, and visitor identification. None of them turns a D into a LinkedIn task or puts two employment sources side by side. That is the skill in this chapter. The misses are in here too: a second pass that rarely lands, a `location` parameter the API ignores, side roles reported as the current company, and a D-versus-F table that deserves to be on every reference page.
 
 Part of the [GTM Coding Agent](https://github.com/shawnla90/gtm-coding-agent). Starter: `starters/moltsets-reachability/`. Skill: `skills/moltsets-reachability/`.

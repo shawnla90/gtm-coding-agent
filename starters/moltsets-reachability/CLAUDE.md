@@ -8,7 +8,7 @@ Walk through these checks one at a time:
 
 1. **Moltsets key**: Check for `.env` in this directory. If missing, `cp .env.example .env` and paste the key from app.moltsets.com. `.env` is gitignored and must never be committed. If the user keeps keys in a local secrets vault (a SQLite db outside any repo), do not ask them to paste: `export SECRETS_DB=~/.gtm-vault/vault.db` and the scripts read `secrets(key, value)` from there. See "The secrets-vault explainer" below.
 
-2. **Apollo key (optional)**: Same file or vault, `APOLLO_API_KEY`. It powers `--apollo`, the employment check. The pipeline runs without it.
+2. **Apollo key (optional)**: Same file or vault, `APOLLO_API_KEY`. It powers `--employment apollo|both`, a second employment source for comparison. The pipeline runs without it.
 
 3. **Google Sheets auth**: Check for `~/.config/gspread/token.json`. If missing, `python3 setup_oauth.py` and walk them through the consent flow. They need a Google Cloud project with the Sheets and Drive APIs enabled.
 
@@ -18,7 +18,7 @@ Walk through these checks one at a time:
 
 6. **Budget first**: `python3 budget.py`. Three free calls. Shows the two record pools, the phone-token balance, and the endpoint catalogue. Do this before any batch.
 
-7. **Run it**: `bash run.sh` (first pass only) or `bash run.sh my_list.csv --full` (Apollo check + second pass).
+7. **Run it**: `bash run.sh` (first pass only) or `bash run.sh my_list.csv --full` (employment check + second pass).
 
 ## The pipeline
 
@@ -27,7 +27,7 @@ init_db.py -> grade.py -> score.py -> build_sheet.py
 ```
 
 - `init_db.py` loads the CSV into SQLite at `data/reachability.db`. Idempotent. `--country`, `--limit`, `--exclude <file>` filter the load.
-- `grade.py` is the waterfall. Per contact: optional Apollo `people/match` on the LinkedIn URL (still there, or moved?) -> Moltsets `reverse_email_lookup` -> on 404 or F, optional `search_people` by name + company DOMAIN (accept only same-domain A/B) -> LinkedIn-only rows go to `linkedin_to_best_email` -> optional capped `linkedin_to_mobile_phone` for dead-email rows. Every call is logged; every row is committed as it finishes.
+- `grade.py` is the waterfall. Per contact: `reverse_linkedin_lookup` on the LinkedIn URL (still there, or moved? plus the graded address when present; `--employment apollo|both` swaps in or adds Apollo `people/match`) -> Moltsets `reverse_email_lookup` when still ungraded -> on 404 or F, optional `search_people` by name + company DOMAIN (accept only same-domain A/B) -> LinkedIn-only rows go to `linkedin_to_best_email` -> optional capped `linkedin_to_mobile_phone` for dead-email rows. Every call is logged; every row is committed as it finishes.
 - `score.py` computes title relevance x grade multiplier and ranks the top 3 sendable per company with persona diversity.
 - `build_sheet.py` renders 9 tabs via the vendored `lib/sheet_engine.py`. Emails obfuscated by default.
 - `budget.py` explains the four units that meter Moltsets, using free calls only.

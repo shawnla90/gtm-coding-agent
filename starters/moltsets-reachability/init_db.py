@@ -29,6 +29,9 @@ CREATE TABLE IF NOT EXISTS contacts (
   -- Apollo employment check (optional)
   apollo_checked_at TEXT, apollo_current_company TEXT, apollo_current_domain TEXT,
   apollo_current_title TEXT, still_at_company TEXT,
+  -- Moltsets employment check (reverse_linkedin_lookup)
+  molt_current_company TEXT, molt_current_domain TEXT, molt_current_title TEXT,
+  employment_source TEXT, employment_agree TEXT,
   -- Moltsets
   molt_route    TEXT, molt_http TEXT, molt_email TEXT, grade TEXT, grade_validated_at TEXT,
   molt_title    TEXT, molt_company TEXT, molt_company_domain TEXT, molt_linkedin TEXT,

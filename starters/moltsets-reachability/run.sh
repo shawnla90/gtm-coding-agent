@@ -4,7 +4,8 @@
 #
 #   bash run.sh                          # sample_contacts.csv, first pass only
 #   bash run.sh my_list.csv              # your own CSV (short schema or a raw Apollo export)
-#   bash run.sh my_list.csv --full       # Apollo employment check + second pass
+#   bash run.sh my_list.csv --full       # Moltsets employment check + second pass
+#   bash run.sh my_list.csv --full --both # also run Apollo people/match and record agreement
 #   bash run.sh my_list.csv --phones 10  # also buy up to 10 mobiles for dead-email rows
 set -e
 cd "$(dirname "$0")"
@@ -14,7 +15,8 @@ CSV="sample_contacts.csv"
 GRADE_ARGS=()
 while [ $# -gt 0 ]; do
   case "$1" in
-    --full) GRADE_ARGS+=(--apollo --second-pass) ;;
+    --full) GRADE_ARGS+=(--second-pass) ;;
+    --both) GRADE_ARGS+=(--employment both) ;;
     --apollo|--second-pass|--redo) GRADE_ARGS+=("$1") ;;
     --phones) GRADE_ARGS+=(--phones "$2"); shift ;;
     --limit) GRADE_ARGS+=(--limit "$2"); shift ;;

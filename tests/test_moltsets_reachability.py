@@ -6,8 +6,8 @@ STARTER_DIR = Path(__file__).resolve().parents[1] / "starters" / "moltsets-reach
 sys.path.insert(0, str(STARTER_DIR))
 
 from lib import moltsets_client as M  # noqa: E402
-from lib.reachability import (GRADE_MULT, classify, companies_match, composite,  # noqa: E402
-                              second_pass_decision)
+from lib.reachability import (GRADE_MULT, classify, combine_employment, companies_match,  # noqa: E402
+                              composite, second_pass_decision)
 
 
 class ClassifyTests(unittest.TestCase):
@@ -89,6 +89,23 @@ class ScoreTests(unittest.TestCase):
         self.assertEqual(companies_match("Acme Inc", "Acme", "acme.com", "acme.com"), "yes")
         self.assertEqual(companies_match("Acme Inc", "Globex Corp"), "moved")
         self.assertEqual(companies_match("Acme", ""), "unknown")
+
+
+class EmploymentTests(unittest.TestCase):
+    def test_both_agree_still(self):
+        self.assertEqual(combine_employment("yes", "yes"), ("yes", "both", "yes"))
+
+    def test_either_moved_wins(self):
+        self.assertEqual(combine_employment("yes", "moved"), ("moved", "both", "no"))
+        self.assertEqual(combine_employment("moved", "unknown"), ("moved", "apollo", "n/a"))
+
+    def test_moltsets_only(self):
+        self.assertEqual(combine_employment("unknown", "yes"), ("yes", "moltsets", "n/a"))
+        self.assertEqual(combine_employment(), ("unknown", "none", "n/a"))
+
+    def test_reverse_linkedin_company_shape(self):
+        res = {"title": "GTM Engineer", "company": {"name": "Acme", "website_url": "https://www.acme.com/"}}
+        self.assertEqual(M.company_of(res), ("Acme", "acme.com"))
 
 
 class ResponseShapeTests(unittest.TestCase):

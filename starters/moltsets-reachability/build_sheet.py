@@ -79,6 +79,9 @@ def main():
     df = pd.DataFrame([dict(zip(cols, r)) for r in cur.fetchall()], columns=cols)
     if df.empty:
         sys.exit("no contacts. run init_db.py and grade.py first.")
+    for c in ("molt_current_company", "molt_current_domain", "employment_source", "employment_agree"):
+        if c not in df.columns:
+            df[c] = ""
     for c in df.columns:
         df[c] = df[c].fillna("").astype(str)
     df["full_name"] = (df["first_name"].str.strip() + " " + df["last_name"].str.strip()).str.strip()
@@ -125,7 +128,7 @@ def main():
         {"kind": "kpi", "label": "Send low volume (C catch-all)", "value": str(tiers.get("T2_catchall", 0))},
         {"kind": "kpi", "label": "Never email (D), routed to LinkedIn", "value": str(tiers.get("SUPPRESS", 0))},
         {"kind": "kpi", "label": "Not in the graph after all passes", "value": str(tiers.get("HOLD_not_found", 0))},
-        {"kind": "kpi", "label": "Job changed (Apollo), re-source", "value": str(tiers.get("HOLD_job_change", 0))},
+        {"kind": "kpi", "label": "Job changed (either source), re-source", "value": str(tiers.get("HOLD_job_change", 0))},
         {"kind": "blank"},
         {"kind": "section", "label": "GRADE DISTRIBUTION"},
     ]
@@ -143,10 +146,17 @@ def main():
     if stats.get("sp_calls"):
         entries.append({"kind": "kpi", "label": "second pass: search_people calls", "value": str(stats["sp_calls"])})
         entries.append({"kind": "kpi", "label": "  recovered same-domain A/B", "value": pct(stats.get("sp_recovered", 0), stats["sp_calls"])})
+    agree = Counter(df["employment_agree"])
+    entries.append({"kind": "kpi", "label": "still at company / moved / unknown",
+                    "value": f"{still.get('yes', 0)} / {still.get('moved', 0)} / {still.get('unknown', 0)}"})
+    if stats.get("rll_calls"):
+        entries.append({"kind": "kpi", "label": "Moltsets reverse_linkedin_lookup (URL key) hit rate", "value": pct(stats.get("rll_hit", 0), stats["rll_calls"])})
+        entries.append({"kind": "kpi", "label": "  of which returned a graded business email", "value": str(stats.get("rll_graded", 0))})
     if stats.get("apollo_checked"):
-        entries.append({"kind": "kpi", "label": "Apollo employment checks", "value": str(stats["apollo_checked"])})
-        entries.append({"kind": "kpi", "label": "  still at company / moved / unknown",
-                        "value": f"{still.get('yes', 0)} / {still.get('moved', 0)} / {still.get('unknown', 0)}"})
+        entries.append({"kind": "kpi", "label": "Apollo people/match checks", "value": str(stats["apollo_checked"])})
+    if agree.get("yes") or agree.get("no"):
+        entries.append({"kind": "kpi", "label": "Apollo vs Moltsets on employment: agree / disagree",
+                        "value": f"{agree.get('yes', 0)} / {agree.get('no', 0)}"})
     if stats.get("phone_calls"):
         entries.append({"kind": "kpi", "label": "mobile lookups (1 phone token per hit)", "value": f"{stats['phone_hit']} hits / {stats['phone_calls']} calls"})
     phone_hits = sum(u[2] for u in usage if u[0] == "linkedin_to_mobile_phone")
@@ -163,12 +173,16 @@ def main():
 
     base_cols = ["rank", "composite_score", "grade", "tier", "route", "full_name", "title", "persona",
                  "company", "domain", "email", "molt_email", "grade_validated_at", "still_at_company",
-                 "apollo_current_company", "linkedin_url", "mobile_phone", "action"]
+                 "employment_agree", "molt_current_company", "apollo_current_company", "linkedin_url",
+                 "mobile_phone", "action"]
     widths = {"full_name": 170, "title": 220, "company": 160, "domain": 150, "email": 200,
               "molt_email": 200, "grade_validated_at": 120, "apollo_current_company": 160,
+              "molt_current_company": 160, "employment_agree": 110,
               "linkedin_url": 230, "mobile_phone": 130, "action": 340, "tier": 150, "route": 150}
+    AGREE_COLOR = {"yes": SE.GREEN_LT, "no": SE.ORANGE, "n/a": SE.GREY_LT}
     cfs = [
         {"col": "composite_score", "type": "grad", "stops": (0, 60, 150)},
+        {"col": "employment_agree", "type": "map", "map": AGREE_COLOR},
         {"col": "grade", "type": "map", "map": GRADE_COLOR},
         {"col": "tier", "type": "map", "map": TIER_COLOR},
         {"col": "route", "type": "map", "map": ROUTE_COLOR},
@@ -216,7 +230,7 @@ def main():
         "dashboard": {"title": "Dashboard",
                       "subtitle": {"title": "REACHABILITY: RELEVANCE x TIMING x A GRADED ADDRESS",
                                    "sub": f"{n} contacts, {sendable} send ready, {routes.get('linkedin', 0) + routes.get('linkedin_then_phone', 0)} rows routed to LinkedIn instead of deleted "
-                                          f"| Apollo confirms the person, Moltsets grades the address, the sheet picks the channel "
+                                          f"| the LinkedIn URL confirms the person, Moltsets grades the address, the sheet picks the channel "
                                           f"| Built with the Clearbox GTM OS - clearbox.to"},
                       "entries": entries},
         "tabs": tabs,

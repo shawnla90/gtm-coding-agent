@@ -207,7 +207,12 @@ def company_of(rec: dict) -> tuple[str, str]:
         return "", ""
     c = rec.get("company")
     if isinstance(c, dict):
-        return str(c.get("name") or ""), str(c.get("domain") or "").lower()
+        d = str(c.get("domain") or "").lower()
+        if not d:
+            w = str(c.get("website_url") or c.get("website") or "").lower()
+            d = w.replace("https://", "").replace("http://", "").split("/")[0]
+            d = d[4:] if d.startswith("www.") else d
+        return str(c.get("name") or ""), d
     name = rec.get("current_company") or ""
     url = rec.get("current_company_url") or ""
     host = url.lower().replace("https://", "").replace("http://", "").split("/")[0]

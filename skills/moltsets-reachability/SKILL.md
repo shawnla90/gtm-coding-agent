@@ -13,7 +13,7 @@ Relevance, timing, reachability. Title scoring covers relevance. The Apollo empl
 ## Inputs
 
 - A contact CSV: the short schema (`first_name,last_name,title,company,domain,email,linkedin_url`) or a raw Apollo people export with its original headers
-- `MOLTSETS_API_KEY` (env, `.env`, or `SECRETS_DB` vault). `APOLLO_API_KEY` optional, powers `--apollo`
+- `MOLTSETS_API_KEY` (env, `.env`, or `SECRETS_DB` vault). `APOLLO_API_KEY` optional, powers `--employment apollo|both`
 - `~/.config/gspread/token.json` from `setup_oauth.py`
 - Optional: `--exclude <file>` of emails or LinkedIn URLs that must never be graded (people already in your pipeline)
 
@@ -24,7 +24,8 @@ cd starters/moltsets-reachability
 python3 budget.py                                    # free: pools, phone tokens, endpoint count. Always first.
 python3 init_db.py my_list.csv --exclude pipeline.txt
 python3 grade.py --limit 20 --dry-run                # shows what would run, spends nothing
-python3 grade.py --apollo --second-pass              # the waterfall
+python3 grade.py --second-pass                       # the waterfall (Moltsets employment check)
+python3 grade.py --employment both --second-pass     # add Apollo people/match and an agree column
 python3 score.py
 python3 build_sheet.py                               # prints the sheet URL; emails obfuscated
 ```
@@ -33,8 +34,8 @@ python3 build_sheet.py                               # prints the sheet URL; ema
 
 ## The waterfall (binding order)
 
-1. **Apollo `people/match` on the LinkedIn URL** (`--apollo`). If the current company disagrees with the listed one: `job_changed`, route `resource`, and the stale email is not graded. Timing before reachability.
-2. **`reverse_email_lookup`** on the business email. Grade A-F. A 404 means the address is not in the graph. It costs nothing and it is not a verdict.
+1. **`reverse_linkedin_lookup` on the LinkedIn URL** (default; `--employment apollo` or `both` to compare). Returns the current company and, when the graph has one, the graded business email. If the current company disagrees with the listed one: `job_changed`, route `resource`, and the stale email is not graded. Timing before reachability. On 200 rows this found 196 profiles and graded 134 addresses where the email-keyed lookup found 70.
+2. **`reverse_email_lookup`** on the business email, only when step 1 did not grade it. A 404 means the address is not in the graph. It costs nothing and it is not a verdict.
 3. **Second pass** (`--second-pass`) on 404 or F: `search_people {query: "First Last", company: "<domain>"}`. Accept only a same-domain grade A/B candidate whose name matches. A different domain is a different person until proven otherwise.
 4. **LinkedIn-only rows**: `linkedin_to_best_email`.
 5. **Phones** (`--phones N`): only for rows whose email is dead (D) or unfound, one phone token per hit, never below the floor.
@@ -61,7 +62,7 @@ Report in this order, every time, with the numbers from the Dashboard tab:
 2. First-pass hit rate and how many the second pass recovered. Coverage gaps are receipts, not embarrassments.
 3. Grade distribution A through F.
 4. Route mix: how many rows kept a channel that a suppress-only tool would have deleted.
-5. Apollo still / moved / unknown.
+5. Still / moved / unknown, and the Apollo-vs-Moltsets agree count when both ran. Say plainly which library skill covers each Apollo step you replaced (see FACTCHECK).
 6. What it cost: records used against the two pools, phone tokens spent (usually zero).
 
 ## Do
@@ -86,4 +87,4 @@ Report in this order, every time, with the numbers from the Dashboard tab:
 - `../../starters/apollo-prospecting/` — the title weights and the sheet engine this reuses
 - `../../chapters/23-reachability-grading.md` — the build, the numbers, and why the route column exists
 - [Moltsets email risk scores](https://developer.moltsets.com/moltsets-data/email-risk-scores)
-- [Moltsets skills library](https://moltsets.com/library) — the 76 upstream Claude skills this one sits beside
+- [Moltsets skills library](https://moltsets.com/library) — the 26 upstream Claude skills this one sits beside

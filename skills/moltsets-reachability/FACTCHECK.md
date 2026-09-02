@@ -58,9 +58,24 @@ Account (free): `get_account`, `get_billing`, `get_usage`
 - `search_people.query` is fuzzy across name, title, and headline. Name-only queries return role accounts and homonyms. Filter on real first+last, title keywords, and domain agreement.
 - `limit` max is 25 per docs.
 
-## Moltsets skills library (moltsets.com/library, checked 2026-09-01)
+## Moltsets skills library (moltsets.com/library, enumerated 2026-09-01)
 
-76 Claude skills, 10 categories, 4 outcomes: verified emails and mobiles; find new prospects; ad audiences (SHA256, MAID); website visitors (IP, RB2B). Data connections listed: Claude Chat, CSV, Excel, Google Sheets, HubSpot, RB2B. Nothing in the library ships an A-F color-graded dashboard, a grade-to-channel routing table, a budget/ledger surface, or an Apollo employment pairing. Say "the library does not cover X"; do not say "Moltsets cannot do X".
+26 skills: 25 cards plus the featured "Email Finder". Categories seen on the cards: Enrichment, Prospecting, Ad Audience, Identity Resolution, IP Intelligence. Four outcome groups: verified emails and mobiles; find new prospects; ad audiences (SHA256, MAID); website visitors (IP, RB2B). Authors: MoltSets (22), Robb Clarke (4 RB2B skills). Data connections listed: Claude Chat, CSV, Excel, Google Sheets, HubSpot, RB2B.
+
+**Overlap with what this repo uses Apollo for (say this plainly):**
+
+| Apollo use in this repo | Library skill that covers it | Verified? |
+|---|---|---|
+| `people/match` on a LinkedIn URL (still at the company?) | Enrich a LinkedIn Profile (`reverse_linkedin_lookup`) | Yes, 2026-09-01: 12/12 profiles returned, agreed with Apollo on 6/8 job changes and 4/4 stays |
+| `people/match` by name + domain | Find & Enrich by Name (`search_linkedin_profile` + email); `search_business_email_by_name` | Endpoint shape verified (name + company domain; `count_only: true` is free); not yet run at volume |
+| Buying-committee expansion per company (apollo-prospecting starter) | Find Employees at a Company · Find Contacts at Target Accounts · HubSpot Buying Committee Expansion | Not yet tested |
+| `mixed_people/api_search` | Search B2B Prospects (`search_people`) | Used since August |
+
+**Not covered by the library or the API (Apollo still needed):** the intent-gated company waterfall in `starters/apollo-prospecting/waterfall.py` (job postings, funding rounds, tech-stack twins) and Apollo's saved-search filters. Nothing in the library ships an A-F color-graded dashboard, a grade-to-channel routing table, a budget/ledger surface, or an employment-vs-address comparison. Say "the library does not cover X"; do not say "Moltsets cannot do X".
+
+## The LinkedIn URL is the better key (verified 2026-09-01)
+
+`reverse_linkedin_lookup {linkedin_url}` returned a profile (current company, title, seniority, `current_role_start_date`) for 12/12 people whose business emails had 404'd on `reverse_email_lookup`. 4 of the 12 also carried a graded business email (2 the same address Apollo held, 2 on a different domain). Response `company` is a dict `{name, website_url, linkedin_url, industry, revenue}`; there is no `domain` key, derive it from `website_url`. It consumes an enrich-pool record on a hit. `search_linkedin_profile` takes `name` + company domain, not a URL (422 otherwise).
 
 ## Receipts you may quote (dated)
 
@@ -68,6 +83,6 @@ Account (free): `get_account`, `get_billing`, `get_usage`
 - AEO409 list (407 Apollo "Verified" addresses): 272 confirmed valid, 17 corrected, 10 risky, 26 no email, 82 not found. Grades A 297, B 2.
 - Headless CRM list (1,752 people, 2026-08-31): A 1,014, B 9, C 6, D 2, F 4, LinkedIn-only 717. `linkedin_to_best_email` 0 hits in 26. `linkedin_to_mobile_phone` 29 hits in 40 calls.
 - Employment sample (40 people, 2026-08-30): Apollo `people/match` 40/40; Moltsets `reverse_email_lookup` 9/40 on that GTM-engineer ICP; 8 of 8 same-address hits were grade A; the two sources agreed on still-at-company 32/40; Apollo alone caught 5 real moves.
-- Tonight's 200-row run: see `data/grade_summary.json` in the starter and the Dashboard tab. Quote those numbers with the date.
+- 2026-09-01, 200 US GTM engineers (Apollo export, all Verified), graded twice. Email key: 70 profiles / 60 graded (all A) / 60 send-ready / 120 to LinkedIn / 18 job changes (Apollo). URL key (`reverse_linkedin_lookup`): 196 profiles / 136 graded (135 A, 1 B) / 113 send-ready (32 corrected same-domain addresses) / 54 to LinkedIn / 27 job changes / 6 hold. Apollo vs Moltsets employment: agree 181 of 193; Apollo 18 moves, Moltsets 23; 12 disagreements split both ways (advisory or side roles listed as current vs "Stealth"). Second pass 2/112 then 0/54. Records 228 enrich + 5 search for the URL run, 0 phone tokens.
 
 Anything not on this page is not a fact yet.

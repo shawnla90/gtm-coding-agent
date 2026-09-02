@@ -1,8 +1,8 @@
 # Moltsets Reachability Starter
 
-Grade every email on a list A through F, route the bad ones to another channel instead of dropping them, and read the result in a color-coded Google Sheet. Apollo confirms the person is still at the company. Moltsets grades the address. The sheet picks the channel.
+Grade every email on a list A through F, route the bad ones to another channel instead of dropping them, and read the result in a color-coded Google Sheet. Moltsets confirms the person is still at the company and grades the address. The sheet picks the channel. Apollo can run alongside for a side-by-side employment check.
 
-Relevance, timing, and reachability are the three things a list has to get right. Title scoring covers relevance. The Apollo employment check covers timing. The Moltsets grade covers reachability, and the route column is what you do when the grade says no.
+Relevance, timing, and reachability are the three things a list has to get right. Title scoring covers relevance. A LinkedIn URL lookup covers timing. The Moltsets grade covers reachability, and the route column is what you do when the grade says no.
 
 ## Quick Start
 
@@ -15,7 +15,8 @@ python3 setup_oauth.py          # one time: Google Sheets consent
 
 python3 budget.py               # three free calls: pools, phone tokens, endpoint count
 bash run.sh                     # sample_contacts.csv, first pass only
-bash run.sh my_list.csv --full  # your list: Apollo employment check + second pass
+bash run.sh my_list.csv --full  # your list: employment check + second pass
+python3 grade.py --employment both --second-pass   # compare Apollo people/match with Moltsets on employment
 ```
 
 Or skip the paste and read the key from a local vault: `export SECRETS_DB=~/.gtm-vault/vault.db`.
@@ -25,7 +26,7 @@ Or skip the paste and read the key from a local vault: `export SECRETS_DB=~/.gtm
 ```
 init_db.py     CSV -> SQLite (short schema or a raw Apollo export)
      |
-grade.py       Apollo people/match (still there?) -> Moltsets reverse_email_lookup (A-F)
+grade.py       reverse_linkedin_lookup (still there? + graded email) -> reverse_email_lookup (A-F)
                -> on 404/F: search_people by name + DOMAIN, accept same-domain A/B only
                -> LinkedIn-only rows: linkedin_to_best_email
                -> optional capped linkedin_to_mobile_phone for dead-email rows
