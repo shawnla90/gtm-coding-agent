@@ -73,7 +73,8 @@ def main():
         digits = "".join(c for c in phone if c.isdigit())
         if len(digits) < 4:
             return "***"
-        return f"+{digits[:1]}-***-***-{digits[-4:]}"
+        # leading apostrophe forces text: USER_ENTERED parses a bare "+..." as a formula (#ERROR!)
+        return f"'+{digits[:1]}-***-***-{digits[-4:]}"
 
     exp_df["email"] = exp_df["email"].apply(_obfuscate_email)
     exp_df["phone"] = exp_df["phone"].apply(_obfuscate_phone)

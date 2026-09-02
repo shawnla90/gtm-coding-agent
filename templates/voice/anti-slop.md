@@ -22,6 +22,11 @@ AI-generated content has tells. These rules eliminate them. Load this file along
 | scalable solution | [say what scales and how] |
 | holistic approach | [say what you actually do] |
 | move the needle | [say what metric improves] |
+| unlock / unlocking | [say what becomes possible] |
+| empower / empowering | [say what they can now do] |
+| revolutionize / disrupt | [say what actually changes] |
+| unleash / supercharge | [delete the hype, keep the fact] |
+| game changer | [say what it actually changes] |
 
 ### AI Slop Tells
 | Pattern | Fix |
@@ -35,6 +40,17 @@ AI-generated content has tells. These rules eliminate them. Load this file along
 | "Look," / "Listen," | Delete unless it's genuinely your voice. |
 | Starting with "So," | Delete the "So,". |
 | "This is a great question" | Delete. Answer the question. |
+| "chaos" as a stakes word | Say what actually broke. |
+| "no fluff" / "no BS" disclaimers | Delete. If it's true, the reader will know. |
+| "nada" filler | Delete. Performative emphasis. |
+| "dive in" / "deep dive" | Just start. |
+| "buckle up" | Delete. |
+| "let's be honest" / "let's be real" | Delete. Just say it. |
+| "spoiler alert" | Delete. |
+| "hot take:" label | Delete the label. State the take. |
+| "It's not about X, it's about Y" | State what it IS about. |
+| "most [X] are Y" hedging | State the claim directly: "intent data is a guess". |
+| "I noticed you..." | State the fact: "{company} runs X". Reads surveillance-y. |
 
 ### Punctuation Tells
 | Pattern | Fix |
