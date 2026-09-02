@@ -4,6 +4,26 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.11.0] - 2026-09-02
+
+Chapter 23, a sixth skill, and a new starter: email reachability graded A through F by Moltsets, with the person confirmed by Apollo and every bad grade routed to another channel instead of deleted. The proving run: 200 GTM engineers from an Apollo export, all marked Verified. Apollo `people/match` caught 18 job changes. Moltsets `reverse_email_lookup` found 70 profiles and confirmed 60 work emails, every one grade A; 112 addresses were not in the graph, and a second pass by name + company domain recovered 2 more. Result: 62 grade A, 60 send-ready (2 held for a domain mismatch), 120 routed to LinkedIn, 18 to re-source, 0 phone tokens spent, 70 enrich records and 12 search records consumed. The 112 misses cost nothing.
+
+### Added
+
+- **`chapters/23-reachability-grading.md`** — the grade semantics from the Moltsets docs (A valid, B delivered, C catch-all, D hard invalid, F no data; F is not D), the four metered units (calls, two record pools, internal tokens, phone tokens), the Apollo + Moltsets pairing (the person graph vs the address graph), the grade-to-route table, and the run above with its misses left in.
+- **`starters/moltsets-reachability/`** — `init_db.py` (short schema or raw Apollo export), `grade.py` (Apollo employment check → `reverse_email_lookup` → second pass `search_people` by name + DOMAIN accepting only same-domain A/B → `linkedin_to_best_email` for LinkedIn-only rows → capped `linkedin_to_mobile_phone` for dead-email rows; per-row commits, fair-use floor guard, every call logged), `score.py` (title relevance × grade multiplier, A 1.0 / B 0.85 / C 0.6 / F 0.3 / D 0.15), `build_sheet.py` (Dashboard, Send Ready, Send Low Volume, Route - LinkedIn, Review - Hold, Suppressed, All Contacts, Grading Model, Moltsets Usage), `budget.py` (the four units from three free calls), `lib/moltsets_client.py` (never-raising client, three response shapes normalized, env → `.env` → `SECRETS_DB` vault), `lib/reachability.py` (pure classify/route/score functions), vendored `lib/sheet_engine.py`, fictional `sample_contacts.csv`.
+- **`skills/moltsets-reachability/`** — `SKILL.md` (the waterfall order, the grade-to-route table, how to read the dashboard back) and `FACTCHECK.md` (grade semantics, the 25-endpoint catalogue, the metered units, parameter gotchas, the library gap, dated receipts).
+- **`tests/test_moltsets_reachability.py`** — 22 unit tests for classify, second-pass acceptance, multipliers, the three response-shape parsers, and the budget floors. No network.
+
+### Changed
+
+- `README.md` (chapter tree, skills and starters blocks, What You'll Learn, chapter counts), `CLAUDE.md` (learning path, ongoing-behavior trigger, reference paths), and `skills/README.md` now index 23 chapters, six skills, and the new starter.
+
+### Verification
+
+- `python3 -m unittest discover -s tests -p "test_moltsets*.py"`: 22 tests OK. `python3 -m compileall starters/moltsets-reachability` clean. `bash -n run.sh` clean.
+- Live run 2026-09-01: `budget.py` against `get_account` / `get_billing` / `get_usage` (plan `subscription_97`, enrich 15,000/5h, search 7,500/5h, phone tokens 29/50); `grade.py --apollo --second-pass` on 200 rows, enrich `records_remaining_5h` 15,000 → 14,930 (70 consumed = 70 hits; 112 not-found consumed none), search 7,500 → 7,488; `build_sheet.py` produced 7 tabs. Sheet URL, database, and CSV are gitignored.
+
 ## [0.10.0] - 2026-08-20
 
 Chapter 22 and its starter: headless LinkedIn outreach from your own account. A three-week campaign against 1,297 GTM engineers — 601 connection requests, 299 accepted (49.8%), 35 replies — where 31 of the 35 replies came from the connection note alone, before any follow-up message existed. The chapter is the build, the full funnel, and the double-send incident that ended the campaign; the starter ships the fix.

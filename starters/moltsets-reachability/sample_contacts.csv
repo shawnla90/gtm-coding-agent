@@ -1,0 +1,26 @@
+first_name,last_name,title,company,domain,email,linkedin_url,seniority,industry,employees,country,source
+Jordan,,Head of Growth,Northwind Labs,northwindlabs.example,jordan@northwindlabs.example,,Head,software,45,United States,sample
+Priya,,VP Revenue Operations,Northwind Labs,northwindlabs.example,priya@northwindlabs.example,,VP,software,45,United States,sample
+Marcus,,GTM Engineer,Northwind Labs,northwindlabs.example,marcus@northwindlabs.example,,Entry,software,45,United States,sample
+Elena,,Founder,Bluefin Analytics,bluefin.example,elena@bluefin.example,,Founder,analytics,12,United States,sample
+Tomas,,Director of Marketing,Bluefin Analytics,bluefin.example,tomas@bluefin.example,,Director,analytics,12,United States,sample
+Aisha,,Chief Revenue Officer,Copperline Systems,copperline.example,aisha@copperline.example,,C-Suite,IT services,180,United States,sample
+Diego,,Sales Development Manager,Copperline Systems,copperline.example,diego@copperline.example,,Manager,IT services,180,United States,sample
+Hannah,,Head of Demand Gen,Copperline Systems,copperline.example,hannah@gmail.com,,Head,IT services,180,United States,sample
+Wei,,Product Marketing Lead,Saltmarsh Software,saltmarsh.example,wei@saltmarsh.example,,Senior,software,60,Canada,sample
+Ravi,,Revenue Operations Manager,Saltmarsh Software,saltmarsh.example,ravi@saltmarsh.example,,Manager,software,60,Canada,sample
+Sofia,,Co-Founder and CEO,Harborlight AI,harborlight.example,sofia@harborlight.example,,Founder,software,8,United States,sample
+Noah,,Growth Engineer,Harborlight AI,harborlight.example,,https://www.linkedin.com/in/sample-noah,Entry,software,8,United States,sample
+Lena,,VP Marketing,Granite Peak Consulting,granitepeak.example,lena@granitepeak.example,,VP,consulting,95,United Kingdom,sample
+Omar,,Business Development Director,Granite Peak Consulting,granitepeak.example,omar@granitepeak.example,,Director,consulting,95,United Kingdom,sample
+Chloe,,Head of Sales,Riverbend Logistics,riverbend.example,chloe@riverbend.example,,Head,logistics,320,United States,sample
+Kenji,,Marketing Operations Manager,Riverbend Logistics,riverbend.example,kenji@riverbend.example,,Manager,logistics,320,United States,sample
+Isabel,,Chief Marketing Officer,Fernhill Health,fernhill.example,isabel@fernhill.example,,C-Suite,healthcare,540,United States,sample
+Lucas,,GTM Lead,Fernhill Health,fernhill.example,lucas@fernhill.example,,Senior,healthcare,540,United States,sample
+Maya,,Founder,Quillstone Media,quillstone.example,maya@quillstone.example,,Founder,media,5,United States,sample
+Ethan,,Partnerships Manager,Quillstone Media,quillstone.example,ethan@quillstone.example,,Manager,media,5,United States,sample
+Zara,,VP Sales,Ironwood Robotics,ironwood.example,zara@ironwood.example,,VP,robotics,210,Germany,sample
+Felix,,Product Manager,Ironwood Robotics,ironwood.example,felix@ironwood.example,,Manager,robotics,210,Germany,sample
+Nadia,,Head of Revenue,Sundial Payments,sundial.example,nadia@sundial.example,,Head,fintech,130,United States,sample
+Owen,,Demand Generation Manager,Sundial Payments,sundial.example,owen@sundial.example,,Manager,fintech,130,United States,sample
+Ines,,Director of Sales Operations,Sundial Payments,sundial.example,ines@sundial.example,,Director,fintech,130,United States,sample

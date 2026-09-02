@@ -73,6 +73,7 @@ Recommend 3-5 chapters based on their profile:
 | RevOps / CRM automation | 04 → 07 → 08 → 13 → 05 |
 | Reddit / AI visibility | 04 → 06 → 07 → 08 → 18 → 19 |
 | LinkedIn outreach from your own account | 04 → 05 → 06 → 07 → 22 |
+| Email deliverability / list reachability | 04 → 07 → 08 → 23 → 05 |
 | Student building a track record | 21 → 02 → 07 → 18 → 09 → 20 → 05 |
 
 Tell them: *"Start with Chapter XX. When you're done, come back and say 'next chapter' and I'll guide you through the next one."*
@@ -97,10 +98,11 @@ When the user returns after setup:
 - **"linkedin outreach" / "connection requests" / "headless linkedin" / "linkedin ledger"** → Chapter 22 and `starters/linkedin-headless-outreach/`. A self-hosted Playwright sender on the user's own account, a SQLite ledger with claim-before-click writes, and a read-only reconcile observer. Always surface the ToS/ban risk neutrally — it's their account and their call — and steer measurement (`reconcile.js`, run from day one) before volume. Never present it as a substitute-for-or-attack-on managed tools like HeyReach.
 - **"student gtm" / "I'm a student"** → Chapter 21 and `starters/student-gtm/`. Run the interview, scaffold their own build-in-public repo, and set the weekly loop: build for a campus client, record it, ship it, write the gotchas, publish.
 - **"apollo prospecting" / "apollo workflow" / "expand buying committee" / "waterfall" / "grow the list"** → `starters/apollo-prospecting/`. Load source contacts from CSV, expand via Apollo API (free), score by title relevance x reachability tier, output to a color-coded Google Sheet. The search is free; the reveal costs credits. Score first, reveal the winners. `waterfall.py` grows the company list itself: gated lookalike searches drain from deepest intent (job postings, funding, tech stack) to plain firmographics, tagging every company with why it made the list — a self-built intent layer.
+- **"moltsets" / "grade this list" / "reachability sheet" / "route by grade" / "which emails can I send to"** → Chapter 23, `skills/moltsets-reachability/`, and `starters/moltsets-reachability/`. Apollo confirms the person is still at the company, Moltsets grades the address A-F, the sheet picks the channel. A bad grade is a routing decision, not a dead contact: D never emails but goes to LinkedIn then phone; F and 404 get a second pass by name + company DOMAIN before LinkedIn. Run `budget.py` before any batch; `company` is always a domain; F is no data, D is the hard invalid, never swap them; nothing sends.
 
 ## Reference Paths
 
-- Chapters: `chapters/01-*.md` through `chapters/22-*.md`
+- Chapters: `chapters/01-*.md` through `chapters/23-*.md`
 - Mode configs: `modes/*.md`
 - Templates: `templates/{claude-md,voice,content,partner}/`
 - Prompts: `prompts/*.md`
@@ -111,6 +113,7 @@ When the user returns after setup:
 - Podcast-to-shorts starter: `starters/podcast-shorts/` (Chapter 20)
 - Student GTM starter: `starters/student-gtm/` (Chapter 21)
 - Apollo prospecting starter: `starters/apollo-prospecting/`
+- Moltsets reachability starter: `starters/moltsets-reachability/` (Chapter 23)
 - LinkedIn headless outreach starter: `starters/linkedin-headless-outreach/` (Chapter 22)
 - Schema files: `starters/signals-dashboard/schema/`
 - Pipeline scripts: `starters/signals-dashboard/pipeline/`
