@@ -26,7 +26,7 @@ gtm-coding-agent/
 ├── CLAUDE.md                              # interactive onboarding         ← START HERE
 ├── README.md                              # you are here
 │
-├── chapters/                              # 21 educational chapters
+├── chapters/                              # 24 educational chapters
 │   ├── 01-coding-agents-vs-editors.md     #   agents vs cursor vs chatgpt
 │   ├── 02-context-engineering.md          #   CLAUDE.md, structured context
 │   ├── 03-token-efficiency.md             #   200K context, cost, subagents
@@ -49,7 +49,8 @@ gtm-coding-agent/
 │   ├── 20-podcast-to-shorts.md             #   one recording → captioned vertical clip drafts
 │   ├── 21-student-gtm.md                   #   campus network → public GTM track record
 │   ├── 22-headless-linkedin-outreach.md    #   self-hosted Playwright outreach + SQLite ledger
-│   └── 23-reachability-grading.md          #   Moltsets A-F grades → route by grade → color-coded sheet, next to your verifier (+ the Apollo overlap, said plainly)
+│   ├── 23-reachability-grading.md          #   Moltsets A-F grades → route by grade → color-coded sheet, next to your verifier (+ the Apollo overlap, said plainly)
+│   └── 24-stream-deck-command-center.md    #   Stream Deck+ profile generated from Python: project keys, Claude Code keys, content kickoffs, MCP
 │
 ├── skills/                                # installable Claude Code skills (the Reddit motion + reachability)
 │   ├── clearbox-onboard/                  #   domain → researched Clearbox offer pack + pastable prompt
@@ -67,6 +68,7 @@ gtm-coding-agent/
 │   ├── market-scoring-sheet/              #   CSV → color-coded 1-5 scored Google Sheet
 │   ├── client-onboarding-miro/            #   Miro board templates (Ch 17)
 │   ├── podcast-shorts/                    #   recording → word-timed captioned vertical drafts (Ch 20)
+│   ├── stream-deck-command-center/        #   generated Stream Deck profile + project launcher + kickoffs (Ch 24)
 │   └── student-gtm/                       #   interview → your own build-in-public repo (Ch 21)
 │
 ├── engine/                                # tool documentation (living, updated regularly)
@@ -141,7 +143,7 @@ gtm-coding-agent/
 | | |
 |---|---|
 | **Interactive Onboarding** | **Educational Chapters** |
-| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 23 chapters from "what is a coding agent" to "decode competitor ad strategy via the public Meta Ad Library." Read in order or jump to what you need. |
+| `CLAUDE.md` asks 6 questions, then builds your workspace. Recommends tools, mode, and learning path — all personalized. | 24 chapters from "what is a coding agent" to "decode competitor ad strategy via the public Meta Ad Library." Read in order or jump to what you need. |
 | **GTM-OS Skeleton** | **Modes** |
 | A working folder structure for ICP, positioning, segments, campaigns, and content. Fork it. Fill it in. Run GTM from it. | 5 personas: solo founder, agency, single-client, ABM outbound, student. Each mode configures the skeleton differently. |
 | **Templates** | **Prompts** |
@@ -157,7 +159,7 @@ Prefer reading to forking? The full playbook is available as a book-style web gu
 
 **[The GTM Coding Agent Playbook on shawnos.ai](https://shawnos.ai/guide/gtm-coding-agent)**
 
-23 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
+24 chapters, expanded with narrative, examples, and Shawn's perspective. The web version is for reading cover to cover. This repo is for forking and building.
 
 ---
 
@@ -280,6 +282,7 @@ New chapters and starters ship as tagged **[Releases](https://github.com/shawnla
 | 21 - Student GTM | Build a public go-to-market track record in one semester with no budget, no title, and the campus network you already have |
 | 22 - Headless LinkedIn Outreach | Run outreach from your own account with a Playwright sender, a SQLite ledger, and a read-only observer — and see why the connection note, not the follow-up, is the campaign |
 | 23 - Reachability Grading | Grade every address A-F with Moltsets, confirm the person is still there from the LinkedIn URL, and route the rows a suppress-only tool deletes: D to LinkedIn then phone, not-found to a second pass, all in a color-coded sheet. Lay the grades next to the verifier you already run (10,088 rows: 6,776 agreements, 819 corrected addresses, 793 job changes the verifier passed), with the Apollo overlap stated plainly |
+| 24 - Stream Deck Command Center | Generate a Stream Deck profile from Python, put each repo on a key that opens Claude Code with the right model, effort and GitHub account, and run a draft, critique, render content pipeline with a human gate, all deployed without losing a profile |
 
 ---
 
