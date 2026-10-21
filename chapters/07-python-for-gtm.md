@@ -115,6 +115,8 @@ HUBSPOT_API_KEY=pat-your-key-here
 
 Then load them: `load_dotenv()` + `os.getenv("APOLLO_API_KEY")`. If the value comes back `None`, you misspelled the variable or forgot to create the file.
 
+The same rule, run against Prospeo from the repo or from a phone agent, is [Chapter 24](./24-enrichment-on-the-go.md). The script there has a dry-run, so the first pass spends nothing.
+
 ## Pattern 1 — API Enrichment
 
 **The scenario:** You have a CSV of 200 company domains. You want to enrich each one with employee count, industry, and funding data from Apollo.

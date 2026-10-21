@@ -4,6 +4,19 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [Unreleased]
+
+### Added
+
+- **Chapter 24: Enrichment on the Go.** Hold your own Prospeo key and call the current API (V2) from Claude Code or a Grok agent. Search (`/search-person`) returns a `person_id` and leaves email and mobile masked. Enrich (`/enrich-person`, `/bulk-enrich-person`) reveals a verified email (1 credit per hit) or a verified mobile (10 credits per hit; a miss is not charged). `GET /account-information` is the free balance check. The call waterfall verifies email first, then asks Prospeo for a verified mobile, then a phone-type check, then a do-not-call match on a SHA-256 of the number, and routes `cleared-to-call` or `email-only`.
+- **`examples/scripts/prospeo_enrich.py`**, **`examples/scripts/.env.example`**, **`examples/scripts/sample_contacts.csv`**. Dry-run sends nothing. `--limit` defaults to 5. The client reads `X-KEY` from `PROSPEO_API_KEY`, retries `429` from the reset headers, and stops when the daily bucket is empty. Output CSVs are gitignored.
+- **`tests/test_prospeo_enrich.py`**. Payload shape, route order, masked numbers, rate-limit retry, and a dry-run that must not touch the network.
+
+### Changed
+
+- `README.md` and `CLAUDE.md` now index 24 chapters, including the learning-path row and the "prospeo" / "enrichment on the go" router.
+- Cross-links from Chapters 04, 06, 07, 08, and 23, and a pointer in `examples/scripts/enrich-skeleton.py`.
+
 ## [0.12.0] - 2026-09-02
 
 The reachability starter learns to sit next to the verifier you already run. If your list carries a ZeroBounce (or NeverBounce, MillionVerifier, Bouncer) verdict, every row now gets a delta class: how Moltsets moved it relative to that verdict. The proving run was a client's 10,088-contact home-services list, already verified and pooled by ZeroBounce: 8,061 profiles returned (79.9%), 7,802 A/B (77.3%), 1,206 F, 1,060 never seen. Where the two agreed on the same address: 6,776 rows. Where they did not: 819 corrected same-domain addresses, 1,380 of 1,739 catch-all rows graded A/B on observed activity, 75 of 725 ZeroBounce drops recovered, 793 job changes, 7 grade D (one marked valid). 9,032 LinkedIn URLs on a list that shipped with none. 14,087 calls, 0 phone tokens, $0 marginal, about 75 minutes. Two corrections to 0.11.0 fall out of it: the grade mix is a property of the ICP (the 200 GTM engineers graded all A; this list graded 77% A with 12% F), and the second pass lands when it is `search_business_profile_by_name` (436 recovered of 2,722; `search_people` went 0 for 181, as it had gone 0 for 54 and 2 for 112 before).
