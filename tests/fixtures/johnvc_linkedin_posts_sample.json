@@ -1,0 +1,15 @@
+[
+  {
+    "id": "urn:li:activity:1234567890",
+    "linkedinUrl": "https://www.linkedin.com/posts/example-activity-1234567890",
+    "content": "Sample post body for fixture tests.",
+    "datePosted": "2026-10-01T12:00:00.000Z",
+    "numLikes": 12,
+    "numComments": 3,
+    "numShares": 1,
+    "author": {
+      "name": "Example Author",
+      "pictureUrl": "https://example.com/avatar.jpg"
+    }
+  }
+]

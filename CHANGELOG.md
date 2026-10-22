@@ -4,6 +4,12 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [Unreleased]
+
+### Added
+
+- **nexus-intel LinkedIn provider switch.** `starters/nexus-intel/scripts/scrape_linkedin.py` keeps harvestapi as the default and opts into `johnvc/linkedin-posts-api` when `LINKEDIN_POSTS_PROVIDER=johnvc`. Same `content_items` writes; dry-run prints the planned Actor + payload. Unit tests in `tests/test_nexus_linkedin_provider.py` (no Apify network). Docs: `engine/apify.md`, `starters/nexus-intel/docs/adding-connectors.md`.
+
 ## [0.12.0] - 2026-09-02
 
 The reachability starter learns to sit next to the verifier you already run. If your list carries a ZeroBounce (or NeverBounce, MillionVerifier, Bouncer) verdict, every row now gets a delta class: how Moltsets moved it relative to that verdict. The proving run was a client's 10,088-contact home-services list, already verified and pooled by ZeroBounce: 8,061 profiles returned (79.9%), 7,802 A/B (77.3%), 1,206 F, 1,060 never seen. Where the two agreed on the same address: 6,776 rows. Where they did not: 819 corrected same-domain addresses, 1,380 of 1,739 catch-all rows graded A/B on observed activity, 75 of 725 ZeroBounce drops recovered, 793 job changes, 7 grade D (one marked valid). 9,032 LinkedIn URLs on a list that shipped with none. 14,087 calls, 0 phone tokens, $0 marginal, about 75 minutes. Two corrections to 0.11.0 fall out of it: the grade mix is a property of the ICP (the 200 GTM engineers graded all A; this list graded 77% A with 12% F), and the second pass lands when it is `search_business_profile_by_name` (436 recovered of 2,722; `search_people` went 0 for 181, as it had gone 0 for 54 and 2 for 112 before).

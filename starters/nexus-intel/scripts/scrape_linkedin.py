@@ -2,8 +2,9 @@
 """
 scrape_linkedin.py — Pull recent LinkedIn posts from tracked sources.
 
-Uses the Apify actor `harvestapi/linkedin-profile-posts` to fetch posts for each
-source with platform='linkedin' and status='active'. Inserts into content_items.
+Default Apify Actors: `harvestapi/linkedin-profile-posts` and
+`harvestapi/linkedin-company-posts`. Opt into `johnvc/linkedin-posts-api` with
+`LINKEDIN_POSTS_PROVIDER=johnvc` (same SQLite writes; input schema differs).
 
 Usage:
   python3 scripts/scrape_linkedin.py                       # scrape all active LinkedIn sources
@@ -13,11 +14,13 @@ Usage:
   python3 scripts/scrape_linkedin.py --max-age-days 60      # drop posts older than N days (default 60)
   python3 scripts/scrape_linkedin.py --max-age-days 0       # disable age filter (not recommended)
   python3 scripts/scrape_linkedin.py --dry-run              # plan only, no Apify spend
+  LINKEDIN_POSTS_PROVIDER=johnvc python3 scripts/scrape_linkedin.py
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from datetime import datetime, timedelta, timezone
 
@@ -74,6 +77,23 @@ def parse_published_at(value) -> datetime | None:
 
 ACTOR_PROFILE_POSTS = "harvestapi/linkedin-profile-posts"
 ACTOR_COMPANY_POSTS = "harvestapi/linkedin-company-posts"
+ACTOR_JOHNVC_POSTS = "johnvc/linkedin-posts-api"
+
+VALID_PROVIDERS = frozenset({"harvestapi", "johnvc"})
+
+
+def linkedin_posts_provider() -> str:
+    """Return the configured LinkedIn posts provider (default harvestapi).
+
+    Set ``LINKEDIN_POSTS_PROVIDER=johnvc`` to call ``johnvc/linkedin-posts-api``
+    instead of the harvestapi profile/company Actors. Unknown values raise.
+    """
+    raw = (os.environ.get("LINKEDIN_POSTS_PROVIDER") or "harvestapi").strip().lower()
+    if raw not in VALID_PROVIDERS:
+        raise ValueError(
+            f"LINKEDIN_POSTS_PROVIDER must be one of {sorted(VALID_PROVIDERS)}, got {raw!r}"
+        )
+    return raw
 
 
 def is_company_source(source: dict) -> bool:
@@ -91,6 +111,54 @@ def is_company_source(source: dict) -> bool:
         return False
     # Fallback: competitors without URL (shouldn't happen) assumed to be companies.
     return source.get("relevance") == "competitor"
+
+
+def profile_url_for_source(source: dict) -> str:
+    """Build a canonical LinkedIn URL for Actors that take ``profileUrls``.
+
+    Prefers ``sources.url`` when present. Otherwise constructs from ``handle``
+    using the company vs person classification.
+    """
+    url = (source.get("url") or "").strip()
+    if url:
+        return url.rstrip("/")
+    handle = (source.get("handle") or "").strip().strip("/")
+    if not handle:
+        raise ValueError(f"source {source.get('id')} has no url or handle")
+    if is_company_source(source):
+        return f"https://www.linkedin.com/company/{handle}"
+    return f"https://www.linkedin.com/in/{handle}"
+
+
+def actor_call_for_source(
+    source: dict,
+    max_posts: int,
+    provider: str | None = None,
+) -> tuple[str, dict]:
+    """Return ``(actor_id, input_payload)`` for one LinkedIn source.
+
+    harvestapi uses separate profile/company Actors with public-identifier lists.
+    johnvc uses one Actor with ``profileUrls`` for both person and company pages.
+    """
+    provider = provider or linkedin_posts_provider()
+    is_company = is_company_source(source)
+    if provider == "johnvc":
+        return (
+            ACTOR_JOHNVC_POSTS,
+            {
+                "profileUrls": [profile_url_for_source(source)],
+                "maxPostsPerProfile": max_posts,
+            },
+        )
+    actor = ACTOR_COMPANY_POSTS if is_company else ACTOR_PROFILE_POSTS
+    id_field = "companyPublicIdentifiers" if is_company else "profilePublicIdentifiers"
+    return (
+        actor,
+        {
+            id_field: [source["handle"]],
+            "maxItems": max_posts,
+        },
+    )
 
 
 def main() -> int:
@@ -112,6 +180,7 @@ def main() -> int:
         cutoff = datetime.now(timezone.utc) - timedelta(days=args.max_age_days)
         print(f"Ingest filter: dropping posts published before {cutoff.date().isoformat()} ({args.max_age_days}d cutoff)")
 
+    provider = linkedin_posts_provider()
     conn = get_db()
     conditions = ["platform = 'linkedin'", "status = 'active'", "handle IS NOT NULL"]
     params: list = []
@@ -126,7 +195,7 @@ def main() -> int:
     sources = [
         dict(r)
         for r in conn.execute(
-            f"SELECT id, handle, name, relevance FROM sources WHERE {where} ORDER BY relevance, tier, name",
+            f"SELECT id, handle, name, relevance, url FROM sources WHERE {where} ORDER BY relevance, tier, name",
             params,
         ).fetchall()
     ]
@@ -135,11 +204,14 @@ def main() -> int:
         print("No matching LinkedIn sources found.")
         return 0
 
-    print(f"Found {len(sources)} LinkedIn sources:")
+    print(f"Found {len(sources)} LinkedIn sources (provider={provider}):")
     for s in sources:
         print(f"  [{s['id']:3}] {s['name']:40} ({s['relevance']}) — {s['handle']}")
 
     if args.dry_run:
+        for s in sources:
+            actor, payload = actor_call_for_source(s, args.max_posts, provider=provider)
+            print(f"  would call {actor} with {payload}")
         print("\n(dry-run — no Apify calls made)")
         return 0
 
@@ -154,16 +226,12 @@ def main() -> int:
     total_ingested = 0
     for s in sources:
         is_company = is_company_source(s)
-        actor = ACTOR_COMPANY_POSTS if is_company else ACTOR_PROFILE_POSTS
-        id_field = "companyPublicIdentifiers" if is_company else "profilePublicIdentifiers"
+        actor, payload = actor_call_for_source(s, args.max_posts, provider=provider)
         source_type = "company" if is_company else "profile"
         print(f"\n── {s['name']} ({s['handle']}, {source_type}) ──")
         items = run_apify_actor(
             actor,
-            {
-                id_field: [s["handle"]],
-                "maxItems": args.max_posts,
-            },
+            payload,
             timeout=600,
         )
         if items is None:
@@ -188,7 +256,12 @@ def main() -> int:
             url = item.get("linkedinUrl") or item.get("url") or item.get("postUrl")
             body = (item.get("content") or item.get("text") or item.get("commentary") or "").strip()
 
-            posted_at = item.get("postedAt") or item.get("publishedAt") or item.get("createdAt")
+            posted_at = (
+                item.get("postedAt")
+                or item.get("publishedAt")
+                or item.get("createdAt")
+                or item.get("datePosted")
+            )
             if isinstance(posted_at, dict):
                 published_at = posted_at.get("date") or posted_at.get("iso") or None
             else:
