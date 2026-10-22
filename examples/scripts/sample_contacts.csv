@@ -1,0 +1,5 @@
+identifier,first_name,last_name,full_name,company_name,company_website,email,email_verified,phone_type,dnc_match,mobile
+ex-1,Jordan,Hale,Jordan Hale,Example,example.com,,true,,,
+ex-2,Avery,Nguyen,Avery Nguyen,Example,example.com,,true,,,
+ex-3,Riley,Chen,Riley Chen,Example,example.com,,false,,,
+ex-4,Sam,,,,,,,

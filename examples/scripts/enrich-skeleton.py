@@ -4,6 +4,9 @@ enrich-skeleton.py — Contact Enrichment Pipeline
 Takes a CSV of contacts (name + company or email) and enriches them
 with additional data from enrichment APIs.
 
+A working Prospeo client is prospeo_enrich.py in this directory.
+The chapter is chapters/24-enrichment-on-the-go.md.
+
 Usage:
     python enrich-skeleton.py contacts.csv --output enriched_contacts.csv
 

@@ -51,7 +51,7 @@ person = response.json().get("person", {})
 
 Waterfall enrichment + workflow builder. Think of it as a spreadsheet that can call 75+ data providers in sequence — tries Provider A, falls back to B, then C. Great for ABM research where you're going deep on 50 accounts. API lets you trigger workflows via webhook and push/pull data from tables.
 
-**The honest question:** "Am I using Clay's waterfall logic, or am I just using it as a UI for one API?" If the answer is one API, a Python script does the same thing for free. Paid plans start around $150/month and credits deplete fast.
+**The honest question:** "Am I using Clay's waterfall logic, or am I just using it as a UI for one API?" If the answer is one API, a Python script does the same thing for free. Paid plans start around $150/month and credits deplete fast. [Chapter 24](./24-enrichment-on-the-go.md) is that script on Prospeo: the key stays yours, so the same call works in the terminal and from a phone agent.
 
 ### Exa
 
