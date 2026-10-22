@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 STARTER_DIR = Path(__file__).resolve().parents[1] / "starters" / "reddit-buyer-signals"
 sys.path.insert(0, str(STARTER_DIR))
+sys.modules.pop("lib", None)  # another starter's `lib` may already be imported
 
 from lib import profile_lookup  # noqa: E402
 import unmask  # noqa: E402
