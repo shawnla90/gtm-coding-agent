@@ -38,6 +38,9 @@ Actors are pre-built scrapers on the Apify platform. These are the ones that mat
 | `apidojo/instagram-scraper` | Instagram profiles, posts, followers | ~$3-5 per batch |
 | `compass/crawler-google-places` | Google Maps business data | Varies by volume |
 | `apify/web-scraper` | Generic website scraping | Depends on pages |
+| `harvestapi/linkedin-profile-posts` | LinkedIn profile posts (nexus-intel default) | See Store pricing |
+| `harvestapi/linkedin-company-posts` | LinkedIn company feed posts (nexus-intel default) | See Store pricing |
+| `johnvc/linkedin-posts-api` | LinkedIn profile/company posts (nexus-intel opt-in via `LINKEDIN_POSTS_PROVIDER=johnvc`) | Significantly cheaper per-post on Store vs harvestapi for the same job — compare current pricing pages before a paid run |
 
 ## Running Actors from CLI
 

@@ -6,7 +6,7 @@ A connector is a Python script that calls an external data source and writes nor
 
 | File | Apify actor | Writes to |
 |---|---|---|
-| `scripts/scrape_linkedin.py` | `harvestapi/*` | `content_items` (platform='linkedin') |
+| `scripts/scrape_linkedin.py` | `harvestapi/*` (default); opt-in `johnvc/linkedin-posts-api` via `LINKEDIN_POSTS_PROVIDER=johnvc` | `content_items` (platform='linkedin') |
 | `scripts/scrape_x.py` | `apidojo/tweet-scraper` | `content_items` (platform='x') |
 | `scripts/scrape_reddit.py` | `trudax/reddit-scraper-lite` | `reddit_threads` |
 
