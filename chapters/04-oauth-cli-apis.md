@@ -342,6 +342,7 @@ Fill this out for your stack. For each tool, note whether you need to: install a
 - API keys live in `.env`, never in code. CLI credentials go in the keychain. No exceptions.
 - Past a few projects, graduate to a local secrets vault: one SQLite file outside every repo, keys checked out into gitignored `.env` files on demand.
 - The decision framework is simple: MCP server exists? Use it. CLI exists? Script it. Neither? Write a Python wrapper.
+- One data API key can follow the work: a script in the repo, a terminal session, a Grok agent on your phone. [Chapter 24](./24-enrichment-on-the-go.md) is that pattern on Prospeo.
 
 ---
 

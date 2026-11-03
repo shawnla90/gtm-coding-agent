@@ -241,4 +241,6 @@ The grade is the product, and the library does not have the piece after it. Twen
 
 Four questions came out of that run. Is a split coming inside F between "seen, never engaged" and "never seen", because two very different send decisions hide in one grade. Is `search_business_profile_by_name` the intended second pass for SMB and owner ICPs, because it beat `search_people` 436 to 0 and the docs should lead with it. Is a batch endpoint on the roadmap, because 14,087 sequential calls is 75 minutes. And could name-search results carry a same-company-as-input flag, because 422 cross-domain returns needed a human. The misses are in here too: 10.5% of a list the graph has never seen, a `location` parameter the API ignores, side roles reported as the current company, and a D-versus-F table that deserves to be on every reference page.
 
+When a route needs a phone, verified mobiles and the cleared-to-call or email-only decision are [Chapter 24](./24-enrichment-on-the-go.md).
+
 Part of the [GTM Coding Agent](https://github.com/shawnla90/gtm-coding-agent). Starter: `starters/moltsets-reachability/`. Skill: `skills/moltsets-reachability/`.

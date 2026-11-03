@@ -215,6 +215,8 @@ With local-first GTM:
 - **There's no admin panel a hacker can log into.** No "forgot password" flow to exploit. No OAuth tokens to steal from a vendor breach.
 - **Your database is a file.** Encrypt your disk (FileVault on macOS — turn it on), and your data is encrypted at rest.
 
+[Chapter 04](./04-oauth-cli-apis.md) is the vault those keys live in. [Chapter 24](./24-enrichment-on-the-go.md) is one key called from the repo and from a phone agent, so the enrichment call travels with the work.
+
 This doesn't mean local-first is immune to security issues. Someone with physical access to your machine could still access your data. But the attack surface is orders of magnitude smaller than a stack of 8 SaaS tools.
 
 ---

@@ -13,6 +13,9 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Revealed contact files from examples/scripts/prospeo_enrich.py
+examples/scripts/*.out.csv
+
 # Python
 __pycache__/
 *.py[cod]
