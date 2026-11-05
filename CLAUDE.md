@@ -76,6 +76,7 @@ Recommend 3-5 chapters based on their profile:
 | Email deliverability / list reachability | 04 → 07 → 08 → 23 → 05 |
 | Enrichment from the terminal or a phone agent | 04 → 07 → 24 |
 | Student building a track record | 21 → 02 → 07 → 18 → 09 → 20 → 05 |
+| Stream Deck / hardware command center | 02 → 10 → 06 → 25 |
 
 Tell them: *"Start with Chapter XX. When you're done, come back and say 'next chapter' and I'll guide you through the next one."*
 
@@ -101,6 +102,7 @@ When the user returns after setup:
 - **"apollo prospecting" / "apollo workflow" / "expand buying committee" / "waterfall" / "grow the list"** → `starters/apollo-prospecting/`. Load source contacts from CSV, expand via Apollo API (free), score by title relevance x reachability tier, output to a color-coded Google Sheet. The search is free; the reveal costs credits. Score first, reveal the winners. `waterfall.py` grows the company list itself: gated lookalike searches drain from deepest intent (job postings, funding, tech stack) to plain firmographics, tagging every company with why it made the list — a self-built intent layer.
 - **"moltsets" / "grade this list" / "reachability sheet" / "route by grade" / "which emails can I send to"** → Chapter 23, `skills/moltsets-reachability/`, and `starters/moltsets-reachability/`. Moltsets `reverse_linkedin_lookup` confirms the person is still at the company and grades the address A-F (Apollo `people/match` can run alongside for comparison), the sheet picks the channel. A bad grade is a routing decision, not a dead contact: D never emails but goes to LinkedIn then phone; F and 404 get a second pass by name + company DOMAIN (`search_business_profile_by_name`; `search_people` went 0 for 181 as a second pass) before LinkedIn. If the CSV carries a verifier verdict (`zb_status` / `verifier_status`), every row also gets a delta class and the sheet adds Disagreements + Verifier vs Moltsets tabs; `import_graded.py` brings rows graded elsewhere into the same sheet. Run `budget.py` before any batch; `company` is always a domain; F is no data, D is the hard invalid, never swap them; nothing sends.
 - **"prospeo" / "enrichment on the go" / "verified mobile" / "enrich from my phone"** → Chapter 24 and `examples/scripts/prospeo_enrich.py`. The reader holds their own Prospeo key: a Grok Bot secret, or a gitignored `.env` / the Chapter 04 vault for Claude Code. Search does not reveal email or mobile. Enrich with `only_verified_email` or `only_verified_mobile`. Dry-run and `--limit` (default 5) before any live batch. `account` is the free check. In the call waterfall, keep the email check, the phone-type check, and the do-not-call hash generic. Prospeo is the verified-mobile step. Never print or commit the key or revealed numbers. The partner link is https://prospeo.io/?via=shawn and it ships with the disclosure that Shawn is a paid Prospeo partner and creator.
+- **"stream deck" / "command center" / "project keys" / "deck profile"** → Chapter 25 and `starters/stream-deck-command-center/`. Build the profile from `build_profile.py`, preview with `preview.py`, import once, then update only with `deploy_live.sh` (never move or delete a live profile folder). Project keys scope GitHub with `GH_TOKEN=$(gh auth token --user ...)` per terminal, never `gh auth switch`. Kickoffs stop at a human gate. The MCP Deck holds open-only actions.
 
 ## Reference Paths
 
@@ -118,6 +120,8 @@ When the user returns after setup:
 - Apollo prospecting starter: `starters/apollo-prospecting/`
 - Moltsets reachability starter: `starters/moltsets-reachability/` (Chapter 23)
 - LinkedIn headless outreach starter: `starters/linkedin-headless-outreach/` (Chapter 22)
+- Chapter 25: `chapters/25-stream-deck-command-center.md`
+- Stream Deck command center starter: `starters/stream-deck-command-center/` (Chapter 25)
 - Schema files: `starters/signals-dashboard/schema/`
 - Pipeline scripts: `starters/signals-dashboard/pipeline/`
 
