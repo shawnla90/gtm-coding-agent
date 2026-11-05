@@ -2,14 +2,18 @@
 
 **HubSpot's native Reply sends from the rep's connected inbox. The cold thread lives on a different mailbox, the one Instantly used. A native reply changes the From address and breaks the thread. The card on the contact sends through Instantly, from that same mailbox, and the backend logs the send with the same idempotency key as Chapter 26.**
 
+The build steps and the gotchas are in [`skills/instantly-hubspot-replies/SKILL.md`](../skills/instantly-hubspot-replies/SKILL.md). The card in the library is "Reply from the sending mailbox".
+
 ---
 
 ## TL;DR
 
 - The card is a React UI extension on a private static app, HubSpot developer projects platform `2025.2`.
 - It lists the thread, then shows `Sends from <mailbox> in the same thread` before the send button enables.
+- A 200 with zero messages renders `No Instantly thread`. That is the empty state. A 401 or 403 is an auth failure.
+- Open MQL opens the unowned deal from Chapter 26. `reply_received` alone does not.
 - The card calls `https://your-app.vercel.app`. That origin is `permittedUrls.fetch` on the app, and it is the `BACKEND` constant in the card.
-- The backend verifies HubSpot's v3 signature with the app client secret, checks an allowlist of HubSpot user emails, then calls `POST /api/v2/emails/reply` with `eaccount` and `reply_to_uuid`.
+- The backend verifies HubSpot's v3 signature with the app client secret, checks an allowlist of the client's logged-in users by email domain, then calls `POST /api/v2/emails/reply` with `eaccount` and `reply_to_uuid`.
 - Install with `hs project upload`. The admin adds the card from the card library and copies the client secret from the Auth tab.
 
 The sample project is `starters/instantly-hubspot-replies/hubspot-card/`.
@@ -66,6 +70,12 @@ Use `hubspot.fetch`. `window.fetch` is not available in the card, and a relative
 
 The card loads the thread first. Until `eaccount` is on screen, the send button stays disabled. The line the rep reads is `Sends from sender@example.com in the same thread.` That sentence is the check. If the mailbox is wrong, they do not send.
 
+The thread route calls `GET /api/v2/emails?lead=` with a `User-Agent`. Without the header Instantly returns 403, and a 403 is not an empty thread. `thread_view` maps a 200 and an empty list to `no_instantly_thread`. The card text is `No Instantly thread`. Send and Open MQL stay disabled. There is nothing to answer, and there is no email id to hang a deal on.
+
+Open MQL posts `{ contactId, manualMql: true, replyToUuid }` to the same reply route. The handler verifies the signature, checks the allowlist, and runs `should_open_deal` with `manual_mql` set. It does not call Instantly to send. The deal is unowned, at the MQL stage id. An auto-reply still does not open one.
+
+A campaign-name guard that is still on will hide this thread, disable Send, and skip the poll for a live campaign whose name contains `CAMPAIGN_NAME_GUARD`. `campaign_suppressed_by_guard` is true only while `INSTANTLY_REPLY_TEST_MODE` is on. Chapter 26 is that bug. Call the same function here, in the webhook, and in the cron.
+
 ---
 
 ## Signed requests
@@ -82,6 +92,8 @@ The check, from HubSpot's [request validation](https://developers.hubspot.com/do
 4. Compare to the header with a constant-time compare.
 
 `signature_is_valid` in the starter is that check. A bad signature is 401. The card never sees the client secret.
+
+When the check fails, do not pull `HUBSPOT_APP_SECRET` with `vercel env pull` and hash that. Sensitive values come back empty or as the literal `[SENSITIVE]`. `pulled_secret_is_usable` rejects both, and a pull that looks non-empty can still be a placeholder. Copy the client secret from the Auth tab into the Vercel dashboard, redeploy, and retry the card. Chapter 27 has the same warning. Print a boolean and a length, not the secret.
 
 After the signature, check the HubSpot user email against `HUBSPOT_REPLY_ALLOWLIST`. Anyone else gets 403 and a disabled composer. The allowlist is the security boundary. Hiding the button in the card is a convenience. The server still checks.
 
@@ -115,7 +127,9 @@ The sample `*-hsmeta.json` files omit the preview image the CLI template usually
 
 ## Who can send
 
-`HUBSPOT_REPLY_ALLOWLIST` is a list of HubSpot user emails. `user_can_reply` compares them case-insensitively. An empty list means nobody sends.
+`HUBSPOT_REPLY_ALLOWLIST` is the client's own logged-in HubSpot users. An entry of `@client-domain.com` allows every user whose login email is on that domain. A full email allows that one user. `user_can_reply` compares them case-insensitively, and it does not treat `client-domain.com.evil.example` as the client's domain. An empty list means nobody sends.
+
+The email you check is the one HubSpot signed, from `context.user.email` in the signed body. Do not trust an email that arrived on an unsigned request.
 
 The rep can still read the thread when they are off the list. They cannot send. Sending stays on the campaign mailbox either way, so a person on the list is not "replying as themselves". The From address is `eaccount`. Say that in the sentence on the card every time.
 
@@ -123,7 +137,7 @@ The rep can still read the thread when they are off the list. They cannot send. 
 
 ## For the coding agent
 
-1. Read this chapter and the files under `hubspot-card/`. Confirm `BACKEND` and `permittedUrls.fetch` are the same https origin.
+1. Read this chapter, the files under `hubspot-card/`, and the Build and Gotchas sections in `skills/instantly-hubspot-replies/SKILL.md`. Confirm `BACKEND` and `permittedUrls.fetch` are the same https origin.
 2. Do not put the client secret, the private app token, or a personal access key in the project files.
 3. Verify the v3 signature before the Instantly call. Reject a stale timestamp.
 4. Enforce the allowlist on the server.

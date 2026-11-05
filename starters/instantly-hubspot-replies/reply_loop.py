@@ -10,12 +10,21 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+from urllib.parse import quote
 
 INTERESTED_STATUS = 1
 EMAIL_TO_CONTACT = 198
 UNIQUE_PREFIX = "instantly:"
 MAX_SIGNATURE_AGE_MS = 5 * 60 * 1000
 LIST_EMAILS_PER_MINUTE = 20
+INSTANTLY_USER_AGENT = "gtm-reply-loop/1.0"
+# Placeholder only. A live campaign name must not be hardcoded here.
+CAMPAIGN_NAME_GUARD = "CAMPAIGN_NAME_GUARD"
+PULLED_SECRET_PLACEHOLDER = "[SENSITIVE]"
+WRITABLE_LEAD_STATUSES = frozenset({"interested", "lead_interested", "1"})
+_MAILBOX_FIELDS_ON_LEAD_CREATE = frozenset(
+    {"eaccount", "sending_account", "email_account", "from_address", "mailbox"}
+)
 
 # Create-webhook event_type enum, checked against the public API on 2026-11-05.
 # auto_reply_received is a payload the events guide names. It is not in this enum.
@@ -124,16 +133,25 @@ def should_open_deal(
     is_auto_reply: bool = False,
     is_bounce: bool = False,
     meeting_booked: bool = False,
+    manual_mql: bool = False,
 ) -> tuple[bool, str]:
+    """Open a deal for interested / lead_interested, or the card's MQL button.
+
+    reply_received on its own is an email log. It is not a deal.
+    """
     if not email_logged:
         return False, "email log failed"
     if is_auto_reply or is_bounce:
         return False, "auto reply or bounce"
     if meeting_booked or event_type == "lead_meeting_booked":
         return False, "meeting booked"
+    if manual_mql:
+        return True, "manual mql"
     interested = str(interest_status) == str(INTERESTED_STATUS) or event_type == "lead_interested"
     if interested:
         return True, "interested"
+    if event_type == "reply_received":
+        return False, "reply received is not a deal"
     return False, "not a positive reply"
 
 
@@ -218,10 +236,20 @@ def cron_http_status(authorization: str | None, expected_secret: str) -> int:
 
 
 def user_can_reply(email: str | None, allowlist: list[str]) -> bool:
-    if not email:
+    """Allow a logged-in HubSpot user by full email, or by @client-domain.com."""
+    if not email or "@" not in email:
         return False
-    allowed = {item.strip().lower() for item in allowlist if item and item.strip()}
-    return email.strip().lower() in allowed
+    normalized = email.strip().lower()
+    domain = normalized.split("@", 1)[1]
+    for item in allowlist:
+        token = (item or "").strip().lower()
+        if not token:
+            continue
+        if token.startswith("@") and token[1:] == domain:
+            return True
+        if token == normalized:
+            return True
+    return False
 
 
 def instantly_reply_body(*, eaccount: str, reply_to_uuid: str, subject: str, text: str) -> dict:
@@ -298,6 +326,7 @@ def build_plan(
             is_auto_reply=bool(reply.get("is_auto_reply")),
             is_bounce=bool(reply.get("is_bounce")),
             meeting_booked=bool(reply.get("meeting_booked")),
+            manual_mql=bool(reply.get("manual_mql")),
         )
         person = reply.get("person") or ""
         company = reply.get("company") or ""
@@ -506,15 +535,160 @@ def blast_radius(leads: list[dict], *, account_id: str, old_domain: str) -> list
     ]
 
 
-def email_swap_plan(*, old_email: str, new_email: str) -> dict:
+def email_swap_plan(*, old_email: str, new_email: str, contact_id: str = "<CONTACT_ID>") -> dict:
+    """Two calls. A v3 PATCH of email drops the old primary and cannot set hs_additional_emails.
+
+    Re-add the old address with the legacy contacts API after the PATCH.
+    """
     if not old_email or not new_email or old_email.lower() == new_email.lower():
         raise ValueError("old and new email must both be present and different")
+    if "@" not in old_email or "@" not in new_email:
+        raise ValueError("old and new email must both be addresses")
+    contact_id = str(contact_id or "").strip()
+    if not contact_id:
+        raise ValueError("contact id required")
+    quoted = quote(old_email.strip(), safe="")
     return {
-        "email": new_email,
-        "hs_additional_emails": old_email,
+        "contact_id": contact_id,
+        "primary_email": new_email,
+        "secondary_email": old_email,
+        "steps": [
+            {
+                "op": "set_primary_email",
+                "method": "PATCH",
+                "path": f"/crm/v3/objects/contacts/{contact_id}",
+                "properties": {"email": new_email},
+            },
+            {
+                "op": "readd_secondary_email",
+                "method": "PUT",
+                "path": f"/contacts/v1/secondary-email/{contact_id}/email/{quoted}",
+            },
+        ],
+        "read_back_properties": ["email", "hs_additional_emails"],
         "note": (
             "Primary email moved after a retired-mailbox re-find. "
-            "The old address stays on the contact as an additional email. "
+            "The v3 PATCH drops the previous primary. "
+            "hs_additional_emails is read-only on v3. "
+            "The legacy PUT puts the old address back as a secondary email. "
             "Nothing was sent."
         ),
     }
+
+
+def campaign_suppressed_by_guard(name: str, *, test_mode: bool, guard: str) -> bool:
+    """A name guard is a test-mode block. It does not run when test mode is off.
+
+    Leaving the match unconditional hides the thread, blocks Send, and skips
+    the poll and the webhook for a live campaign whose name contains the guard.
+    """
+    if not test_mode:
+        return False
+    needle = (guard or "").strip().lower()
+    if not needle:
+        return False
+    return needle in (name or "").lower()
+
+
+def campaign_in_scope(
+    *,
+    campaign_id: str,
+    campaign_name: str,
+    allowed_ids: list[str],
+    test_mode: bool,
+    name_guard: str,
+) -> tuple[bool, str]:
+    """Campaign ids are always filtered. The name guard is not."""
+    allowed = {item.strip() for item in allowed_ids if item and str(item).strip()}
+    if not campaign_id or str(campaign_id).strip() not in allowed:
+        return False, "campaign id not configured"
+    if campaign_suppressed_by_guard(campaign_name, test_mode=test_mode, guard=name_guard):
+        return False, "test mode name guard"
+    return True, "in scope"
+
+
+def thread_view(*, http_status: int, messages: list | None) -> str:
+    """200 and an empty list is the empty state. Anything else is not that state."""
+    if http_status != 200:
+        return "auth_failure"
+    if not messages:
+        return "no_instantly_thread"
+    return "thread"
+
+
+def instantly_list_emails_request(*, lead: str = "", campaign_id: str = "") -> dict:
+    """GET /api/v2/emails. ?lead= returns 403 when User-Agent is missing."""
+    params: dict[str, str] = {}
+    if lead:
+        params["lead"] = lead
+    if campaign_id:
+        params["campaign_id"] = campaign_id
+    return {
+        "method": "GET",
+        "path": "/api/v2/emails",
+        "params": params,
+        "headers": {
+            "Accept": "application/json",
+            "User-Agent": INSTANTLY_USER_AGENT,
+        },
+    }
+
+
+def reject_mailbox_on_lead_create(payload: dict) -> dict:
+    """Create-lead has no sending mailbox. assigned_to is a workspace user id.
+
+    Pin the mailbox later, on POST /api/v2/emails/reply, with eaccount.
+    """
+    found = _MAILBOX_FIELDS_ON_LEAD_CREATE.intersection(payload)
+    if found:
+        raise ValueError(
+            "lead create cannot assign a sending mailbox. "
+            "assigned_to is a workspace user id. "
+            "Pin the mailbox with eaccount on POST /api/v2/emails/reply."
+        )
+    return payload
+
+
+def should_write_lead_status(status: str) -> bool:
+    """Write the HubSpot lead-status property for a positive status only.
+
+    auto_reply, bounce, and out_of_office are non-empty. A workflow that
+    enrolls on any non-empty value will open an owned deal off those writes.
+    """
+    return str(status or "").strip().lower() in WRITABLE_LEAD_STATUSES
+
+
+def status_write_stuck(*, http_status: int, requested, observed) -> bool:
+    """True when Instantly returned 200 and the lead status did not change."""
+    return http_status == 200 and str(requested) != str(observed)
+
+
+def blocklist_entry_body(email: str) -> dict:
+    """POST /api/v2/block-lists-entries. This is what parks a lead. A status PATCH is not."""
+    cleaned = (email or "").strip().lower()
+    if "@" not in cleaned:
+        raise ValueError("email required")
+    return {"bl_value": cleaned}
+
+
+def pulled_secret_is_usable(value: str | None) -> bool:
+    """False for the empty string and the [SENSITIVE] marker vercel env pull writes.
+
+    A sensitive HUBSPOT_APP_SECRET from that pull is still not the client secret
+    when this returns true. Do not debug a signature with a pulled value.
+    """
+    cleaned = (value or "").strip()
+    if not cleaned or cleaned == PULLED_SECRET_PLACEHOLDER:
+        return False
+    return True
+
+
+def reply_fields_prove_interest(*, text: str, interest_status=None, event_type: str | None = None) -> bool:
+    """Reply status, reply date, and snippet can be filled by an auto-reply.
+
+    Those fields are not arguments here on purpose. The body class plus a
+    positive interest signal is the proof.
+    """
+    if classify(event_type, text) != "other":
+        return False
+    return str(interest_status) == str(INTERESTED_STATUS) or event_type == "lead_interested"
