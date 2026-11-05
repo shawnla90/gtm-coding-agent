@@ -21,9 +21,29 @@ const ReplyCard = ({ context, actions }) => {
     const data = await response.json();
     if (!response.ok) {
       setError(data.message || "Could not load the thread.");
+      setThread(null);
       return;
     }
-    setThread(data);
+    const messages = Array.isArray(data.messages) ? data.messages : [];
+    if (messages.length === 0) {
+      setThread({ empty: true, messages: [] });
+      return;
+    }
+    setThread({ ...data, empty: false, messages });
+  }
+
+  async function openMql() {
+    setError("");
+    const response = await hubspot.fetch(`${BACKEND}/api/hubspot/reply`, {
+      method: "POST",
+      body: { contactId, manualMql: true, replyToUuid: thread.reply_to_uuid },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      setError(data.message || "MQL was refused.");
+      return;
+    }
+    actions.addAlert({ type: "success", message: "Unowned MQL deal opened." });
   }
 
   async function send() {
@@ -48,7 +68,8 @@ const ReplyCard = ({ context, actions }) => {
   }
 
   const mailbox = thread && thread.eaccount;
-  const ready = Boolean(mailbox && body.trim());
+  const empty = Boolean(thread && thread.empty);
+  const ready = Boolean(mailbox && body.trim() && !empty);
 
   return (
     <Flex direction="column" gap="sm">
@@ -57,9 +78,13 @@ const ReplyCard = ({ context, actions }) => {
           ? `Sends from ${mailbox} in the same thread.`
           : "Sends from the campaign mailbox in the same thread."}
       </Text>
+      {empty ? <Text>No Instantly thread</Text> : null}
       {error ? <Alert title="Not sent" variant="error">{error}</Alert> : null}
       <Button onClick={loadThread}>Load thread</Button>
       <TextArea name="body" label="Reply" value={body} onChange={setBody} />
+      <Button onClick={openMql} disabled={!mailbox || empty}>
+        Open MQL
+      </Button>
       <Button onClick={send} disabled={!ready}>
         Send from the campaign mailbox
       </Button>

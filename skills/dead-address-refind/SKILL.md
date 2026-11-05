@@ -1,14 +1,22 @@
 ---
 name: dead-address-refind
-version: 1.0.0
-description: When a cold-email mailbox auto-replies that the address is no longer in use, check whether the person is still at the company and look for the new address before calling it a departure. Learn the domain and the pattern, verify with three verifiers plus a made-up catch-all control, treat Moltsets F as no data, and swap the CRM email only with a plan, an undo file, and a human yes. Use when the user says "dead address", "re-find", "address retired", "no longer in use", "mailbox not monitored", or "he left but LinkedIn says he is still there".
+version: 1.1.0
+description: When a cold-email mailbox auto-replies that the address is no longer in use, check whether the person is still at the company and look for the new address before calling it a departure. Auto-replies fill Instantly reply status, date, and snippet and look like real replies. Learn the second domain and the pattern, run the enrichment waterfall, verify with three verifiers plus a made-up catch-all control, treat Moltsets F as no data, and swap the CRM email only with a plan, an undo file, and a human yes. Use when the user says "dead address", "re-find", "address retired", "no longer in use", "mailbox not monitored", or "he left but LinkedIn says he is still there".
 ---
 
 # dead-address-refind
 
 An auto-reply is not proof someone left. Look for the new address first.
 
-The worked case is in [Chapter 29](../../chapters/29-dead-address-versus-departed.md). The decisions are in [`reply_loop.py`](../../starters/instantly-hubspot-replies/reply_loop.py): `classify`, `next_action`, `learn_initial_last`, `verifier_reading`, `treat_moltsets_grade`, `blast_radius`, `email_swap_plan`. Nothing in this skill sends mail or adds a lead by itself.
+A "this address is no longer in use" auto-reply is a dead mailbox. It is not a resignation. The company may be migrating staff onto a second domain. Learn that domain and the new pattern, run the enrichment waterfall, confirm the candidate with more than one verifier and a made-up address as a control, swap the CRM email, and only then have a person put the lead back so the campaign can send again.
+
+The worked case is in [Chapter 29](../../chapters/29-dead-address-versus-departed.md). The decisions are in [`reply_loop.py`](../../starters/instantly-hubspot-replies/reply_loop.py): `classify`, `next_action`, `learn_initial_last`, `verifier_reading`, `treat_moltsets_grade`, `blast_radius`, `email_swap_plan`, `reply_fields_prove_interest`, `blocklist_entry_body`. Nothing in this skill sends mail or adds a lead by itself.
+
+## It already looks like a real reply
+
+Instantly fills reply status, reply date, and the snippet from an auto-reply. The lead row looks answered. Those three fields are not a person. `reply_fields_prove_interest` ignores them and reads the body. "No longer in use" classifies as `address_retired`. Do not open a deal. Do not write `interested` on the contact. Do not write `auto_reply` into a HubSpot lead-status property either: a workflow that enrolls on any non-empty status will create an owned deal. That trigger is gotcha 8 in [`instantly-hubspot-replies`](../instantly-hubspot-replies/SKILL.md).
+
+Park the dead address with `POST /api/v2/block-lists-entries` (`blocklist_entry_body`). A PATCH of `lt_interest_status` can return 200 and leave the status unchanged, so it is not how you stop the sequence. Interest-status writes also fire webhooks. Do not PATCH status from the webhook that a status change just caused.
 
 ## Inputs
 
@@ -34,6 +42,8 @@ Check retired-mailbox phrases before a generic out-of-office phrase. A subject l
 
 ## Re-find
 
+The company may be migrating staff to a second domain. Coworkers flip first. This is a mailbox move, not a job change, until employment sources say otherwise.
+
 1. List other contacts at the account. A second domain often shows up there before it shows up on this person.
 2. Read MX and TXT. A Microsoft 365 tenant tends to show `mail.protection.outlook.com` on the MX and `include:spf.protection.outlook.com` on the SPF.
 3. Learn the pattern from known-good addresses on that domain. `learn_initial_last` accepts the pattern only when every sample matches first initial plus last name. If the samples disagree, stop and ask.
@@ -50,14 +60,14 @@ Check retired-mailbox phrases before a generic out-of-office phrase. A subject l
 
 `blast_radius` lists other campaign leads at the same account whose email is still on the old domain. Put that list in the summary.
 
-The swap, after a yes:
+The swap, after a yes. A v3 PATCH of `email` drops the old primary. `hs_additional_emails` is read-only on v3, and writing it returns `READ_ONLY_VALUE` while the old address is still gone. `email_swap_plan` builds the two HubSpot calls in steps 2 and 3. Do the whole swap in this order:
 
-- New address becomes the contact's primary `email`.
-- Old address is kept on `hs_additional_emails`. Confirm that property on the portal before apply.
-- Add a note. Leave `hubspot_owner_id` unset.
-- `email_swap_plan` builds that payload. Apply it with the same plan, undo file, and read-back as Chapter 26.
-- Re-add the person to the same campaign as a new lead. Read the skipped count and the blocklisted count in the add response. A 200 with a skip is not "they are in the sequence".
-- Do this add only after the human yes. The automation posts the summary and stops.
+1. Search the new address first. If another contact already owns it, stop. A primary change can merge records.
+2. `PATCH /crm/v3/objects/contacts/{contactId}` with `properties.email` set to the new address. Record both addresses in the undo file before this call. Leave `hubspot_owner_id` unset.
+3. `PUT /contacts/v1/secondary-email/{contactId}/email/{oldEmail}` on the legacy contacts API. URL-encode the old address. This puts it back as a secondary email.
+4. Read `email` and `hs_additional_emails` back. Primary is the new address. The old address is on the secondary list. Owner is unchanged. Add a note. Apply with the same plan, undo file, and read-back as Chapter 26.
+5. Re-add the person to the same campaign as a new lead so the sequence can send to the new address. Instantly will not pin a sending mailbox on that add (`assigned_to` is a user id). Read the skipped count and the blocklisted count. A 200 with a skip is not "they are in the sequence". Blocklist the dead address first, or the add can bounce off it.
+6. Do this add only after the human yes. The automation posts the summary and stops. It does not send.
 
 ## Later automation
 
@@ -74,7 +84,8 @@ The worker may stop the lead, write the note, run the re-find, and post the summ
 ## Don't
 
 - Don't call a retired mailbox a job change because the wording felt like "he left".
-- Don't drop the old address off the contact. Keep it as an additional email.
+- Don't drop the old address off the contact. The v3 email PATCH will drop it unless you PUT it back through the legacy secondary-email endpoint.
+- Don't treat Instantly reply status, reply date, or a snippet as proof a person wrote. Auto-replies fill all three.
 - Don't auto-add the new address to the campaign, and don't auto-send.
 - Don't treat Moltsets F as a bad address.
 - Don't treat a verifier "valid" on a live auto-reply mailbox as proof a person reads it.
