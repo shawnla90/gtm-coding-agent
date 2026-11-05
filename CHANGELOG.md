@@ -4,6 +4,28 @@ All notable changes to this kit are tracked here. Everything in this repo is cod
 
 The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first.
 
+## [0.14.0] - 2026-11-05
+
+Cold email replies into HubSpot without a sync vendor, the go-live, a card that replies from the sending mailbox, and a re-find for a retired mailbox that is not a departure. The story is a proptech / multifamily services client on a conference campaign. Portal ids, campaign ids, and prospect addresses in the chapters are placeholders. Chapter numbers start at 26 so Chapter 25 can be the Stream Deck command center (written as Chapter 24 on `chapter-24-stream-deck`) without colliding with Chapter 24, Enrichment on the Go.
+
+### Added
+
+- **Chapter 26: Cold Email Replies into the CRM.** A webhook plus a cron poll. `GET /api/v2/emails` (about 20 requests a minute) and `POST /api/v2/emails/reply` with `eaccount` and `reply_to_uuid`. HubSpot email engagements use `hs_email_direction` `EMAIL` or `INCOMING_EMAIL`, the contact association, and `hs_unique_id` `instantly:<email id>`. A positive reply (`lt_interest_status` 1 or `lead_interested`) opens an unowned deal named `(Prefix) - Person - Company` after the email log returns an id. Meeting Booked, auto-replies, and bounces do not. Pipeline and stage are ids. Test mode and a portal allow flag refuse writes. Plan, apply, undo, read back.
+- **Chapter 27: Going Live on the Reply Loop.** Service key and personal access key without a HubSpot seat, chmod 600, non-interactive `hs account auth`, and the limit of a personal access key (it cannot read the app client secret). Env var names, 401 without the secret and 200 with it, one Instantly webhook per event per campaign, old sync webhooks left in place, the hand-logged thread skipped by the same `hs_unique_id`, and a check that no workflow assigns an owner.
+- **Chapter 28: Reply from the Sending Mailbox.** Private static HubSpot UI extension on platform 2025.2. The card shows which mailbox will send before the button enables, calls the backend through `permittedUrls.fetch` and a `BACKEND` constant, and the backend verifies the v3 signature and an email allowlist before it replies via Instantly.
+- **Chapter 29: Dead Address versus Departed.** A retired mailbox auto-reply, employment sources that still say current, a second Microsoft 365 domain, an initial-plus-last-name pattern, three verifiers with made-up catch-all controls, Moltsets F treated like C, blast radius on the old domain, and a human-gated swap. The later worker may stop, note, re-find, and post a summary. It does not add or send.
+- **`skills/instantly-hubspot-replies/`** and **`skills/dead-address-refind/`**.
+- **`starters/instantly-hubspot-replies/`**. Pure rules in `reply_loop.py`, copy-in route files, and a minimal `hubspot-card/` project. No network in the tests.
+
+### Changed
+
+- `README.md`, `CLAUDE.md`, and `skills/README.md` index chapters 26 to 29, the two skills, and the starter. The anatomy tree's "through chapter 24" lines are left in place so this branch and the Stream Deck renumber can merge in either order. Chapters 26 to 29 are listed in their own block.
+
+### Verification
+
+- `python3 -m unittest tests/test_reply_loop.py`
+- `node --check` on `starters/instantly-hubspot-replies/routes/*.mjs`
+
 ## [Unreleased]
 
 ### Added

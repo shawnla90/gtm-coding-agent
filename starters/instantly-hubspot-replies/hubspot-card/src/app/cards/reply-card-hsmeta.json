@@ -1,0 +1,11 @@
+{
+  "uid": "reply_from_sending_mailbox_card",
+  "type": "card",
+  "config": {
+    "name": "Reply from the sending mailbox",
+    "description": "Reply in the same Instantly thread, from the mailbox that sent the cold email.",
+    "entrypoint": "/app/cards/ReplyCard.jsx",
+    "location": "crm.record.tab",
+    "objectTypes": ["CONTACT"]
+  }
+}
