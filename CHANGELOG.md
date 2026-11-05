@@ -18,6 +18,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/). Newest first
 - `README.md` and `CLAUDE.md` now index 24 chapters, including the learning-path row and the "prospeo" / "enrichment on the go" router.
 - Cross-links from Chapters 04, 06, 07, 08, and 23, and a pointer in `examples/scripts/enrich-skeleton.py`.
 
+## [0.13.0] - 2026-11-05
+
+Chapter 25 and a new starter: the Stream Deck+ as a command center for a GTM coding agent. The whole profile is generated from Python instead of dragged together in Elgato's editor, so the deck is a file your agent can edit, preview, and deploy. One key opens Claude Code in the right repo with the right model, effort, session name, and first prompt, with GitHub scoped to that one terminal. The chapter also covers the content kickoff pipeline (Claude drafts, a second model critiques via the clipboard, Codex renders, a human decides), Elgato's MCP server with an open-only page, a usage dial plugin, and the deploy-in-place rule learned by losing two profiles to a backup restore.
+
+This chapter was written as Chapter 24 on `chapter-24-stream-deck` (2026-10-09, commit a516462). Main already shipped Enrichment on the Go as Chapter 24, so this renumber lands it as Chapter 25. Chapters 26 and up stay free for the reply-loop work.
+
+### Added
+
+- **`chapters/25-stream-deck-command-center.md`**: the `.streamDeckProfile` format and a generator with deterministic UUIDs and a dead-key check; real key art from `.app` bundles and favicons; the deploy-in-place rule (never move or delete a live profile folder, swap pages inside the same profile UUID with the app quit); Claude Code command keys (`/compact`, `/effort max`, `/model`, Esc, Shift+Tab); project launcher keys with per-terminal `GH_TOKEN` instead of a global `gh auth switch`; agentic content kickoffs with a human gate; Elgato MCP; a usage dial plugin sketch; gotchas (macOS privacy and `~/Documents`, the MCP Deck UUID changing, synthetic GUI clicks, npm 11 install scripts).
+- **`starters/stream-deck-command-center/`**: `profile/build_profile.py` (HOME, CLAUDE, PROJECTS with one folder per project, KICKOFF; `--mcp` for the MCP Deck; device block read live, nothing machine-specific committed), `profile/icons.py` (single, grid, glyph, and back styles with a letter-tile fallback), `profile/preview.py` (contact sheet), `profile/deploy_live.sh` (backup, clean quit, in-place page swap, log check for a restore), `profile/projects.py`, `icons/fetch_icons.sh`, `launchers/claude-project.command` and friends, `kickoffs/` (content-new, content-critique, content-render, content-open), `build_apps.sh`, `config.example.sh`, `projects.example.toml`, `mcp/claude-mcp-config.example.json`.
+
+### Changed
+
+- `README.md` (chapter tree, starters block, What You'll Learn) and `CLAUDE.md` (learning path, ongoing-behavior trigger, reference paths) now index Chapter 25 and the new starter. The "through chapter 24" range line is left as-is so this branch and the chapters 26-29 branch can merge in either order.
+
+### Verification
+
+- `bash -n` / `zsh -n` clean on every launcher, kickoff, and script. From a scratch copy with the example config: `build_apps.sh` built 4 apps, `build_profile.py` wrote a 7-page profile for 3 example projects plus 6 generated wrappers, `build_profile.py --mcp` wrote the MCP Deck profile, `preview.py` rendered the contact sheet. `deploy_live.sh` was not run against a device for this release. Those checks are the author's from 2026-10-09. This renumber re-runs the syntax checks only.
+
 ## [0.12.0] - 2026-09-02
 
 The reachability starter learns to sit next to the verifier you already run. If your list carries a ZeroBounce (or NeverBounce, MillionVerifier, Bouncer) verdict, every row now gets a delta class: how Moltsets moved it relative to that verdict. The proving run was a client's 10,088-contact home-services list, already verified and pooled by ZeroBounce: 8,061 profiles returned (79.9%), 7,802 A/B (77.3%), 1,206 F, 1,060 never seen. Where the two agreed on the same address: 6,776 rows. Where they did not: 819 corrected same-domain addresses, 1,380 of 1,739 catch-all rows graded A/B on observed activity, 75 of 725 ZeroBounce drops recovered, 793 job changes, 7 grade D (one marked valid). 9,032 LinkedIn URLs on a list that shipped with none. 14,087 calls, 0 phone tokens, $0 marginal, about 75 minutes. Two corrections to 0.11.0 fall out of it: the grade mix is a property of the ICP (the 200 GTM engineers graded all A; this list graded 77% A with 12% F), and the second pass lands when it is `search_business_profile_by_name` (436 recovered of 2,722; `search_people` went 0 for 181, as it had gone 0 for 54 and 2 for 112 before).
