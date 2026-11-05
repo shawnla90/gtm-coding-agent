@@ -1,0 +1,9 @@
+{
+  "name": "reply-from-sending-mailbox-card",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@hubspot/ui-extensions": "*",
+    "react": "^18.2.0"
+  }
+}

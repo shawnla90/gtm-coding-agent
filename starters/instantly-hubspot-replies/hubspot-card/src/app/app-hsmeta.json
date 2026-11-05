@@ -1,0 +1,28 @@
+{
+  "uid": "reply-from-sending-mailbox",
+  "type": "app",
+  "config": {
+    "name": "Reply from the sending mailbox",
+    "description": "Lists the cold thread and replies from the mailbox that sent it.",
+    "distribution": "private",
+    "auth": {
+      "type": "static",
+      "requiredScopes": [
+        "crm.objects.contacts.read",
+        "crm.objects.contacts.write"
+      ],
+      "optionalScopes": [],
+      "conditionallyRequiredScopes": []
+    },
+    "permittedUrls": {
+      "fetch": ["https://your-app.vercel.app"],
+      "iframe": [],
+      "img": []
+    },
+    "support": {
+      "supportEmail": "ops@example.com",
+      "documentationUrl": "https://example.com/docs",
+      "supportUrl": "https://example.com/support"
+    }
+  }
+}

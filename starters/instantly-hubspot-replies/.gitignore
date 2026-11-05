@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+*.undo.json
+plans/
+__pycache__/
+node_modules/

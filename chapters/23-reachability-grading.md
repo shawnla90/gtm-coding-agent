@@ -36,7 +36,7 @@ From [developer.moltsets.com](https://developer.moltsets.com/moltsets-data/email
 | F | no data | re-verify or treat like C | second pass, then `linkedin` |
 | 404 | not in the graph | (costs nothing) | second pass, then `linkedin` |
 
-The docs' own rule: suppress D at the list level; segment C and F away from A/B rather than dropping them. They are unknown, not bad.
+The docs' own rule: suppress D at the list level; segment C and F away from A/B rather than dropping them. They are unknown, not bad. When a mailbox auto-replies that the address is retired and the person is still at the company, an F on the new address is that same unknown. [Chapter 29](./29-dead-address-versus-departed.md) treats F like C and looks for the new domain before calling it a departure.
 
 Two more things the docs do not say loudly enough. A personal Gmail is an output of this graph, never an input; free-mail addresses 404 on every lookup. And `search_people` wants a company **domain**, not a company name. `"Bobyard"` returns nothing; `"bobyard.com"` returns the profile. Get that wrong and you get a wall of false misses that look exactly like real ones.
 
