@@ -1,6 +1,8 @@
 // Copy to app/api/cron/poll/route.js.
 // Vercel Cron sends Authorization: Bearer <CRON_SECRET>.
 // GET /api/v2/emails is limited to about 20 requests a minute. One page per wake.
+// Send a User-Agent. ?lead= returns 403 without one.
+// The campaign-name guard is test-mode only. See campaign_suppressed_by_guard.
 
 export function cronStatus(authorization, expected) {
   if (!expected || authorization !== `Bearer ${expected}`) return 401;

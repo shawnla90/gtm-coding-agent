@@ -65,6 +65,25 @@ class DealGateTests(unittest.TestCase):
         self.assertFalse(opened)
         self.assertEqual(reason, "email log failed")
 
+    def test_reply_received_alone_does_not_open_a_deal(self):
+        opened, reason = mod.should_open_deal(email_logged=True, event_type="reply_received")
+        self.assertFalse(opened)
+        self.assertEqual(reason, "reply received is not a deal")
+
+    def test_manual_mql_opens_after_the_email_lands(self):
+        opened, reason = mod.should_open_deal(email_logged=True, manual_mql=True)
+        self.assertTrue(opened)
+        self.assertEqual(reason, "manual mql")
+        opened, reason = mod.should_open_deal(
+            email_logged=False, manual_mql=True, event_type="reply_received"
+        )
+        self.assertFalse(opened)
+        self.assertEqual(reason, "email log failed")
+        opened, _reason = mod.should_open_deal(
+            email_logged=True, manual_mql=True, is_auto_reply=True
+        )
+        self.assertFalse(opened)
+
     def test_meeting_booked_auto_reply_and_bounce_stay_closed(self):
         for kwargs in (
             {"meeting_booked": True},
@@ -218,6 +237,9 @@ class HttpTests(unittest.TestCase):
         )
         self.assertTrue(mod.user_can_reply("Rep@example.com", ["rep@example.com"]))
         self.assertFalse(mod.user_can_reply("other@example.com", ["rep@example.com"]))
+        self.assertTrue(mod.user_can_reply("rep@client-domain.com", ["@client-domain.com"]))
+        self.assertFalse(mod.user_can_reply("rep@example.com", ["@client-domain.com"]))
+        self.assertFalse(mod.user_can_reply("rep@client-domain.com.evil.example", ["@client-domain.com"]))
 
     def test_reply_body_and_webhook_redaction(self):
         body = mod.instantly_reply_body(
@@ -298,10 +320,111 @@ class RefindTests(unittest.TestCase):
         ]
         found = mod.blast_radius(leads, account_id="acct-1", old_domain="example.com")
         self.assertEqual(len(found), 2)
-        plan = mod.email_swap_plan(old_email="jordan.hale@example.com", new_email="jhale@example.net")
-        self.assertEqual(plan["email"], "jhale@example.net")
-        self.assertEqual(plan["hs_additional_emails"], "jordan.hale@example.com")
-        self.assertNotIn("hubspot_owner_id", plan)
+        plan = mod.email_swap_plan(
+            old_email="jordan.hale@example.com",
+            new_email="jhale@example.net",
+            contact_id="<CONTACT_ID>",
+        )
+        self.assertEqual(plan["primary_email"], "jhale@example.net")
+        self.assertEqual(plan["secondary_email"], "jordan.hale@example.com")
+        self.assertEqual(plan["steps"][0]["method"], "PATCH")
+        self.assertNotIn("hs_additional_emails", plan["steps"][0]["properties"])
+        self.assertEqual(plan["steps"][1]["method"], "PUT")
+        self.assertIn(
+            "/contacts/v1/secondary-email/<CONTACT_ID>/email/jordan.hale%40example.com",
+            plan["steps"][1]["path"],
+        )
+        self.assertNotIn("hubspot_owner_id", json.dumps(plan))
+
+
+class ProductionGotchaTests(unittest.TestCase):
+    def test_name_guard_is_test_mode_only(self):
+        live_name = "CAMPAIGN_NAME_GUARD"
+        self.assertFalse(
+            mod.campaign_suppressed_by_guard(live_name, test_mode=False, guard=mod.CAMPAIGN_NAME_GUARD)
+        )
+        self.assertTrue(
+            mod.campaign_suppressed_by_guard(live_name, test_mode=True, guard=mod.CAMPAIGN_NAME_GUARD)
+        )
+        self.assertFalse(
+            mod.campaign_suppressed_by_guard(
+                "a conference campaign", test_mode=True, guard=mod.CAMPAIGN_NAME_GUARD
+            )
+        )
+        in_prod, reason = mod.campaign_in_scope(
+            campaign_id="<CAMPAIGN_ID>",
+            campaign_name=live_name,
+            allowed_ids=["<CAMPAIGN_ID>"],
+            test_mode=False,
+            name_guard=mod.CAMPAIGN_NAME_GUARD,
+        )
+        self.assertTrue(in_prod)
+        self.assertEqual(reason, "in scope")
+        in_test, reason = mod.campaign_in_scope(
+            campaign_id="<CAMPAIGN_ID>",
+            campaign_name=live_name,
+            allowed_ids=["<CAMPAIGN_ID>"],
+            test_mode=True,
+            name_guard=mod.CAMPAIGN_NAME_GUARD,
+        )
+        self.assertFalse(in_test)
+        self.assertEqual(reason, "test mode name guard")
+
+    def test_empty_thread_is_not_an_auth_failure(self):
+        self.assertEqual(mod.thread_view(http_status=200, messages=[]), "no_instantly_thread")
+        self.assertEqual(mod.thread_view(http_status=200, messages=None), "no_instantly_thread")
+        self.assertEqual(mod.thread_view(http_status=401, messages=[]), "auth_failure")
+        self.assertEqual(mod.thread_view(http_status=403, messages=[]), "auth_failure")
+        self.assertEqual(
+            mod.thread_view(http_status=200, messages=[{"id": "email-1"}]),
+            "thread",
+        )
+
+    def test_list_emails_sends_a_user_agent_and_lead_create_has_no_mailbox(self):
+        request = mod.instantly_list_emails_request(lead="prospect@example.com")
+        self.assertEqual(request["path"], "/api/v2/emails")
+        self.assertEqual(request["params"]["lead"], "prospect@example.com")
+        self.assertTrue(request["headers"]["User-Agent"])
+        self.assertNotIn("Authorization", request["headers"])
+        self.assertEqual(
+            mod.reject_mailbox_on_lead_create({"email": "prospect@example.com", "campaign": "<CAMPAIGN_ID>"}),
+            {"email": "prospect@example.com", "campaign": "<CAMPAIGN_ID>"},
+        )
+        with self.assertRaises(ValueError):
+            mod.reject_mailbox_on_lead_create({"email": "prospect@example.com", "eaccount": "sender@example.com"})
+
+    def test_lead_status_property_and_a_stuck_200(self):
+        self.assertTrue(mod.should_write_lead_status("interested"))
+        self.assertTrue(mod.should_write_lead_status("1"))
+        for status in ("auto_reply", "bounce", "out_of_office", "reply_received", ""):
+            self.assertFalse(mod.should_write_lead_status(status), status)
+        self.assertTrue(mod.status_write_stuck(http_status=200, requested=1, observed=0))
+        self.assertFalse(mod.status_write_stuck(http_status=200, requested=1, observed=1))
+        self.assertFalse(mod.status_write_stuck(http_status=400, requested=1, observed=0))
+        self.assertEqual(
+            mod.blocklist_entry_body("Prospect@example.com"),
+            {"bl_value": "prospect@example.com"},
+        )
+
+    def test_pulled_secret_placeholder_and_auto_reply_metadata(self):
+        self.assertFalse(mod.pulled_secret_is_usable(""))
+        self.assertFalse(mod.pulled_secret_is_usable("  "))
+        self.assertFalse(mod.pulled_secret_is_usable("[SENSITIVE]"))
+        self.assertTrue(mod.pulled_secret_is_usable("from-the-auth-tab"))
+        retired = (
+            "This email address is no longer in use and is not monitored. "
+            "Please contact a colleague."
+        )
+        self.assertFalse(
+            mod.reply_fields_prove_interest(text=retired, event_type="reply_received")
+        )
+        self.assertTrue(
+            mod.reply_fields_prove_interest(
+                text="Yes, send the one-pager.",
+                interest_status=1,
+                event_type="reply_received",
+            )
+        )
 
 
 class TreeTests(unittest.TestCase):
@@ -330,6 +453,8 @@ class TreeTests(unittest.TestCase):
         meta = json.loads((ROOT / "hubspot-card" / "src" / "app" / "app-hsmeta.json").read_text())
         self.assertIn("https://your-app.vercel.app", jsx)
         self.assertIn("Sends from", jsx)
+        self.assertIn("No Instantly thread", jsx)
+        self.assertIn("Open MQL", jsx)
         self.assertIn("hubspot.fetch", jsx)
         self.assertIn("const BACKEND", jsx)
         self.assertEqual(meta["config"]["permittedUrls"]["fetch"], ["https://your-app.vercel.app"])
