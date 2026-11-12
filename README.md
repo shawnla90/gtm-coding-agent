@@ -147,10 +147,12 @@ Numbering starts at 26 so Chapter 25 can be the Stream Deck command center witho
 
 | Chapter | File | You'll be able to |
 |---|---|---|
-| 26 - Cold Email Replies into the CRM | `chapters/26-replies-into-the-crm.md` | Log Instantly replies as HubSpot email engagements and open an unowned stage-1 deal on a positive reply |
+| 26 - Cold Email Replies into the CRM | `chapters/26-replies-into-the-crm.md` | Log Instantly replies as HubSpot email engagements and open an unowned MQL deal only for an interested reply or the card's MQL button |
 | 27 - Going Live on the Reply Loop | `chapters/27-reply-loop-go-live.md` | Mint a service key and a personal access key without a seat, deploy the webhook and the cron, and prove 401 and 200 |
-| 28 - Reply from the Sending Mailbox | `chapters/28-reply-from-the-sending-mailbox.md` | Add a private HubSpot card that replies through Instantly from the campaign mailbox |
+| 28 - Reply from the Sending Mailbox | `chapters/28-reply-from-the-sending-mailbox.md` | Add a private HubSpot card that replies through Instantly from the campaign mailbox, and treat an empty thread as a 200 |
 | 29 - Dead Address versus Departed | `chapters/29-dead-address-versus-departed.md` | Treat a retired mailbox as a re-find, not a resignation, and swap the address only after a human yes |
+
+The production gotchas for that loop (campaign-name guard, `vercel env pull` placeholders, the User-Agent on `GET /api/v2/emails?lead=`, the legacy secondary-email PUT, workflow triggers, the blocklist) are the Build and Gotchas sections in `skills/instantly-hubspot-replies/SKILL.md`. A dead-address auto-reply that fills Instantly's reply status is `skills/dead-address-refind/SKILL.md`.
 
 ---
 

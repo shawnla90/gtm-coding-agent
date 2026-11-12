@@ -8,15 +8,15 @@ The client is the same proptech / multifamily services client, on the same confe
 
 ## TL;DR
 
-- An auto-reply is not proof of a departure. Check employment, then look for the new address.
+- An auto-reply is not proof of a departure. Instantly can still fill reply status, reply date, and a snippet, so the lead looks answered. Check employment, then look for the new address.
 - Find the second domain from other contacts at the account, and from MX, TXT, and SPF.
 - Learn the pattern from known-good addresses. Run the email waterfall against the new domain. Verify with MillionVerifier, ZeroBounce, and NeverBounce, plus a made-up address on each domain as a catch-all control.
 - A dead mailbox can still come back "valid". It exists, and it auto-replies.
 - Moltsets grade F means no data. Treat it like C. D is the hard invalid.
-- Swap only with a yes: new address becomes primary, the old one stays as an additional email, with a note, a plan, an undo file, and a read-back. Then re-add the lead and read the skipped and blocklisted counts.
+- Swap only with a yes: PATCH the new primary, then PUT the old address back through the legacy secondary-email endpoint. `hs_additional_emails` is read-only on v3. Plan, undo file, read-back. Then re-add the lead and read the skipped and blocklisted counts.
 - The later automation may stop the lead, write the note, re-find, and post a summary. It does not add, and it does not send.
 
-The recipe is `skills/dead-address-refind/SKILL.md`. The functions are in `starters/instantly-hubspot-replies/reply_loop.py`. Grades are [Chapter 23](./23-reachability-grading.md).
+The recipe is `skills/dead-address-refind/SKILL.md`. The functions are in `starters/instantly-hubspot-replies/reply_loop.py`. Grades are [Chapter 23](./23-reachability-grading.md). The reply loop's gotchas, including the workflow that fires on any lead status, are in `skills/instantly-hubspot-replies/SKILL.md`.
 
 ---
 
@@ -25,6 +25,8 @@ The recipe is `skills/dead-address-refind/SKILL.md`. The functions are in `start
 The body was the usual retired-mailbox note: this email address is no longer in use and is not monitored, please contact a colleague.
 
 That sentence is about the mailbox. It does not say he resigned. It does not name a new employer. The first pass treated it as a job change anyway, because "no longer" sounds like "gone".
+
+Instantly had already stored a reply status, a reply date, and a snippet. The row looked like a person had written back. `reply_fields_prove_interest` ignores those three fields and reads the body. This body is `address_retired`. It does not open a deal, and it is not a reason to write `interested` on the contact. Writing `auto_reply` into a lead-status property is its own problem: Chapter 27, the workflow that enrolls on any non-empty status.
 
 Then the other sources lined up the other way. Moltsets, Apollo, Prospeo, and LinkedIn still had him current. The operator already knew he had not left. Four data sources and a person who knew the account beat one auto-reply.
 
@@ -85,19 +87,20 @@ Before the swap, list the other campaign leads at the same account whose email i
 
 The human reads the summary: class, employment sources, new domain, pattern, verifier reading, Moltsets grade, blast radius. Then yes or no.
 
-On yes, the CRM write is small:
+On yes, the CRM write is two calls. I tried to do it as one, and the old address disappeared.
 
-| Field | Value |
-|---|---|
-| `email` | `jhale@example.net` (primary) |
-| `hs_additional_emails` | `jordan.hale@example.com` |
-| note | Primary moved after a retired-mailbox re-find. Old address kept. Nothing sent. |
+A v3 `PATCH` of `email` sets the new primary and drops the previous one. It does not move the old address onto `hs_additional_emails`. That property is read-only. Putting it on the PATCH returns `READ_ONLY_VALUE`, and the old address is still gone. `email_swap_plan` refuses a swap where the two addresses are the same, and it returns the PATCH plus the legacy PUT. Do this around those two calls:
 
-Confirm `hs_additional_emails` is the additional-email property on this portal before you apply. Omit `hubspot_owner_id`. `email_swap_plan` builds that payload and refuses a swap where the two addresses are the same.
+1. Search the new address. If another contact already has it, stop. Changing primary can merge two records.
+2. Write both addresses into the undo file. Omit `hubspot_owner_id`.
+3. `PATCH /crm/v3/objects/contacts/<CONTACT_ID>` with `{"properties": {"email": "jhale@example.net"}}`.
+4. `PUT /contacts/v1/secondary-email/<CONTACT_ID>/email/jordan.hale%40example.com` on the legacy contacts API. That call puts the old address back as a secondary email. The reference is the [legacy secondary-email PUT](https://developers.hubspot.com/docs/api-reference/legacy/crm/objects/contacts/v1/put-contacts-v1-secondary-email-vid-email-email).
 
-Use the plan, apply, undo file, and read-back from [Chapter 26](./26-replies-into-the-crm.md). Read the contact back. Primary is the new address. The old address is still on the record. Owner is unchanged.
+Use the plan, apply, undo file, and read-back from [Chapter 26](./26-replies-into-the-crm.md). Read `email` and `hs_additional_emails`. Primary is `jhale@example.net`. The old address is on the secondary list. Owner is unchanged. Add a note that nothing was sent.
 
-Then re-add him to the same campaign as a new lead. Instantly keys the lead on the email, so updating the old lead in place is how you keep mailing the retired box. The bulk-add endpoint is [add leads in bulk](https://developer.instantly.ai/api-reference/lead/add-leads-in-bulk-to-a-campaign-or-list). Read the skipped count and the blocklisted count in the response. A skip or a blocklist hit means he is not in the sequence, whatever the HTTP status was. Fix that before anyone expects a send. This re-add is a human step. It is not part of `next_action`.
+Stop the sequence against the dead box with a blocklist entry, `POST /api/v2/block-lists-entries` and `{"bl_value": "jordan.hale@example.com"}`. A lead-status PATCH that returns 200 may have changed nothing. `status_write_stuck` is that check. Do not park him by writing interest status. That write fires webhooks.
+
+Then re-add him to the same campaign as a new lead, so the sequence can send to the new address. Instantly keys the lead on the email, so updating the old lead in place is how you keep mailing the retired box. The API still cannot pin a sending mailbox on that add. `assigned_to` is a workspace user id. The campaign chooses the mailbox. The bulk-add endpoint is [add leads in bulk](https://developer.instantly.ai/api-reference/lead/add-leads-in-bulk-to-a-campaign-or-list). Read the skipped count and the blocklisted count in the response. A skip or a blocklist hit means he is not in the sequence, whatever the HTTP status was. If you blocklisted the old address, confirm the new address is the one on the add. Fix a skip before anyone expects a send. This re-add is a human step. It is not part of `next_action`. The worker does not send.
 
 ---
 

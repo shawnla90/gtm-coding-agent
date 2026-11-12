@@ -14,6 +14,16 @@ Nothing here calls Instantly or HubSpot. `python3 -m unittest tests/test_reply_l
 - A deal when the email log did not return an id.
 - A second email log when `hs_unique_id` is already `instantly:<email id>`.
 - A pipeline or stage value of `MQL`. Pass ids.
+- A deal on `reply_received` alone. Interest status 1, `lead_interested`, or `manual_mql` opens one.
+- A campaign-name guard while `INSTANTLY_REPLY_TEST_MODE` is off. `campaign_suppressed_by_guard` is the check. The placeholder guard is `CAMPAIGN_NAME_GUARD`.
+- `eaccount` (or any sending mailbox) on lead create.
+- A HubSpot lead-status write for `auto_reply`, `bounce`, or `out_of_office`.
+- Treating a 200 from a lead-status PATCH as proof the status changed. Park with `blocklist_entry_body`.
+- A v3 PATCH that sets `hs_additional_emails`. That property is read-only. `email_swap_plan` PATCHes the new primary, then PUTs the old address through the legacy secondary-email endpoint.
+
+The card renders `No Instantly thread` when the thread route is a 200 with zero messages. `thread_view` maps a non-200 to `auth_failure`. Send is allowed for logged-in HubSpot users on `@client-domain.com` via `user_can_reply`. Do not fill `HUBSPOT_APP_SECRET` from `vercel env pull`.
+
+The Build section and the Gotchas section are `skills/instantly-hubspot-replies/SKILL.md`. The retired-mailbox case is `skills/dead-address-refind/SKILL.md`.
 
 ## Layout
 

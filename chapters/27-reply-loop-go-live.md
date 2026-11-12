@@ -2,13 +2,13 @@
 
 **Chapter 26 is the loop. This chapter is the cutover: keys without a HubSpot seat, the env vars, a deploy that proves 401 and 200, webhooks created beside the old sync tool, and a check that nothing in the portal assigns an owner the moment the deal exists.**
 
-Same client as Chapter 26. A proptech / multifamily services client, a conference campaign, placeholders only.
+Same client as Chapter 26. A proptech / multifamily services client, a conference campaign, placeholders only. The build steps and the gotchas are in [`skills/instantly-hubspot-replies/SKILL.md`](../skills/instantly-hubspot-replies/SKILL.md).
 
 ---
 
 ## TL;DR
 
-- The admin mints a private app token for the API and a personal access key for the CLI, and sends both privately. You chmod them `600` outside git.
+- The client's IT admin mints a private app token for the API and a personal access key for the CLI, and sends both privately. You chmod them `600` outside git. That pair is enough. You upload the card from your own machine. The client does no developer work.
 - A personal access key can upload the project. It cannot read the app's client secret. That value is copied from the app's Auth tab.
 - The production portal stays dark until `HUBSPOT_ALLOW_<CLIENT>_PORTAL` is the string `true` and `INSTANTLY_REPLY_TEST_MODE` is `false`.
 - Webhook and cron routes return 401 without the secret and 200 with it.
@@ -19,7 +19,7 @@ Same client as Chapter 26. A proptech / multifamily services client, a conferenc
 
 ## Keys without a seat
 
-You can run this without a paid HubSpot seat. What you need is an admin who will mint two credentials and hand them over in a private channel.
+You can run this without a paid HubSpot seat. What you need is the client's IT admin, who mints two credentials and hands them over in a private channel. You upload the custom card from your own machine with the personal access key. The client does not open the developer project, and they do not need a developer on the card. After `hs project upload`, an admin adds the card from the card library. That is the whole client-side step.
 
 | Credential | What it is | Who uses it |
 |---|---|---|
@@ -63,6 +63,8 @@ What the personal access key can do: `hs project upload`, `hs account`, and API 
 
 What it cannot do: read an app's client secret. The secret lives on the app's Auth tab. The admin copies it and you put it in `HUBSPOT_APP_SECRET` on the backend. Chapter 28 needs that secret to verify signed card requests. There is no CLI call that prints it for you. If a command claims it fetched the client secret, stop and check what it actually returned.
 
+`vercel env pull` does not fetch it either. Sensitive production values come back as an empty string or the literal `[SENSITIVE]`. `pulled_secret_is_usable` rejects both. I have also seen a pull that looked populated and was still not the secret the deployed function was using. When a signature fails, do not HMAC a pulled `HUBSPOT_APP_SECRET`. Copy the Auth tab value into the Vercel dashboard again, redeploy, and retry a live card request. Print a boolean and a length. The same warning covers every other sensitive name in that file.
+
 ---
 
 ## Env vars
@@ -75,7 +77,8 @@ Names only. Values stay in Vercel and in the chmod 600 files.
 | `HUBSPOT_PORTAL_ID` | The portal the token must belong to. A mismatch refuses the write. |
 | `HUBSPOT_ACCESS_TOKEN` | Private app token. |
 | `INSTANTLY_API_KEY` | Bearer token for API v2. |
-| `INSTANTLY_REPLY_TEST_MODE` | `false` only after the first hand-checked reply. Default the example to `true`. |
+| `INSTANTLY_REPLY_TEST_MODE` | `false` only after the first hand-checked reply. Default the example to `true`. The campaign-name guard is read only while this is on. |
+| `INSTANTLY_TEST_CAMPAIGN_GUARD` | Placeholder `CAMPAIGN_NAME_GUARD`. While test mode is on, a campaign whose name contains it is skipped. While test mode is off, ignore the string even if a live campaign contains it. |
 | `INSTANTLY_CAMPAIGN_IDS` | Comma-separated campaign ids. One prefix each. |
 | `INSTANTLY_CAMPAIGN_DEAL_PREFIXES` | Comma-separated prefixes, same order and same length. `CONF` for the conference campaign. |
 | `HUBSPOT_MQL_PIPELINE_ID` | Pipeline id. Not the label. |
@@ -99,7 +102,9 @@ Cron, in `vercel.json`:
 { "crons": [{ "path": "/api/cron/poll", "schedule": "*/10 * * * *" }] }
 ```
 
-`GET /api/v2/emails` allows about 20 requests a minute. One page each time the cron wakes is inside that budget. A tight loop is how you spend the minute and miss the rest of the hour.
+`GET /api/v2/emails` allows about 20 requests a minute. One page each time the cron wakes is inside that budget. A tight loop is how you spend the minute and miss the rest of the hour. Send a `User-Agent` on that call. `?lead=` returns 403 without one. Chapter 26 has the header the starter sets.
+
+Before the poll or the webhook writes, call `campaign_in_scope`. A name guard that still matches after test mode is off will drop the live campaign here and the card will show no thread. The guard is gotcha 3 in the skill.
 
 Check the doors before you point Instantly at them:
 
@@ -157,6 +162,12 @@ Before the first real deal, open Automation, then Workflows. Look at deal-based 
 
 If one of those workflows matches this pipeline, exclude the pipeline or turn the action off before apply. Then create the proof deal from Chapter 26 again, if you are still in a test portal, and read `hubspot_owner_id` back. Empty is the result you want. `read_back` flags a record that comes back with an owner.
 
+## Lead status, and the workflow that already exists
+
+On the same pass, open every workflow that reads an Instantly lead-status property. I wrote `auto_reply`, `bounce`, and `out_of_office` into that field because the values were true. An older workflow enrolled on any non-empty value. Its name was the "positive responses, then deal creation" kind of trigger. It created an owned deal and emailed the team. My create payload never set an owner. The workflow did.
+
+`should_write_lead_status` is true only for `interested`, `lead_interested`, and `1`. Leave the property blank for auto-replies, bounces, and out-of-office. If the client wants those values stored, they change the enrollment trigger to the value `interested` first. Do the audit before the first write. Do not discover this by paging the team.
+
 ---
 
 ## Order of the flip
@@ -165,8 +176,8 @@ If one of those workflows matches this pipeline, exclude the pipeline or turn th
 2. Env vars set. Test mode still true. Allow flag still off.
 3. Deploy. 401 and 200 as above.
 4. Webhooks created. Old webhooks still present.
-5. One real positive reply, planned and applied by hand, read back, no owner.
-6. `HUBSPOT_ALLOW_<CLIENT>_PORTAL=true` and `INSTANTLY_REPLY_TEST_MODE=false`.
+5. One real positive reply, planned and applied by hand, undo file kept, read back, no owner. This one is by hand on purpose. The automation stays off until the read-back matches.
+6. `HUBSPOT_ALLOW_<CLIENT>_PORTAL=true` and `INSTANTLY_REPLY_TEST_MODE=false`. Confirm the name guard no longer suppresses the live campaign.
 7. Watch the next reply land on its own. Then watch the one after that skip if you replay it.
 
 Part of the [GTM Coding Agent](https://github.com/shawnla90/gtm-coding-agent). Previous: [Chapter 26](./26-replies-into-the-crm.md). Next: [Chapter 28](./28-reply-from-the-sending-mailbox.md).
