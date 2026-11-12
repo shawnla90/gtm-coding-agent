@@ -1,0 +1,16 @@
+# Your real settings stay local
+config.sh
+projects.toml
+
+# Build output
+out/
+apps/
+generated/
+profile/preview.png
+
+# Icon sources you pulled from your own apps and sites
+icons/src/*.png
+!icons/src/.gitkeep
+
+__pycache__/
+*.pyc

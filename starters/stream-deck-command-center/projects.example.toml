@@ -1,0 +1,55 @@
+# Copy to projects.toml and edit. One [[project]] per repo you work in.
+# build_profile.py turns each project into a key on the PROJECTS page and a folder of
+# workflow keys. launchers/claude-project.command reads the same file at press time.
+#
+# model:    anything `claude --model` accepts (opus, sonnet, haiku, or a full model id)
+# effort:   low | medium | high | xhigh | max
+# gh_user:  the GitHub account this repo belongs to. The launcher exports
+#           GH_TOKEN=$(gh auth token --user <gh_user>) for THAT terminal only.
+#           Leave it empty to use whatever account gh has active.
+# icon:     a file in icons/src without .png (e.g. "web-acme"). Missing icons fall back
+#           to a colored letter tile, so this is optional.
+# color:    accent for the project's folder key, as [r, g, b].
+
+[[project]]
+id = "acme"
+name = "Acme GTM"
+path = "~/code/acme-gtm"
+gh_user = "example-user"
+model = "opus"
+effort = "high"
+icon = "web-acme"
+color = [22, 219, 100]
+github = "https://github.com/example-org/acme-gtm/pulls"
+
+  [[project.workflow]]
+  label = "Status"
+  prompt = "Read the repo's CLAUDE.md and recent git log. Tell me what's in flight, what's blocked, and the next three steps. Don't change anything."
+
+  [[project.workflow]]
+  label = "Signals"
+  prompt = "Run the signal review from this repo's README on today's data and summarize the top 10 accounts. Stop before any send."
+  effort = "max"
+
+[[project]]
+id = "site"
+name = "Client Site"
+path = "~/code/client-site"
+gh_user = "example-org-bot"
+model = "sonnet"
+effort = "medium"
+icon = "web-client"
+color = [10, 132, 255]
+github = "https://github.com/example-org/client-site/pulls"
+
+  [[project.workflow]]
+  label = "Preview"
+  prompt = "Start the dev server, check the pages listed in README for broken images or layout issues, and report. Don't push."
+
+[[project]]
+id = "ops"
+name = "Ops Scripts"
+path = "~/code/ops-scripts"
+model = "sonnet"
+effort = "low"
+color = [255, 159, 10]
