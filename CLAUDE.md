@@ -63,6 +63,8 @@ Recommend 3-5 chapters based on their profile:
 
 | Profile | Chapters |
 |---------|----------|
+| Cold email replies into the CRM | 04 → 13 → 26 → 27 → 28 |
+| Retired mailbox / re-find an address | 23 → 07 → 29 → 26 |
 | Brand new to agents | 01 → 02 → 03 → 10 |
 | Technical, outbound-focused | 04 → 07 → 08 → 06 |
 | Content + GTM | 09 → 14 → 02 → 03 → 05 |
@@ -88,6 +90,10 @@ When the user returns after setup:
 - **"next chapter"** → Guide them through the next chapter in their learning path
 - **"help me with [GTM task]"** → Reference relevant templates, prompts, and chapters
 - **"add a tool"** → Help them integrate via the framework in Chapter 04 (OAuth vs CLI vs API)
+- **"instantly reply" / "log replies to hubspot" / "reply loop" / "unibox" / "go live on the reply loop"** → Chapters 26 and 27, `skills/instantly-hubspot-replies/`, and `starters/instantly-hubspot-replies/`. Webhook plus a cron poll of `GET /api/v2/emails`. Log the engagement with `hs_unique_id` `instantly:<email id>`. Open an unowned deal only after that log returns an id, and only for interest status 1 or `lead_interested`. Meeting Booked, auto-replies, and bounces do not open a deal. Test mode and `HUBSPOT_ALLOW_<CLIENT>_PORTAL` refuse the production portal until the flag is the string `true`. Plan, apply, undo, read back. Never set an owner.
+- **"reply from the sending mailbox" / "hubspot card" / "crm card"** → Chapter 28 and the `hubspot-card/` sample in that starter. Private static app on platform 2025.2. `permittedUrls.fetch` and the `BACKEND` constant point at `https://your-app.vercel.app`. Verify the HubSpot v3 signature with the app client secret. Allowlist HubSpot user emails. Reply via Instantly from the same mailbox.
+- **"service key" / "personal access key" / "no hubspot seat"** → Chapter 27. Private app token for the API, personal access key for `hs account auth`. chmod 600 outside git. A personal access key cannot read the app client secret. The admin copies that from the Auth tab.
+- **"dead address" / "re-find" / "address retired" / "no longer in use"** → Chapter 29 and `skills/dead-address-refind/`. An auto-reply is not proof of a departure. Find the second domain, learn the pattern, verify with three verifiers plus a made-up catch-all control. Moltsets F is no data (treat it like C). Swap only with a human yes. Never auto-add or auto-send.
 - **"create content"** → Load their voice profile first, then assist with content
 - **"add a client"** → Use `templates/partner/` to scaffold a new client folder (agency mode)
 - **"build dashboard"** → Guide them to Chapter 11 and `starters/signals-dashboard (Ch 11) or nexus-intel (Ch 12)/`
@@ -110,6 +116,9 @@ When the user returns after setup:
 - Prompts: `prompts/*.md`
 - Examples: `examples/{voice-dna,icp,prompts,scripts}/`
 - Prospeo enrich script: `examples/scripts/prospeo_enrich.py` (Chapter 24)
+- Chapters 26 to 29: `chapters/26-replies-into-the-crm.md`, `chapters/27-reply-loop-go-live.md`, `chapters/28-reply-from-the-sending-mailbox.md`, `chapters/29-dead-address-versus-departed.md`
+- Reply loop starter: `starters/instantly-hubspot-replies/` (Chapters 26-28)
+- Dead-address re-find skill: `skills/dead-address-refind/` (Chapter 29)
 - GTM-OS skeleton: `gtm-os/`
 - Dashboard starter: `starters/signals-dashboard/`
 - Reddit buyer-signals starter: `starters/reddit-buyer-signals/` (Chapters 18-19)

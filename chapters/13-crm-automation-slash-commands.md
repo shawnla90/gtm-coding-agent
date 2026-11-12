@@ -356,4 +356,6 @@ The ones who adopt this become something different than what they were. The ones
 
 The starter script and slash-command file ship in `starters/crm-automation/`. Clone, add your tokens to `.env`, run with `--dry-run` first. When the output looks right, rerun without the flag and watch the deals update.
 
+Logging cold-email replies into HubSpot as email engagements, without a sync tool, is [Chapter 26](./26-replies-into-the-crm.md).
+
 The next chapter extends the pattern to multi-agent RevOps orchestration — one agent running stale-opportunity checks, another running champion-change detection, a third running new-hire triggers, all writing to the same set of custom properties with different signal types. The CRM becomes the shared canvas. Coming soon.
